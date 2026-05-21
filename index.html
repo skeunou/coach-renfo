@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Séance Renfo Trail</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:   #0d0d0f;
+    --surf: #141416;
+    --surf2:#1c1c20;
+    --bdr:  #2a2a30;
+    --acc:  #e8ff47;
+    --acc2: #ff6b35;
+    --warn: #ff9500;
+    --txt:  #f0f0f0;
+    --mut:  #6b6b78;
+    --grn:  #4ade80;
+    --red:  #f87171;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { background: var(--bg); color: var(--txt); font-family: 'DM Sans', system-ui, sans-serif; font-size: 14px; min-height: 100vh; }
+  .bb { font-family: 'Bebas Neue', sans-serif; }
+
+  /* HEADER STICKY */
+  #header {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--bg); border-bottom: 2px solid var(--acc);
+  }
+  #header-top { padding: 14px 14px 10px; }
+  .header-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  #session-label { font-family:'Bebas Neue',sans-serif; font-size:10px; letter-spacing:3px; color:var(--acc); text-transform:uppercase; margin-bottom:2px; }
+  #session-title { font-family:'Bebas Neue',sans-serif; font-size:28px; letter-spacing:1px; line-height:1; color:var(--txt); }
+  #session-badge { font-size:10px; font-weight:600; padding:4px 8px; border-radius:4px; background:rgba(255,107,53,0.15); color:var(--acc2); border:1px solid rgba(255,107,53,0.3); white-space:nowrap; flex-shrink:0; }
+  #session-banner { margin-top:10px; background:rgba(232,255,71,0.06); border-left:3px solid var(--acc); padding:8px 10px; font-size:11px; color:#c8c8c8; line-height:1.5; }
+  #session-banner strong { color:var(--acc); }
+
+  /* PROGRESS */
+  #progress-wrap { padding:6px 14px 3px; }
+  #progress-bar-bg { height:3px; background:var(--surf2); border-radius:2px; overflow:hidden; }
+  #progress-bar-fill { height:100%; background:var(--acc); border-radius:2px; width:0%; transition:width .3s; }
+  #progress-label { font-size:10px; color:var(--mut); text-align:right; margin-top:2px; }
+
+  /* TIMER */
+  #timer-wrap { margin:8px 14px 0; background:var(--surf); border:1px solid var(--bdr); border-radius:10px; padding:14px; }
+  #timer-lbl { font-family:'Bebas Neue',sans-serif; font-size:11px; letter-spacing:2px; color:var(--mut); margin-bottom:8px; }
+  #timer-display { font-family:'Bebas Neue',sans-serif; font-size:52px; text-align:center; line-height:1; letter-spacing:3px; color:var(--acc); transition:color .2s; }
+  #timer-display.running { color:var(--grn); }
+  .timer-presets { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin:8px 0; }
+  .preset-btn { padding:9px 2px; border:1px solid var(--bdr); background:var(--surf2); color:var(--txt); border-radius:6px; font-family:system-ui; font-size:12px; font-weight:500; cursor:pointer; }
+  .preset-btn.active { border-color:var(--acc); background:var(--acc); color:#000; font-weight:700; }
+  .timer-controls { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  #timer-toggle { padding:13px; background:var(--acc); color:#000; border:none; border-radius:8px; font-family:'Bebas Neue',sans-serif; font-size:16px; letter-spacing:1px; cursor:pointer; }
+  #timer-reset  { padding:13px; background:var(--surf2); color:var(--mut); border:1px solid var(--bdr); border-radius:8px; font-family:'Bebas Neue',sans-serif; font-size:16px; cursor:pointer; }
+
+  /* TABS */
+  #tabs { display:flex; background:var(--surf); border-bottom:1px solid var(--bdr); overflow-x:auto; scrollbar-width:none; }
+  #tabs::-webkit-scrollbar { display:none; }
+  .tab-btn { flex:1; padding:11px 6px; text-align:center; font-family:'Bebas Neue',sans-serif; font-size:11px; letter-spacing:2px; cursor:pointer; color:var(--mut); background:none; border:none; border-bottom:2px solid transparent; white-space:nowrap; }
+  .tab-btn.active { color:var(--acc); border-bottom-color:var(--acc); }
+
+  /* CONTENT */
+  #content { padding:12px 14px 80px; }
+  .tab-pane { display:none; }
+  .tab-pane.active { display:block; }
+
+  /* CARDS */
+  .card { background:var(--surf); border:1px solid var(--bdr); border-radius:10px; padding:14px; margin-bottom:10px; }
+  .card.done { border-color:rgba(74,222,128,0.4); }
+  .card.warn { border:1px solid rgba(255,149,0,0.4); }
+  .section-lbl { font-family:'Bebas Neue',sans-serif; font-size:14px; letter-spacing:2px; color:var(--mut); margin-bottom:12px; }
+
+  /* EXO CARD */
+  .exo-card { background:var(--surf); border:1px solid var(--bdr); border-radius:10px; margin-bottom:10px; overflow:hidden; }
+  .exo-card.done { border-color:rgba(74,222,128,0.4); }
+  .exo-inner { padding:12px 14px 8px; }
+  .exo-id { font-family:'Bebas Neue',sans-serif; font-size:11px; letter-spacing:2px; color:var(--acc); margin-bottom:2px; }
+  .exo-name { font-size:15px; font-weight:600; color:var(--txt); margin-bottom:3px; }
+  .exo-params { font-size:12px; color:var(--acc); font-weight:600; margin-bottom:4px; }
+  .exo-cues { font-size:11px; color:var(--mut); line-height:1.5; margin-bottom:6px; }
+  .exo-video { display:inline-flex; align-items:center; gap:4px; font-size:10px; color:var(--acc2); padding:3px 7px; border:1px solid rgba(255,107,53,0.3); border-radius:4px; background:rgba(255,107,53,0.06); text-decoration:none; font-weight:600; }
+  .exo-tags { display:flex; gap:4px; margin-top:6px; }
+  .tag-zp  { font-size:9px; padding:2px 6px; border-radius:3px; letter-spacing:.5px; text-transform:uppercase; font-weight:700; background:rgba(255,149,0,0.12); color:var(--warn); border:1px solid rgba(255,149,0,0.25); }
+  .tag-ecc { font-size:9px; padding:2px 6px; border-radius:3px; letter-spacing:.5px; text-transform:uppercase; font-weight:700; background:rgba(232,255,71,0.08); color:var(--acc); border:1px solid rgba(232,255,71,0.2); }
+
+  /* SERIES GRID */
+  .series-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; padding:0 14px 12px; }
+  .serie-box { background:var(--surf2); border:1.5px solid var(--bdr); border-radius:7px; padding:10px 4px; text-align:center; cursor:pointer; user-select:none; -webkit-user-select:none; }
+  .serie-box.done { background:rgba(74,222,128,0.1); border-color:var(--grn); }
+  .serie-box .snum { font-family:'Bebas Neue',sans-serif; font-size:18px; color:var(--mut); line-height:1; }
+  .serie-box.done .snum { color:var(--grn); }
+  .serie-box .sreps { font-size:9px; color:var(--mut); margin-top:2px; }
+  .serie-box.empty { opacity:.07; cursor:default; }
+  .note-wrap { margin:0 14px 12px; }
+  .note-input { width:100%; background:var(--surf2); border:1px solid var(--bdr); border-radius:6px; padding:8px 10px; color:var(--txt); font-family:system-ui; font-size:12px; min-height:38px; resize:none; outline:none; }
+
+  /* WARMUP / COOLDOWN */
+  .check-item { display:flex; align-items:center; gap:10px; padding:11px 12px; background:var(--surf); border:1px solid var(--bdr); border-radius:8px; margin-bottom:6px; cursor:pointer; }
+  .check-item.done { border-color:var(--grn); opacity:.5; }
+  .check-circle { width:22px; height:22px; border-radius:50%; border:2px solid var(--bdr); background:transparent; display:flex; align-items:center; justify-content:center; font-size:12px; color:#000; flex-shrink:0; transition:.2s; }
+  .check-item.done .check-circle { background:var(--grn); border-color:var(--grn); }
+  .check-text { flex:1; font-size:13px; color:var(--txt); }
+
+  /* BLOC DIVIDER */
+  .bloc-divider { display:flex; align-items:center; gap:8px; margin:16px 0 8px; }
+  .bloc-line { flex:1; height:1px; background:var(--bdr); }
+  .bloc-name { font-family:'Bebas Neue',sans-serif; font-size:10px; letter-spacing:2px; color:var(--mut); white-space:nowrap; }
+
+  /* BILAN */
+  .scale-row { margin-bottom:12px; }
+  .scale-lbl { font-size:10px; color:var(--mut); letter-spacing:1px; text-transform:uppercase; margin-bottom:6px; }
+  .scale-btns { display:flex; gap:3px; }
+  .scale-btn { flex:1; padding:10px 2px; border:1.5px solid var(--bdr); background:var(--surf2); color:var(--mut); border-radius:6px; font-family:'Bebas Neue',sans-serif; font-size:18px; cursor:pointer; text-align:center; }
+  .scale-btn.sel-acc  { background:var(--acc); color:#000; border-color:var(--acc); }
+  .scale-btn.sel-grn  { background:rgba(74,222,128,0.15); color:var(--grn); border-color:var(--grn); }
+  .scale-btn.sel-warn { background:rgba(255,149,0,0.15); color:var(--warn); border-color:var(--warn); }
+  .final-textarea { width:100%; background:var(--surf2); border:1px solid var(--bdr); border-radius:8px; padding:10px; color:var(--txt); font-family:system-ui; font-size:13px; min-height:70px; resize:none; outline:none; margin-bottom:12px; }
+  .zp-alert { background:rgba(255,149,0,0.1); border:1px solid rgba(255,149,0,0.3); border-radius:8px; padding:12px 14px; color:var(--warn); font-size:12px; margin-bottom:12px; }
+
+  /* EXPORT */
+  .export-pre { background:var(--surf2); border:1px solid var(--bdr); border-radius:8px; padding:12px; font-size:11px; line-height:1.7; white-space:pre-wrap; color:var(--txt); margin-bottom:10px; font-family:monospace; }
+
+  /* BUTTONS */
+  .btn-primary { width:100%; padding:16px; background:var(--acc); color:#000; border:none; border-radius:8px; font-family:'Bebas Neue',sans-serif; font-size:18px; letter-spacing:2px; cursor:pointer; margin-bottom:8px; }
+  .btn-secondary { width:100%; padding:13px; background:var(--surf2); color:var(--acc); border:1px solid rgba(232,255,71,0.3); border-radius:8px; font-family:'Bebas Neue',sans-serif; font-size:15px; letter-spacing:1px; cursor:pointer; margin-top:8px; }
+  .btn-copy { width:100%; padding:12px; background:var(--surf2); color:var(--txt); border:1px solid var(--bdr); border-radius:8px; font-family:system-ui; font-size:13px; font-weight:600; cursor:pointer; margin-bottom:10px; }
+  .btn-hist { width:100%; background:none; border:1px solid var(--bdr); color:var(--mut); border-radius:8px; padding:10px 14px; font-family:system-ui; font-size:12px; font-weight:600; cursor:pointer; text-align:left; margin-top:4px; }
+
+  /* HIST ITEM */
+  .hist-item { background:var(--surf2); border:1px solid var(--bdr); border-radius:8px; padding:12px 14px; margin-top:8px; }
+  .hist-date { font-family:'Bebas Neue',sans-serif; font-size:13px; letter-spacing:1px; color:var(--acc); margin-bottom:6px; }
+  .hist-scores { display:flex; gap:16px; margin-bottom:4px; }
+  .hist-score { font-size:11px; color:var(--mut); }
+  .hist-score span { font-size:14px; font-weight:600; color:var(--txt); margin-right:2px; }
+
+  /* FINISH SCREEN */
+  #finish-screen { display:none; background:var(--bg); min-height:100vh; padding:40px 20px; text-align:center; }
+  #finish-screen.active { display:block; }
+  .finish-icon { font-size:52px; margin-bottom:12px; }
+  .finish-title { font-family:'Bebas Neue',sans-serif; font-size:28px; letter-spacing:2px; color:var(--acc); margin-bottom:6px; }
+  .finish-sub { font-size:13px; color:var(--mut); margin-bottom:20px; }
+  .finish-scores { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:16px; }
+  .finish-score-box { background:var(--surf); border:1px solid var(--bdr); border-radius:8px; padding:10px; }
+  .finish-score-val { font-family:'Bebas Neue',sans-serif; font-size:26px; color:var(--acc); }
+  .finish-score-lbl { font-size:9px; color:var(--mut); text-transform:uppercase; letter-spacing:1px; }
+
+  /* PREP MATERIAL */
+  .prep-item { display:flex; gap:8px; align-items:baseline; margin-bottom:7px; }
+  .prep-id { font-family:'Bebas Neue',sans-serif; font-size:12px; letter-spacing:1px; color:var(--acc); min-width:28px; }
+  .prep-name { font-size:13px; font-weight:600; color:var(--txt); }
+  .prep-detail { font-size:11px; color:var(--mut); }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     CONFIGURATION — MODIFIER UNIQUEMENT CETTE SECTION
+     ═══════════════════════════════════════════════════════════ -->
+<script>
+// ── SESSION INFO ──────────────────────────────────────────────
+const SESSION_INFO = {
+  id:        "S1-2026-05-18",
+  label:     "S1 · 18 Mai 2026",
+  title:     "Activation Pré-UBS",
+  badge:     "J-6 UBS",
+  banner:    "Adaptation : BB 83 · HRV équilibré · ZP 3/10 → 65-70% max, zéro échec.",
+  type:      "S1-A",
+  dateLabel: "18 mai 2026",
+};
+
+// ── EXERCICES ─────────────────────────────────────────────────
+const EXOS = [
+  {
+    id:"A1", bloc:"A",
+    name:"Romanian Deadlift KB",
+    params:"3 × 10 · KB 20-24 kg · Tempo 3-1-1 · Récup 90s",
+    cues:"Descente 3s. Stop mi-tibia. Dos neutre, hanches back. Amplitude réduite si ZP monte.",
+    url:"https://www.youtube.com/watch?v=2SHsk9AzdjA",
+    series:3, reps:"10 reps", tags:["ZP"], recup:90,
+    prep:"KB 20 kg (ou 24 si ZP stable)"
+  },
+  {
+    id:"A2", bloc:"A",
+    name:"Step-up excentrique",
+    params:"3 × 8/côté · BW ou 5-10 kg · Tempo 4-0-1 · Récup 90s",
+    cues:"Montée normale, descente 4s contrôlée. Box 30-40 cm. Remplaçant bulgare (ZP gauche).",
+    url:"https://www.youtube.com/watch?v=vSnh3fYkIrA",
+    series:3, reps:"8/côté", tags:["ECC"], recup:90,
+    prep:"Box plio · haltères 5-10 kg optionnel"
+  },
+  {
+    id:"A3", bloc:"A",
+    name:"Hip Thrust unilatéral",
+    params:"3 × 12/côté · BW (+10 kg si ZP 0-1) · Tempo 2-1-2 · Récup 60s",
+    cues:"Omoplates sur banc. Extension complète hanche, maintien 1s. Pas de compensation lombaire.",
+    url:"https://www.youtube.com/watch?v=xDmFkJxPzeM",
+    series:3, reps:"12/côté", tags:["ZP"], recup:60,
+    prep:"Banc · haltère 10 kg optionnel"
+  },
+  {
+    id:"B1", bloc:"B",
+    name:"Planche isométrique",
+    params:"3 × 90s · Récup 60s",
+    cues:"Corps droit, fessiers contractés, respiration abdominale.",
+    url:"https://www.youtube.com/watch?v=ASdvN_XEl_c",
+    series:3, reps:"90s", tags:[], recup:60,
+    prep:"Tapis ou sol"
+  },
+  {
+    id:"B2", bloc:"B",
+    name:"Pallof Press élastique",
+    params:"3 × 10/côté · Élastique Medium · Récup 45s",
+    cues:"Corps de profil, élastique hauteur poitrine. Pousser droit, maintien 2s. Bassin stable.",
+    url:"https://www.youtube.com/watch?v=AH_QZLm_0-s",
+    series:3, reps:"10/côté", tags:[], recup:45,
+    prep:"Élastique Medium · ancrage barre traction"
+  },
+  {
+    id:"C1", bloc:"C",
+    name:"Tractions pronation",
+    params:"3 × max propres · BW · Récup 90s",
+    cues:"Amplitude complète, pas de kipping. <5 reps → élastique. >10 → lest KB.",
+    url:"https://www.youtube.com/watch?v=eGo4IYlbE5g",
+    series:3, reps:"max", tags:[], recup:90,
+    prep:"Barre de traction · élastique ou lest"
+  },
+  {
+    id:"C2", bloc:"C",
+    name:"Développé incliné + Élév. latérales",
+    params:"3 × (10 DH 15-20 kg + 12 élév. 5-10 kg) · Superset · Récup 60s",
+    cues:"Sans pause entre les deux. DH : coudes 45°. Élév. : stop épaule, pas de balancier.",
+    url:"https://www.youtube.com/watch?v=8iPEnn-ltC8",
+    series:3, reps:"superset", tags:[], recup:60,
+    prep:"Banc inclinable · haltères 15-20 kg + 5-10 kg"
+  },
+  {
+    id:"C3", bloc:"C",
+    name:"Curl haltères + Dips banc",
+    params:"2 × (10 curls 10-15 kg + 12 dips BW) · Superset · Récup 45s",
+    cues:"Curls : coudes fixes, supination complète. Dips : descente complète, coudes arrière.",
+    url:"https://www.youtube.com/watch?v=sAq_ocpRh_I",
+    series:2, reps:"superset", tags:[], recup:45,
+    prep:"Haltères 10-15 kg · banc pour dips"
+  },
+];
+
+// ── ÉCHAUFFEMENT ──────────────────────────────────────────────
+const WARMUP = [
+  "Rotation hanches + cercles épaules — 90s",
+  "Hip hinge BW — allongement ischios — 10 reps",
+  "Squat profond BW + ouverture hanche — 10 reps",
+  "Dead bug lent — lombaires au sol — 6/côté",
+  "Clamshell élastique Light — 15/côté",
+  "Shoulder dislocations — 10 reps",
+];
+
+// ── RETOUR AU CALME ───────────────────────────────────────────
+const COOLDOWN = [
+  "Étirement ischio debout sur banc — 45s/côté",
+  "Fente basse hip flexor + rotation thoracique — 45s/côté",
+  "Pigeon au sol (fessier + piriforme) — 60s/côté",
+  "Respiration 4-7-8 — 5 cycles",
+];
+
+// ── POINTS DE VIGILANCE (HTML libre) ─────────────────────────
+const VIGILANCE_HTML = `
+  ZP 3/10 → amplitude réduite A1+A3. Si ≥4/10 : stop exo.<br>
+  Bulgare → step-up excentrique (tension ZP gauche).<br>
+  TRX → planche. Charges à <span style="color:var(--acc);font-weight:600">65-70% max</span>. Zéro échec.
+`;
+
+// ── LABELS BLOCS ─────────────────────────────────────────────
+const BLOC_LABELS = {
+  A: "Chaîne Postérieure",
+  B: "Gainage Fonctionnel",
+  C: "Haut du Corps",
+};
+</script>
+<!-- ═══════════════════════════════════════════════════════════
+     FIN CONFIGURATION
+     ═══════════════════════════════════════════════════════════ -->
+
+<!-- FINISH SCREEN -->
+<div id="finish-screen">
+  <div class="finish-icon">✓</div>
+  <div class="finish-title" id="finish-title"></div>
+  <div class="finish-sub" id="finish-sub"></div>
+  <div class="finish-scores" id="finish-scores"></div>
+  <div id="finish-zp-alert"></div>
+  <pre class="export-pre" id="finish-export"></pre>
+  <button class="btn-copy" id="finish-copy">▤ Copier dans le presse-papier</button>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+
+  <!-- HEADER -->
+  <div id="header">
+    <div id="header-top">
+      <div class="header-row">
+        <div>
+          <div class="bb" id="session-label"></div>
+          <div class="bb" id="session-title"></div>
+        </div>
+        <span id="session-badge"></span>
+      </div>
+      <div id="session-banner"></div>
+    </div>
+
+    <div id="progress-wrap">
+      <div id="progress-bar-bg"><div id="progress-bar-fill"></div></div>
+      <div id="progress-label">0 / 0 séries · 0%</div>
+    </div>
+
+    <div id="timer-wrap">
+      <div class="bb" id="timer-lbl">Timer Récupération</div>
+      <div class="bb" id="timer-display">01:30</div>
+      <div class="timer-presets">
+        <button class="preset-btn" data-sec="45">0'45</button>
+        <button class="preset-btn active" data-sec="90">1'00</button>
+        <button class="preset-btn" data-sec="90">1'30</button>
+        <button class="preset-btn" data-sec="120">2'00</button>
+      </div>
+      <div class="timer-controls">
+        <button id="timer-toggle">▶ START</button>
+        <button id="timer-reset">RESET</button>
+      </div>
+    </div>
+
+    <div id="tabs">
+      <button class="tab-btn active" data-tab="prep">Prép.</button>
+      <button class="tab-btn" data-tab="warm">Échauff.</button>
+      <button class="tab-btn" data-tab="main">Exercices</button>
+      <button class="tab-btn" data-tab="cool">Retour</button>
+      <button class="tab-btn" data-tab="end">Bilan</button>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div id="content">
+
+    <!-- PREP -->
+    <div class="tab-pane active" id="tab-prep">
+      <div class="card">
+        <div class="section-lbl">Matériel à préparer</div>
+        <div id="prep-list"></div>
+      </div>
+      <div class="card warn">
+        <div class="section-lbl" style="color:var(--warn)">Points de vigilance</div>
+        <div id="vigilance-content" style="font-size:12px;color:#c8c8c8;line-height:1.7"></div>
+      </div>
+      <button class="btn-primary" onclick="setTab('warm')">C'est parti → Échauffement</button>
+    </div>
+
+    <!-- WARMUP -->
+    <div class="tab-pane" id="tab-warm">
+      <div id="warmup-list"></div>
+      <button class="btn-secondary" onclick="setTab('main')">→ Bloc principal</button>
+    </div>
+
+    <!-- MAIN -->
+    <div class="tab-pane" id="tab-main">
+      <div id="exo-list"></div>
+      <button class="btn-secondary" onclick="setTab('cool')">→ Retour au calme</button>
+    </div>
+
+    <!-- COOLDOWN -->
+    <div class="tab-pane" id="tab-cool">
+      <div id="cooldown-list"></div>
+      <button class="btn-secondary" onclick="setTab('end')">→ Bilan final</button>
+    </div>
+
+    <!-- END / BILAN -->
+    <div class="tab-pane" id="tab-end">
+      <div class="card">
+        <div class="section-lbl">Bilan de Séance</div>
+        <!-- RPE -->
+        <div class="scale-row">
+          <div class="scale-lbl">Ressenti général /10</div>
+          <div class="scale-btns" id="scale-rpe"></div>
+        </div>
+        <!-- JAMBES -->
+        <div class="scale-row">
+          <div class="scale-lbl">Jambes /10</div>
+          <div class="scale-btns" id="scale-jambes"></div>
+        </div>
+        <!-- ZP -->
+        <div class="scale-row">
+          <div class="scale-lbl">Zone pubienne /10</div>
+          <div class="scale-btns" id="scale-zp"></div>
+        </div>
+        <div id="zp-alert" style="display:none" class="zp-alert">ZP ≥ 4 — adapte ou stoppe les exos qui tirent sur la zone.</div>
+        <textarea class="final-textarea" id="final-note" placeholder="Charges réelles · durée totale · sensations globales..."></textarea>
+        <button class="btn-primary" onclick="submitSession()">Terminer et générer le résumé</button>
+      </div>
+
+      <div class="card">
+        <div class="section-lbl">Export copiable</div>
+        <pre class="export-pre" id="export-preview"></pre>
+        <button class="btn-copy" id="copy-btn">▤ Copier dans le presse-papier</button>
+      </div>
+
+      <button class="btn-hist" id="hist-toggle" onclick="toggleHist()">▼ Historique séances (0)</button>
+      <div id="hist-list" style="display:none"></div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /app -->
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// ÉTAT GLOBAL
+// ═══════════════════════════════════════════════════════════════
+const HIST_KEY = "history:sessions:v2";
+const TOTAL_SERIES = EXOS.reduce((a, e) => a + e.series, 0);
+
+let state = {
+  seriesDone: {},   // "A1-0": true/false
+  notes: {},        // "A1": "texte"
+  warmDone: {},     // 0: true/false
+  coolDone: {},     // 0: true/false
+  rpe: null,
+  jambes: null,
+  zp: null,
+  finalNote: "",
+};
+
+let history = [];
+let showHist = false;
+
+// TIMER
+let timerSec   = 90;
+let timerPreset= 90;
+let timerRunning = false;
+let timerInterval = null;
+
+// ═══════════════════════════════════════════════════════════════
+// STORAGE
+// ═══════════════════════════════════════════════════════════════
+async function loadHistory() {
+  try {
+    const h = await window.storage.get(HIST_KEY);
+    if (h) history = JSON.parse(h.value);
+  } catch(e) {}
+}
+
+async function saveHistory(snap) {
+  try {
+    const next = [snap, ...history.filter(s => s.id !== snap.id)];
+    await window.storage.set(HIST_KEY, JSON.stringify(next));
+    history = next;
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TIMER
+// ═══════════════════════════════════════════════════════════════
+function fmtTime(s) {
+  return String(Math.floor(s/60)).padStart(2,"0") + ":" + String(s%60).padStart(2,"0");
+}
+
+function updateTimerDisplay() {
+  const el = document.getElementById("timer-display");
+  el.textContent = fmtTime(timerSec);
+  el.classList.toggle("running", timerRunning);
+  document.getElementById("timer-toggle").textContent = timerRunning ? "⏸ PAUSE" : "▶ START";
+}
+
+function playBeep() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [[880,0],[1100,.45]].forEach(([f,d]) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value = f;
+      g.gain.setValueAtTime(.3, ctx.currentTime + d);
+      g.gain.exponentialRampToValueAtTime(.001, ctx.currentTime + d + .4);
+      o.start(ctx.currentTime + d);
+      o.stop(ctx.currentTime + d + .5);
+    });
+  } catch(e) {}
+}
+
+function setPreset(sec) {
+  clearInterval(timerInterval); timerRunning = false;
+  timerPreset = sec; timerSec = sec;
+  document.querySelectorAll(".preset-btn").forEach(b => b.classList.toggle("active", +b.dataset.sec === sec));
+  updateTimerDisplay();
+}
+
+function startWith(sec) {
+  clearInterval(timerInterval);
+  timerPreset = sec; timerSec = sec; timerRunning = true;
+  timerInterval = setInterval(() => {
+    timerSec--;
+    if (timerSec <= 0) {
+      clearInterval(timerInterval); timerRunning = false;
+      timerSec = timerPreset; playBeep();
+    }
+    updateTimerDisplay();
+  }, 1000);
+  updateTimerDisplay();
+}
+
+document.getElementById("timer-toggle").addEventListener("click", () => {
+  timerRunning = !timerRunning;
+  if (timerRunning) {
+    timerInterval = setInterval(() => {
+      timerSec--;
+      if (timerSec <= 0) {
+        clearInterval(timerInterval); timerRunning = false;
+        timerSec = timerPreset; playBeep();
+      }
+      updateTimerDisplay();
+    }, 1000);
+  } else { clearInterval(timerInterval); }
+  updateTimerDisplay();
+});
+
+document.getElementById("timer-reset").addEventListener("click", () => {
+  clearInterval(timerInterval); timerRunning = false;
+  timerSec = timerPreset; updateTimerDisplay();
+});
+
+document.querySelectorAll(".preset-btn").forEach(b => {
+  b.addEventListener("click", () => setPreset(+b.dataset.sec));
+});
+
+// ═══════════════════════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════════════════════
+function setTab(name) {
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b.dataset.tab === name));
+  document.querySelectorAll(".tab-pane").forEach(p => p.classList.toggle("active", p.id === "tab-" + name));
+  if (name === "end") updateExport();
+}
+
+document.querySelectorAll(".tab-btn").forEach(b => b.addEventListener("click", () => setTab(b.dataset.tab)));
+
+// ═══════════════════════════════════════════════════════════════
+// PROGRESS
+// ═══════════════════════════════════════════════════════════════
+function updateProgress() {
+  const done = Object.values(state.seriesDone).filter(Boolean).length;
+  const pct = Math.round(done / TOTAL_SERIES * 100);
+  document.getElementById("progress-bar-fill").style.width = pct + "%";
+  document.getElementById("progress-label").textContent = done + " / " + TOTAL_SERIES + " séries · " + pct + "%";
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BUILD UI
+// ═══════════════════════════════════════════════════════════════
+function buildHeader() {
+  document.getElementById("session-label").textContent = SESSION_INFO.label;
+  document.getElementById("session-title").textContent = SESSION_INFO.title;
+  document.getElementById("session-badge").textContent = SESSION_INFO.badge;
+  document.getElementById("session-banner").innerHTML = "<strong>Adaptation :</strong> " + SESSION_INFO.banner;
+}
+
+function buildPrep() {
+  const list = document.getElementById("prep-list");
+  list.innerHTML = EXOS.map(e => `
+    <div class="prep-item">
+      <span class="prep-id">${e.id}</span>
+      <div><div class="prep-name">${e.name}</div><div class="prep-detail">${e.prep}</div></div>
+    </div>
+  `).join("");
+  document.getElementById("vigilance-content").innerHTML = VIGILANCE_HTML;
+}
+
+function buildWarmup() {
+  const list = document.getElementById("warmup-list");
+  list.innerHTML = WARMUP.map((w, i) => `
+    <div class="check-item${state.warmDone[i] ? " done" : ""}" onclick="toggleWarm(${i})">
+      <div class="check-circle">${state.warmDone[i] ? "✓" : ""}</div>
+      <div class="check-text">${w}</div>
+    </div>
+  `).join("");
+}
+
+function buildCooldown() {
+  const list = document.getElementById("cooldown-list");
+  list.innerHTML = COOLDOWN.map((c, i) => `
+    <div class="check-item${state.coolDone[i] ? " done" : ""}" onclick="toggleCool(${i})">
+      <div class="check-circle">${state.coolDone[i] ? "✓" : ""}</div>
+      <div class="check-text">${c}</div>
+    </div>
+  `).join("");
+}
+
+function buildExos() {
+  const container = document.getElementById("exo-list");
+  const blocs = [...new Set(EXOS.map(e => e.bloc))];
+  container.innerHTML = "";
+
+  blocs.forEach(bloc => {
+    const divider = document.createElement("div");
+    divider.className = "bloc-divider";
+    divider.innerHTML = `<div class="bloc-line"></div><div class="bloc-name">Bloc ${bloc} — ${BLOC_LABELS[bloc]||""}</div><div class="bloc-line"></div>`;
+    container.appendChild(divider);
+
+    EXOS.filter(e => e.bloc === bloc).forEach(exo => {
+      const allDone = Array.from({length: exo.series}, (_,i) => state.seriesDone[exo.id+"-"+i]).every(Boolean);
+      const card = document.createElement("div");
+      card.className = "exo-card" + (allDone ? " done" : "");
+      card.id = "exo-card-" + exo.id;
+
+      const tagsHtml = exo.tags.map(t =>
+        t === "ZP"  ? '<span class="tag-zp">ZP Watch</span>' :
+        t === "ECC" ? '<span class="tag-ecc">Excentrique</span>' : ""
+      ).join("");
+
+      const seriesHtml = Array.from({length: 4}, (_,i) => {
+        if (i < exo.series) {
+          const key = exo.id + "-" + i;
+          const done = state.seriesDone[key];
+          return `<div class="serie-box${done?" done":""}" onclick="toggleSerie('${key}',${exo.recup},'${exo.id}')">
+            <div class="snum">${done ? "✓" : "S"+(i+1)}</div>
+            ${!done ? `<div class="sreps">${exo.reps}</div>` : ""}
+          </div>`;
+        } else {
+          return `<div class="serie-box empty"></div>`;
+        }
+      }).join("");
+
+      card.innerHTML = `
+        <div class="exo-inner">
+          <div class="exo-id">${exo.id}</div>
+          <div class="exo-name">${exo.name}</div>
+          <div class="exo-params">${exo.params}</div>
+          <div class="exo-cues">${exo.cues}</div>
+          <a href="${exo.url}" target="_blank" rel="noreferrer" class="exo-video">▶ Vidéo technique</a>
+          ${tagsHtml ? `<div class="exo-tags">${tagsHtml}</div>` : ""}
+        </div>
+        <div class="series-grid">${seriesHtml}</div>
+        <div class="note-wrap">
+          <textarea class="note-input" placeholder="Charge réelle · RPE · sensations..." rows="2" oninput="debouncedNote('${exo.id}', this.value)">${state.notes[exo.id]||""}</textarea>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  });
+}
+
+function buildScales() {
+  // RPE & Jambes: 1-10
+  [["scale-rpe","rpe","acc"],["scale-jambes","jambes","acc"]].forEach(([id, key, type]) => {
+    const el = document.getElementById(id);
+    el.innerHTML = Array.from({length:10},(_,i)=>i+1).map(v => {
+      const sel = state[key] === v;
+      const cls = sel ? "scale-btn sel-acc" : "scale-btn";
+      return `<button class="${cls}" onclick="setScale('${key}',${v})">${v}</button>`;
+    }).join("");
+  });
+  // ZP: 0-9
+  const zpEl = document.getElementById("scale-zp");
+  zpEl.innerHTML = Array.from({length:10},(_,i)=>i).map(v => {
+    const sel = state.zp === v;
+    let cls = "scale-btn";
+    if (sel && v < 4)  cls = "scale-btn sel-grn";
+    if (sel && v >= 4) cls = "scale-btn sel-warn";
+    return `<button class="${cls}" onclick="setScale('zp',${v})">${v}</button>`;
+  }).join("");
+
+  document.getElementById("zp-alert").style.display = (state.zp !== null && state.zp >= 4) ? "block" : "none";
+}
+
+function buildHistList() {
+  const sameType = history.filter(h => h.type === SESSION_INFO.type);
+  document.getElementById("hist-toggle").textContent = (showHist ? "▲" : "▼") + " Historique séances " + SESSION_INFO.type.split("-")[0] + " (" + sameType.length + ")";
+  const list = document.getElementById("hist-list");
+  if (!showHist) { list.style.display = "none"; return; }
+  list.style.display = "block";
+  if (sameType.length === 0) {
+    list.innerHTML = `<div style="font-size:12px;color:var(--mut);padding:12px 0;text-align:center">Aucune séance précédente.</div>`;
+    return;
+  }
+  list.innerHTML = sameType.map(h => `
+    <div class="hist-item">
+      <div class="hist-date">${h.date} — ${h.label}</div>
+      <div class="hist-scores">
+        <div class="hist-score"><span>${h.rpe}/10</span>Ressenti</div>
+        <div class="hist-score"><span>${h.jambes}/10</span>Jambes</div>
+        <div class="hist-score"><span>${h.zp}/10</span>ZP</div>
+      </div>
+      ${h.charges ? `<div style="font-size:10px;color:var(--mut);margin-top:6px;line-height:1.6">${h.charges}</div>` : ""}
+      ${h.notes   ? `<div style="font-size:10px;color:var(--mut);margin-top:4px">${h.notes}</div>` : ""}
+    </div>
+  `).join("");
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INTERACTIONS
+// ═══════════════════════════════════════════════════════════════
+function toggleSerie(key, recup, exoId) {
+  state.seriesDone[key] = !state.seriesDone[key];
+  startWith(recup);
+  // Rebuild exo card
+  const exo = EXOS.find(e => e.id === exoId);
+  if (!exo) return;
+  const allDone = Array.from({length: exo.series}, (_,i) => state.seriesDone[exo.id+"-"+i]).every(Boolean);
+  const card = document.getElementById("exo-card-" + exoId);
+  if (card) card.className = "exo-card" + (allDone ? " done" : "");
+  const seriesGrid = card.querySelector(".series-grid");
+  if (seriesGrid) {
+    seriesGrid.innerHTML = Array.from({length:4},(_,i)=>{
+      if (i < exo.series) {
+        const k = exo.id+"-"+i;
+        const done = state.seriesDone[k];
+        return `<div class="serie-box${done?" done":""}" onclick="toggleSerie('${k}',${exo.recup},'${exo.id}')">
+          <div class="snum">${done?"✓":"S"+(i+1)}</div>
+          ${!done?`<div class="sreps">${exo.reps}</div>`:""}
+        </div>`;
+      } else { return `<div class="serie-box empty"></div>`; }
+    }).join("");
+  }
+  updateProgress();
+  updateExport();
+}
+
+function toggleWarm(i) {
+  state.warmDone[i] = !state.warmDone[i];
+  buildWarmup();
+}
+
+function toggleCool(i) {
+  state.coolDone[i] = !state.coolDone[i];
+  buildCooldown();
+}
+
+const noteDebounce = {};
+function debouncedNote(exoId, val) {
+  state.notes[exoId] = val;
+  clearTimeout(noteDebounce[exoId]);
+  noteDebounce[exoId] = setTimeout(() => updateExport(), 300);
+}
+
+function setScale(key, val) {
+  state[key] = val;
+  buildScales();
+  updateExport();
+}
+
+function toggleHist() {
+  showHist = !showHist;
+  buildHistList();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════════════════════════
+function buildExport() {
+  const lines = [`═══ SÉANCE ${SESSION_INFO.label} — ${SESSION_INFO.title} — ${SESSION_INFO.dateLabel} ═══`, ""];
+  EXOS.forEach(e => {
+    lines.push(e.id + " — " + e.name);
+    for (let i = 0; i < e.series; i++)
+      lines.push("  S" + (i+1) + " : " + (state.seriesDone[e.id+"-"+i] ? "✓" : "—"));
+    if (state.notes[e.id]) lines.push("  Note : " + state.notes[e.id]);
+    lines.push("");
+  });
+  lines.push("Ressenti général : " + (state.rpe    ?? "-") + "/10");
+  lines.push("Jambes : "           + (state.jambes ?? "-") + "/10");
+  lines.push("Zone pubienne : "    + (state.zp     ?? "-") + "/10");
+  if (state.finalNote) lines.push("Notes : " + state.finalNote);
+  return lines.join("\n");
+}
+
+function updateExport() {
+  const txt = buildExport();
+  const el = document.getElementById("export-preview");
+  if (el) el.textContent = txt;
+}
+
+document.getElementById("copy-btn").addEventListener("click", () => {
+  navigator.clipboard.writeText(buildExport()).then(() => {
+    const btn = document.getElementById("copy-btn");
+    btn.textContent = "Copié ✓";
+    setTimeout(() => btn.textContent = "▤ Copier dans le presse-papier", 2000);
+  }).catch(()=>{});
+});
+
+document.getElementById("final-note").addEventListener("input", function() {
+  state.finalNote = this.value;
+  updateExport();
+});
+
+// ═══════════════════════════════════════════════════════════════
+// SUBMIT
+// ═══════════════════════════════════════════════════════════════
+async function submitSession() {
+  if (state.rpe    === null) { alert("Note ton ressenti général /10"); return; }
+  if (state.jambes === null) { alert("Note tes jambes /10");           return; }
+  if (state.zp     === null) { alert("Note ta ZP /10");                return; }
+
+  const snap = {
+    id:      SESSION_INFO.id,
+    date:    SESSION_INFO.dateLabel,
+    type:    SESSION_INFO.type,
+    label:   SESSION_INFO.title,
+    rpe:     state.rpe,
+    jambes:  state.jambes,
+    zp:      state.zp,
+    notes:   state.finalNote,
+    charges: Object.entries(state.notes).map(([k,v]) => k+": "+v).join(" | "),
+  };
+
+  await saveHistory(snap);
+
+  // Show finish screen
+  document.getElementById("app").style.display = "none";
+  const fs = document.getElementById("finish-screen");
+  fs.classList.add("active");
+
+  const sNum = SESSION_INFO.label.split(" · ")[0];
+  document.getElementById("finish-title").textContent = "Séance " + sNum + " terminée";
+  document.getElementById("finish-sub").textContent = SESSION_INFO.dateLabel + " · " + SESSION_INFO.title;
+
+  document.getElementById("finish-scores").innerHTML = [["Ressenti",state.rpe],["Jambes",state.jambes],["ZP fin",state.zp]].map(([l,v]) =>
+    `<div class="finish-score-box"><div class="finish-score-val">${v}/10</div><div class="finish-score-lbl">${l}</div></div>`
+  ).join("");
+
+  if (state.zp >= 4) {
+    document.getElementById("finish-zp-alert").innerHTML = `<div class="zp-alert" style="margin-bottom:12px">ZP ≥ 4 — mentionne-le dans le chat avant la prochaine séance.</div>`;
+  }
+
+  const exportTxt = buildExport();
+  document.getElementById("finish-export").textContent = exportTxt;
+  document.getElementById("finish-copy").addEventListener("click", () => {
+    navigator.clipboard.writeText(exportTxt).then(() => {
+      document.getElementById("finish-copy").textContent = "Copié ✓";
+    }).catch(()=>{});
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// WAKE LOCK
+// ═══════════════════════════════════════════════════════════════
+let wakeLock = null;
+async function acquireWakeLock() {
+  try {
+    if ("wakeLock" in navigator) wakeLock = await navigator.wakeLock.request("screen");
+  } catch(e) {}
+}
+acquireWakeLock();
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") acquireWakeLock();
+});
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+async function init() {
+  await loadHistory();
+  buildHeader();
+  buildPrep();
+  buildWarmup();
+  buildCooldown();
+  buildExos();
+  buildScales();
+  buildHistList();
+  updateProgress();
+  updateExport();
+
+  // Fix preset buttons labels
+  const labels = ["0'45","1'00","1'30","2'00"];
+  const secs   = [45, 60, 90, 120];
+  document.querySelectorAll(".preset-btn").forEach((b, i) => {
+    b.textContent = labels[i];
+    b.dataset.sec = secs[i];
+    b.classList.toggle("active", secs[i] === 90);
+    b.addEventListener("click", () => setPreset(secs[i]));
+  });
+  setPreset(90);
+}
+
+init();
+</script>
+</body>
+</html>
