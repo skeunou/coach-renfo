@@ -2,879 +2,562 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Séance Renfo Trail</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S2 — Bloc 0 Transition</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg:   #0d0d0f;
-    --surf: #141416;
-    --surf2:#1c1c20;
-    --bdr:  #2a2a30;
-    --acc:  #e8ff47;
-    --acc2: #ff6b35;
-    --warn: #ff9500;
-    --txt:  #f0f0f0;
-    --mut:  #6b6b78;
-    --grn:  #4ade80;
-    --red:  #f87171;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  body { background: var(--bg); color: var(--txt); font-family: 'DM Sans', system-ui, sans-serif; font-size: 14px; min-height: 100vh; }
-  .bb { font-family: 'Bebas Neue', sans-serif; }
+:root {
+  --bg:#0d0d0f; --surf:#141416; --surf2:#1c1c20; --bdr:#2a2a30;
+  --acc:#e8ff47; --acc2:#ff6b35; --warn:#ff9500; --txt:#f0f0f0;
+  --mut:#6b6b78; --grn:#4ade80; --red:#f87171; --purp:#a78bfa;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;min-height:100vh;padding-bottom:80px;}
 
-  /* HEADER STICKY */
-  #header {
-    position: sticky; top: 0; z-index: 100;
-    background: var(--bg); border-bottom: 2px solid var(--acc);
-  }
-  #header-top { padding: 14px 14px 10px; }
-  .header-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
-  #session-label { font-family:'Bebas Neue',sans-serif; font-size:10px; letter-spacing:3px; color:var(--acc); text-transform:uppercase; margin-bottom:2px; }
-  #session-title { font-family:'Bebas Neue',sans-serif; font-size:28px; letter-spacing:1px; line-height:1; color:var(--txt); }
-  #session-badge { font-size:10px; font-weight:600; padding:4px 8px; border-radius:4px; background:rgba(255,107,53,0.15); color:var(--acc2); border:1px solid rgba(255,107,53,0.3); white-space:nowrap; flex-shrink:0; }
-  #session-banner { margin-top:10px; background:rgba(232,255,71,0.06); border-left:3px solid var(--acc); padding:8px 10px; font-size:11px; color:#c8c8c8; line-height:1.5; }
-  #session-banner strong { color:var(--acc); }
+/* HEADER */
+.header{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:2px solid var(--acc);padding:12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.header-title{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;color:var(--acc);}
+.badge{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;letter-spacing:1px;text-transform:uppercase;}
+.badge-bloc0{background:#1c1c20;border:1px solid var(--purp);color:var(--purp);}
+.badge-date{background:var(--surf2);border:1px solid var(--bdr);color:var(--mut);}
+.badge-zp{background:#1a1010;border:1px solid var(--warn);color:var(--warn);}
 
-  /* PROGRESS */
-  #progress-wrap { padding:6px 14px 3px; }
-  #progress-bar-bg { height:3px; background:var(--surf2); border-radius:2px; overflow:hidden; }
-  #progress-bar-fill { height:100%; background:var(--acc); border-radius:2px; width:0%; transition:width .3s; }
-  #progress-label { font-size:10px; color:var(--mut); text-align:right; margin-top:2px; }
+/* BANDEAU ADAPTATION */
+.adapt-banner{margin:12px 16px;background:var(--surf);border:1px solid var(--bdr);border-left:3px solid var(--purp);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--mut);line-height:1.5;}
+.adapt-banner strong{color:var(--txt);}
 
-  /* TIMER */
-  #timer-wrap { margin:8px 14px 0; background:var(--surf); border:1px solid var(--bdr); border-radius:10px; padding:14px; }
-  #timer-lbl { font-family:'Bebas Neue',sans-serif; font-size:11px; letter-spacing:2px; color:var(--mut); margin-bottom:8px; }
-  #timer-display { font-family:'Bebas Neue',sans-serif; font-size:52px; text-align:center; line-height:1; letter-spacing:3px; color:var(--acc); transition:color .2s; }
-  #timer-display.running { color:var(--grn); }
-  .timer-presets { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin:8px 0; }
-  .preset-btn { padding:9px 2px; border:1px solid var(--bdr); background:var(--surf2); color:var(--txt); border-radius:6px; font-family:system-ui; font-size:12px; font-weight:500; cursor:pointer; }
-  .preset-btn.active { border-color:var(--acc); background:var(--acc); color:#000; font-weight:700; }
-  .timer-controls { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-  #timer-toggle { padding:13px; background:var(--acc); color:#000; border:none; border-radius:8px; font-family:'Bebas Neue',sans-serif; font-size:16px; letter-spacing:1px; cursor:pointer; }
-  #timer-reset  { padding:13px; background:var(--surf2); color:var(--mut); border:1px solid var(--bdr); border-radius:8px; font-family:'Bebas Neue',sans-serif; font-size:16px; cursor:pointer; }
+/* PROGRESS BAR */
+.prog-wrap{margin:0 16px 12px;background:var(--surf2);border-radius:6px;height:6px;overflow:hidden;}
+.prog-bar{height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));border-radius:6px;transition:width .4s ease;}
+.prog-label{font-size:11px;color:var(--mut);text-align:right;margin:4px 16px 0;letter-spacing:.5px;}
 
-  /* TABS */
-  #tabs { display:flex; background:var(--surf); border-bottom:1px solid var(--bdr); overflow-x:auto; scrollbar-width:none; }
-  #tabs::-webkit-scrollbar { display:none; }
-  .tab-btn { flex:1; padding:11px 6px; text-align:center; font-family:'Bebas Neue',sans-serif; font-size:11px; letter-spacing:2px; cursor:pointer; color:var(--mut); background:none; border:none; border-bottom:2px solid transparent; white-space:nowrap; }
-  .tab-btn.active { color:var(--acc); border-bottom-color:var(--acc); }
+/* ONGLETS */
+.tabs{display:flex;padding:0 16px;gap:4px;margin-bottom:16px;}
+.tab{flex:1;padding:10px 0;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1.5px;text-align:center;background:var(--surf);border:1px solid var(--bdr);border-radius:8px;cursor:pointer;color:var(--mut);transition:all .2s;}
+.tab.active{background:var(--acc);color:#000;border-color:var(--acc);}
 
-  /* CONTENT */
-  #content { padding:12px 14px 80px; }
-  .tab-pane { display:none; }
-  .tab-pane.active { display:block; }
+/* CONTENU ONGLETS */
+.tab-content{display:none;padding:0 16px;}
+.tab-content.active{display:block;}
 
-  /* CARDS */
-  .card { background:var(--surf); border:1px solid var(--bdr); border-radius:10px; padding:14px; margin-bottom:10px; }
-  .card.done { border-color:rgba(74,222,128,0.4); }
-  .card.warn { border:1px solid rgba(255,149,0,0.4); }
-  .section-lbl { font-family:'Bebas Neue',sans-serif; font-size:14px; letter-spacing:2px; color:var(--mut); margin-bottom:12px; }
+/* TIMER RÉCUP */
+.timer-sticky{position:sticky;top:58px;z-index:90;margin:0 16px 16px;background:var(--surf);border:1px solid var(--bdr);border-radius:10px;padding:12px 14px;}
+.timer-display{font-family:'Bebas Neue',sans-serif;font-size:52px;color:var(--acc);text-align:center;line-height:1;letter-spacing:3px;}
+.timer-display.running{color:var(--grn);}
+.timer-display.done{color:var(--acc2);}
+.timer-presets{display:flex;gap:6px;margin:8px 0 10px;justify-content:center;}
+.preset-btn{padding:5px 12px;background:var(--surf2);border:1px solid var(--bdr);border-radius:6px;color:var(--mut);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;}
+.preset-btn:hover,.preset-btn.active-preset{background:var(--acc);color:#000;border-color:var(--acc);}
+.timer-controls{display:flex;gap:8px;justify-content:center;}
+.timer-btn{padding:8px 24px;border-radius:8px;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;cursor:pointer;border:none;transition:all .2s;}
+.timer-btn-start{background:var(--acc);color:#000;}
+.timer-btn-start:hover{opacity:.9;}
+.timer-btn-reset{background:var(--surf2);border:1px solid var(--bdr);color:var(--mut);}
 
-  /* EXO CARD */
-  .exo-card { background:var(--surf); border:1px solid var(--bdr); border-radius:10px; margin-bottom:10px; overflow:hidden; }
-  .exo-card.done { border-color:rgba(74,222,128,0.4); }
-  .exo-inner { padding:12px 14px 8px; }
-  .exo-id { font-family:'Bebas Neue',sans-serif; font-size:11px; letter-spacing:2px; color:var(--acc); margin-bottom:2px; }
-  .exo-name { font-size:15px; font-weight:600; color:var(--txt); margin-bottom:3px; }
-  .exo-params { font-size:12px; color:var(--acc); font-weight:600; margin-bottom:4px; }
-  .exo-cues { font-size:11px; color:var(--mut); line-height:1.5; margin-bottom:6px; }
-  .exo-video { display:inline-flex; align-items:center; gap:4px; font-size:10px; color:var(--acc2); padding:3px 7px; border:1px solid rgba(255,107,53,0.3); border-radius:4px; background:rgba(255,107,53,0.06); text-decoration:none; font-weight:600; }
-  .exo-tags { display:flex; gap:4px; margin-top:6px; }
-  .tag-zp  { font-size:9px; padding:2px 6px; border-radius:3px; letter-spacing:.5px; text-transform:uppercase; font-weight:700; background:rgba(255,149,0,0.12); color:var(--warn); border:1px solid rgba(255,149,0,0.25); }
-  .tag-ecc { font-size:9px; padding:2px 6px; border-radius:3px; letter-spacing:.5px; text-transform:uppercase; font-weight:700; background:rgba(232,255,71,0.08); color:var(--acc); border:1px solid rgba(232,255,71,0.2); }
+/* SECTIONS */
+.section-label{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:var(--mut);text-transform:uppercase;margin:0 0 8px;padding:0 2px;}
 
-  /* SERIES GRID */
-  .series-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; padding:0 14px 12px; }
-  .serie-box { background:var(--surf2); border:1.5px solid var(--bdr); border-radius:7px; padding:10px 4px; text-align:center; cursor:pointer; user-select:none; -webkit-user-select:none; }
-  .serie-box.done { background:rgba(74,222,128,0.1); border-color:var(--grn); }
-  .serie-box .snum { font-family:'Bebas Neue',sans-serif; font-size:18px; color:var(--mut); line-height:1; }
-  .serie-box.done .snum { color:var(--grn); }
-  .serie-box .sreps { font-size:9px; color:var(--mut); margin-top:2px; }
-  .serie-box.empty { opacity:.07; cursor:default; }
-  .note-wrap { margin:0 14px 12px; }
-  .note-input { width:100%; background:var(--surf2); border:1px solid var(--bdr); border-radius:6px; padding:8px 10px; color:var(--txt); font-family:system-ui; font-size:12px; min-height:38px; resize:none; outline:none; }
+/* MATÉRIEL */
+.mat-list{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
+.mat-tag{background:var(--surf2);border:1px solid var(--bdr);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--txt);}
 
-  /* WARMUP / COOLDOWN */
-  .check-item { display:flex; align-items:center; gap:10px; padding:11px 12px; background:var(--surf); border:1px solid var(--bdr); border-radius:8px; margin-bottom:6px; cursor:pointer; }
-  .check-item.done { border-color:var(--grn); opacity:.5; }
-  .check-circle { width:22px; height:22px; border-radius:50%; border:2px solid var(--bdr); background:transparent; display:flex; align-items:center; justify-content:center; font-size:12px; color:#000; flex-shrink:0; transition:.2s; }
-  .check-item.done .check-circle { background:var(--grn); border-color:var(--grn); }
-  .check-text { flex:1; font-size:13px; color:var(--txt); }
+/* CHECKLIST */
+.check-list{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+.check-item{display:flex;align-items:flex-start;gap:10px;background:var(--surf);border:1px solid var(--bdr);border-radius:8px;padding:10px 12px;cursor:pointer;transition:all .2s;}
+.check-item.done{opacity:.5;}
+.check-item.done .check-circle{background:var(--grn);border-color:var(--grn);}
+.check-item.done .check-circle::after{content:'✓';color:#000;font-size:11px;font-weight:700;}
+.check-circle{width:20px;height:20px;min-width:20px;border-radius:50%;border:2px solid var(--bdr);display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.check-text{font-size:13px;line-height:1.4;}
+.check-sub{font-size:11px;color:var(--mut);margin-top:2px;}
 
-  /* BLOC DIVIDER */
-  .bloc-divider { display:flex; align-items:center; gap:8px; margin:16px 0 8px; }
-  .bloc-line { flex:1; height:1px; background:var(--bdr); }
-  .bloc-name { font-family:'Bebas Neue',sans-serif; font-size:10px; letter-spacing:2px; color:var(--mut); white-space:nowrap; }
+/* BLOC EXERCICE */
+.bloc-header{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:var(--acc2);margin:16px 0 8px;padding:0 2px;}
+.exo-card{background:var(--surf);border:1px solid var(--bdr);border-radius:10px;margin-bottom:10px;overflow:hidden;}
+.exo-header{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;}
+.exo-tag{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--acc);min-width:28px;}
+.exo-name{font-size:14px;font-weight:600;flex:1;}
+.exo-meta{font-size:11px;color:var(--mut);}
+.exo-badge-zp{font-size:10px;background:#1a2010;border:1px solid var(--grn);color:var(--grn);padding:2px 8px;border-radius:10px;letter-spacing:.5px;}
+.exo-body{padding:0 14px 12px;border-top:1px solid var(--bdr);}
+.exo-desc{font-size:12px;color:var(--mut);margin:8px 0 10px;line-height:1.5;}
+.series-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+.serie-cell{background:var(--surf2);border:1px solid var(--bdr);border-radius:8px;padding:8px 4px;text-align:center;cursor:pointer;transition:all .2s;}
+.serie-cell.done{background:#0d1f0d;border-color:var(--grn);}
+.serie-cell.done .serie-num{color:var(--grn);}
+.serie-num{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--acc);display:block;}
+.serie-label{font-size:10px;color:var(--mut);display:block;margin-top:2px;}
+.exo-video{display:inline-flex;align-items:center;gap:5px;margin-top:8px;font-size:11px;color:var(--acc2);text-decoration:none;}
+.exo-note{margin-top:8px;}
+.exo-note textarea{width:100%;background:var(--surf2);border:1px solid var(--bdr);border-radius:6px;padding:8px;color:var(--txt);font-family:'DM Sans',sans-serif;font-size:12px;resize:none;}
+.rx-scaled{display:flex;gap:8px;margin-top:8px;}
+.rx-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;letter-spacing:1px;}
+.rx{background:#1c1c10;border:1px solid var(--acc);color:var(--acc);}
+.scaled{background:#1a1a1a;border:1px solid var(--mut);color:var(--mut);}
+.rx-detail{font-size:12px;color:var(--txt);margin-top:4px;}
 
-  /* BILAN */
-  .scale-row { margin-bottom:12px; }
-  .scale-lbl { font-size:10px; color:var(--mut); letter-spacing:1px; text-transform:uppercase; margin-bottom:6px; }
-  .scale-btns { display:flex; gap:3px; }
-  .scale-btn { flex:1; padding:10px 2px; border:1.5px solid var(--bdr); background:var(--surf2); color:var(--mut); border-radius:6px; font-family:'Bebas Neue',sans-serif; font-size:18px; cursor:pointer; text-align:center; }
-  .scale-btn.sel-acc  { background:var(--acc); color:#000; border-color:var(--acc); }
-  .scale-btn.sel-grn  { background:rgba(74,222,128,0.15); color:var(--grn); border-color:var(--grn); }
-  .scale-btn.sel-warn { background:rgba(255,149,0,0.15); color:var(--warn); border-color:var(--warn); }
-  .final-textarea { width:100%; background:var(--surf2); border:1px solid var(--bdr); border-radius:8px; padding:10px; color:var(--txt); font-family:system-ui; font-size:13px; min-height:70px; resize:none; outline:none; margin-bottom:12px; }
-  .zp-alert { background:rgba(255,149,0,0.1); border:1px solid rgba(255,149,0,0.3); border-radius:8px; padding:12px 14px; color:var(--warn); font-size:12px; margin-bottom:12px; }
+/* BILAN */
+.bilan-card{background:var(--surf);border:1px solid var(--bdr);border-radius:10px;padding:14px;margin-bottom:12px;}
+.bilan-label{font-size:11px;color:var(--mut);font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
+.rpe-slider{width:100%;accent-color:var(--acc);}
+.rpe-val{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--acc);text-align:center;margin-top:4px;}
+.notes-ta{width:100%;background:var(--surf2);border:1px solid var(--bdr);border-radius:8px;padding:10px;color:var(--txt);font-family:'DM Sans',sans-serif;font-size:13px;resize:none;min-height:80px;}
+.export-btn{width:100%;padding:12px;background:var(--acc);color:#000;border:none;border-radius:10px;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;cursor:pointer;margin-top:8px;}
+.export-block{background:var(--surf2);border:1px solid var(--bdr);border-radius:8px;padding:12px;font-size:11px;font-family:monospace;color:var(--mut);white-space:pre-wrap;margin-top:10px;display:none;}
 
-  /* EXPORT */
-  .export-pre { background:var(--surf2); border:1px solid var(--bdr); border-radius:8px; padding:12px; font-size:11px; line-height:1.7; white-space:pre-wrap; color:var(--txt); margin-bottom:10px; font-family:monospace; }
-
-  /* BUTTONS */
-  .btn-primary { width:100%; padding:16px; background:var(--acc); color:#000; border:none; border-radius:8px; font-family:'Bebas Neue',sans-serif; font-size:18px; letter-spacing:2px; cursor:pointer; margin-bottom:8px; }
-  .btn-secondary { width:100%; padding:13px; background:var(--surf2); color:var(--acc); border:1px solid rgba(232,255,71,0.3); border-radius:8px; font-family:'Bebas Neue',sans-serif; font-size:15px; letter-spacing:1px; cursor:pointer; margin-top:8px; }
-  .btn-copy { width:100%; padding:12px; background:var(--surf2); color:var(--txt); border:1px solid var(--bdr); border-radius:8px; font-family:system-ui; font-size:13px; font-weight:600; cursor:pointer; margin-bottom:10px; }
-  .btn-hist { width:100%; background:none; border:1px solid var(--bdr); color:var(--mut); border-radius:8px; padding:10px 14px; font-family:system-ui; font-size:12px; font-weight:600; cursor:pointer; text-align:left; margin-top:4px; }
-
-  /* HIST ITEM */
-  .hist-item { background:var(--surf2); border:1px solid var(--bdr); border-radius:8px; padding:12px 14px; margin-top:8px; }
-  .hist-date { font-family:'Bebas Neue',sans-serif; font-size:13px; letter-spacing:1px; color:var(--acc); margin-bottom:6px; }
-  .hist-scores { display:flex; gap:16px; margin-bottom:4px; }
-  .hist-score { font-size:11px; color:var(--mut); }
-  .hist-score span { font-size:14px; font-weight:600; color:var(--txt); margin-right:2px; }
-
-  /* FINISH SCREEN */
-  #finish-screen { display:none; background:var(--bg); min-height:100vh; padding:40px 20px; text-align:center; }
-  #finish-screen.active { display:block; }
-  .finish-icon { font-size:52px; margin-bottom:12px; }
-  .finish-title { font-family:'Bebas Neue',sans-serif; font-size:28px; letter-spacing:2px; color:var(--acc); margin-bottom:6px; }
-  .finish-sub { font-size:13px; color:var(--mut); margin-bottom:20px; }
-  .finish-scores { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:16px; }
-  .finish-score-box { background:var(--surf); border:1px solid var(--bdr); border-radius:8px; padding:10px; }
-  .finish-score-val { font-family:'Bebas Neue',sans-serif; font-size:26px; color:var(--acc); }
-  .finish-score-lbl { font-size:9px; color:var(--mut); text-transform:uppercase; letter-spacing:1px; }
-
-  /* PREP MATERIAL */
-  .prep-item { display:flex; gap:8px; align-items:baseline; margin-bottom:7px; }
-  .prep-id { font-family:'Bebas Neue',sans-serif; font-size:12px; letter-spacing:1px; color:var(--acc); min-width:28px; }
-  .prep-name { font-size:13px; font-weight:600; color:var(--txt); }
-  .prep-detail { font-size:11px; color:var(--mut); }
+/* CARD VIGILANCE */
+.vigilance-card{background:#1a1010;border:1px solid var(--warn);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--warn);line-height:1.6;}
+.vigilance-card strong{color:var(--txt);}
 </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════════════════════
-     CONFIGURATION — MODIFIER UNIQUEMENT CETTE SECTION
-     ═══════════════════════════════════════════════════════════ -->
-<script>
-// ── SESSION INFO ──────────────────────────────────────────────
-const SESSION_INFO = {
-  id:        "S1-2026-05-18",
-  label:     "S1 · 18 Mai 2026",
-  title:     "Activation Pré-UBS",
-  badge:     "J-6 UBS",
-  banner:    "Adaptation : BB 83 · HRV équilibré · ZP 3/10 → 65-70% max, zéro échec.",
-  type:      "S1-A",
-  dateLabel: "18 mai 2026",
-};
-
-// ── EXERCICES ─────────────────────────────────────────────────
-const EXOS = [
-  {
-    id:"A1", bloc:"A",
-    name:"Romanian Deadlift KB",
-    params:"3 × 10 · KB 20-24 kg · Tempo 3-1-1 · Récup 90s",
-    cues:"Descente 3s. Stop mi-tibia. Dos neutre, hanches back. Amplitude réduite si ZP monte.",
-    url:"https://www.youtube.com/watch?v=2SHsk9AzdjA",
-    series:3, reps:"10 reps", tags:["ZP"], recup:90,
-    prep:"KB 20 kg (ou 24 si ZP stable)"
-  },
-  {
-    id:"A2", bloc:"A",
-    name:"Step-up excentrique",
-    params:"3 × 8/côté · BW ou 5-10 kg · Tempo 4-0-1 · Récup 90s",
-    cues:"Montée normale, descente 4s contrôlée. Box 30-40 cm. Remplaçant bulgare (ZP gauche).",
-    url:"https://www.youtube.com/watch?v=vSnh3fYkIrA",
-    series:3, reps:"8/côté", tags:["ECC"], recup:90,
-    prep:"Box plio · haltères 5-10 kg optionnel"
-  },
-  {
-    id:"A3", bloc:"A",
-    name:"Hip Thrust unilatéral",
-    params:"3 × 12/côté · BW (+10 kg si ZP 0-1) · Tempo 2-1-2 · Récup 60s",
-    cues:"Omoplates sur banc. Extension complète hanche, maintien 1s. Pas de compensation lombaire.",
-    url:"https://www.youtube.com/watch?v=xDmFkJxPzeM",
-    series:3, reps:"12/côté", tags:["ZP"], recup:60,
-    prep:"Banc · haltère 10 kg optionnel"
-  },
-  {
-    id:"B1", bloc:"B",
-    name:"Planche isométrique",
-    params:"3 × 90s · Récup 60s",
-    cues:"Corps droit, fessiers contractés, respiration abdominale.",
-    url:"https://www.youtube.com/watch?v=ASdvN_XEl_c",
-    series:3, reps:"90s", tags:[], recup:60,
-    prep:"Tapis ou sol"
-  },
-  {
-    id:"B2", bloc:"B",
-    name:"Pallof Press élastique",
-    params:"3 × 10/côté · Élastique Medium · Récup 45s",
-    cues:"Corps de profil, élastique hauteur poitrine. Pousser droit, maintien 2s. Bassin stable.",
-    url:"https://www.youtube.com/watch?v=AH_QZLm_0-s",
-    series:3, reps:"10/côté", tags:[], recup:45,
-    prep:"Élastique Medium · ancrage barre traction"
-  },
-  {
-    id:"C1", bloc:"C",
-    name:"Tractions pronation",
-    params:"3 × max propres · BW · Récup 90s",
-    cues:"Amplitude complète, pas de kipping. <5 reps → élastique. >10 → lest KB.",
-    url:"https://www.youtube.com/watch?v=eGo4IYlbE5g",
-    series:3, reps:"max", tags:[], recup:90,
-    prep:"Barre de traction · élastique ou lest"
-  },
-  {
-    id:"C2", bloc:"C",
-    name:"Développé incliné + Élév. latérales",
-    params:"3 × (10 DH 15-20 kg + 12 élév. 5-10 kg) · Superset · Récup 60s",
-    cues:"Sans pause entre les deux. DH : coudes 45°. Élév. : stop épaule, pas de balancier.",
-    url:"https://www.youtube.com/watch?v=8iPEnn-ltC8",
-    series:3, reps:"superset", tags:[], recup:60,
-    prep:"Banc inclinable · haltères 15-20 kg + 5-10 kg"
-  },
-  {
-    id:"C3", bloc:"C",
-    name:"Curl haltères + Dips banc",
-    params:"2 × (10 curls 10-15 kg + 12 dips BW) · Superset · Récup 45s",
-    cues:"Curls : coudes fixes, supination complète. Dips : descente complète, coudes arrière.",
-    url:"https://www.youtube.com/watch?v=sAq_ocpRh_I",
-    series:2, reps:"superset", tags:[], recup:45,
-    prep:"Haltères 10-15 kg · banc pour dips"
-  },
-];
-
-// ── ÉCHAUFFEMENT ──────────────────────────────────────────────
-const WARMUP = [
-  "Rotation hanches + cercles épaules — 90s",
-  "Hip hinge BW — allongement ischios — 10 reps",
-  "Squat profond BW + ouverture hanche — 10 reps",
-  "Dead bug lent — lombaires au sol — 6/côté",
-  "Clamshell élastique Light — 15/côté",
-  "Shoulder dislocations — 10 reps",
-];
-
-// ── RETOUR AU CALME ───────────────────────────────────────────
-const COOLDOWN = [
-  "Étirement ischio debout sur banc — 45s/côté",
-  "Fente basse hip flexor + rotation thoracique — 45s/côté",
-  "Pigeon au sol (fessier + piriforme) — 60s/côté",
-  "Respiration 4-7-8 — 5 cycles",
-];
-
-// ── POINTS DE VIGILANCE (HTML libre) ─────────────────────────
-const VIGILANCE_HTML = `
-  ZP 3/10 → amplitude réduite A1+A3. Si ≥4/10 : stop exo.<br>
-  Bulgare → step-up excentrique (tension ZP gauche).<br>
-  TRX → planche. Charges à <span style="color:var(--acc);font-weight:600">65-70% max</span>. Zéro échec.
-`;
-
-// ── LABELS BLOCS ─────────────────────────────────────────────
-const BLOC_LABELS = {
-  A: "Chaîne Postérieure",
-  B: "Gainage Fonctionnel",
-  C: "Haut du Corps",
-};
-</script>
-<!-- ═══════════════════════════════════════════════════════════
-     FIN CONFIGURATION
-     ═══════════════════════════════════════════════════════════ -->
-
-<!-- FINISH SCREEN -->
-<div id="finish-screen">
-  <div class="finish-icon">✓</div>
-  <div class="finish-title" id="finish-title"></div>
-  <div class="finish-sub" id="finish-sub"></div>
-  <div class="finish-scores" id="finish-scores"></div>
-  <div id="finish-zp-alert"></div>
-  <pre class="export-pre" id="finish-export"></pre>
-  <button class="btn-copy" id="finish-copy">▤ Copier dans le presse-papier</button>
+<!-- HEADER -->
+<div class="header">
+  <span class="header-title">S2 — TRANSITION</span>
+  <span class="badge badge-bloc0">BLOC 0</span>
+  <span class="badge badge-date" id="date-badge"></span>
+  <span class="badge badge-zp">ZP 2-3/10</span>
 </div>
 
-<!-- MAIN APP -->
-<div id="app">
+<!-- BANDEAU -->
+<div class="adapt-banner">
+  <strong>Bloc 0 — Récup post-100K</strong> · Courbatures + ZP légère · <strong>Séance haut du corps + gainage doux uniquement</strong> — zéro hinge, zéro impact, zéro squat. Charge réduite à 50-60%. Objectif : entretien tissulaire, relance circulatoire.
+</div>
 
-  <!-- HEADER -->
-  <div id="header">
-    <div id="header-top">
-      <div class="header-row">
-        <div>
-          <div class="bb" id="session-label"></div>
-          <div class="bb" id="session-title"></div>
-        </div>
-        <span id="session-badge"></span>
-      </div>
-      <div id="session-banner"></div>
+<!-- PROGRESS -->
+<div class="prog-wrap"><div class="prog-bar" id="prog-bar" style="width:0%"></div></div>
+<div class="prog-label"><span id="prog-count">0</span> / <span id="prog-total">0</span> séries</div>
+
+<!-- ONGLETS -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('prep')">PRÉP.</div>
+  <div class="tab" onclick="switchTab('wod')">SÉANCE</div>
+  <div class="tab" onclick="switchTab('bilan')">BILAN</div>
+</div>
+
+<!-- ====== PREP ====== -->
+<div class="tab-content active" id="tab-prep">
+
+  <div class="vigilance-card">
+    ⚠️ <strong>ZP légère + courbatures</strong> — Écarter tout mouvement en hinge, squat, fente ou impact. Si ZP monte en cours de séance, passer directement au bilan.
+  </div>
+
+  <div class="section-label">Matériel</div>
+  <div class="mat-list">
+    <span class="mat-tag">Haltères 10 / 15 kg</span>
+    <span class="mat-tag">TRX</span>
+    <span class="mat-tag">Élastique Medium</span>
+    <span class="mat-tag">Barre de traction</span>
+    <span class="mat-tag">Banc inclinable</span>
+  </div>
+
+  <div class="section-label">Échauffement — 6 min</div>
+  <div class="check-list" id="chk-echauff">
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-circle"></div>
+      <div><div class="check-text">Mobilité épaules — Cercles bras croisés + ouvertures</div><div class="check-sub">1 min · lent et ample</div></div>
     </div>
-
-    <div id="progress-wrap">
-      <div id="progress-bar-bg"><div id="progress-bar-fill"></div></div>
-      <div id="progress-label">0 / 0 séries · 0%</div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-circle"></div>
+      <div><div class="check-text">Rotateurs coiffe — rotation externe élastique (léger)</div><div class="check-sub">2×15 chaque côté</div></div>
     </div>
-
-    <div id="timer-wrap">
-      <div class="bb" id="timer-lbl">Timer Récupération</div>
-      <div class="bb" id="timer-display">01:30</div>
-      <div class="timer-presets">
-        <button class="preset-btn" data-sec="45">0'45</button>
-        <button class="preset-btn active" data-sec="90">1'00</button>
-        <button class="preset-btn" data-sec="90">1'30</button>
-        <button class="preset-btn" data-sec="120">2'00</button>
-      </div>
-      <div class="timer-controls">
-        <button id="timer-toggle">▶ START</button>
-        <button id="timer-reset">RESET</button>
-      </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-circle"></div>
+      <div><div class="check-text">Activation dorsaux — TRX row très léger, tempo lent</div><div class="check-sub">2×10 — sentir le travail sans forcer</div></div>
     </div>
-
-    <div id="tabs">
-      <button class="tab-btn active" data-tab="prep">Prép.</button>
-      <button class="tab-btn" data-tab="warm">Échauff.</button>
-      <button class="tab-btn" data-tab="main">Exercices</button>
-      <button class="tab-btn" data-tab="cool">Retour</button>
-      <button class="tab-btn" data-tab="end">Bilan</button>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-circle"></div>
+      <div><div class="check-text">Gainage léger — planche sur genoux ou coudes 30s</div><div class="check-sub">2 séries — vérifier ZP</div></div>
+    </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-circle"></div>
+      <div><div class="check-text">Dead hang — 20-30s passif sur la barre</div><div class="check-sub">Décompression rachis + mobilité épaule</div></div>
     </div>
   </div>
 
-  <!-- CONTENT -->
-  <div id="content">
+</div>
 
-    <!-- PREP -->
-    <div class="tab-pane active" id="tab-prep">
-      <div class="card">
-        <div class="section-lbl">Matériel à préparer</div>
-        <div id="prep-list"></div>
+<!-- ====== SÉANCE ====== -->
+<div class="tab-content" id="tab-wod">
+
+  <!-- TIMER -->
+  <div class="timer-sticky">
+    <div class="timer-display" id="timer-disp">01:30</div>
+    <div class="timer-presets">
+      <button class="preset-btn" onclick="setPreset(45)">45s</button>
+      <button class="preset-btn active-preset" onclick="setPreset(90)">90s</button>
+      <button class="preset-btn" onclick="setPreset(120)">2min</button>
+    </div>
+    <div class="timer-controls">
+      <button class="timer-btn timer-btn-start" id="timer-start-btn" onclick="toggleTimer()">START</button>
+      <button class="timer-btn timer-btn-reset" onclick="resetTimer()">RESET</button>
+    </div>
+  </div>
+
+  <!-- BLOC A -->
+  <div class="bloc-header">A — TIRAGE (fil conducteur)</div>
+
+  <div class="exo-card" id="exo-tractions">
+    <div class="exo-header" onclick="toggleExo('tractions')">
+      <span class="exo-tag">A1</span>
+      <span class="exo-name">Tractions pronation</span>
+      <span class="exo-badge-zp">✓ ZP OK</span>
+    </div>
+    <div class="exo-body" id="body-tractions" style="display:none;">
+      <div class="exo-desc">Fil conducteur de tout le macrocycle. Bloc 0 = volume réduit, tempo lent, amplitude complète. Si courbatures dorsaux, réduire à 4 reps.</div>
+      <div class="rx-scaled">
+        <span class="rx-tag rx">RX</span>
+        <span class="rx-detail">3×5 — tempo 2-0-2 — repos 90s</span>
       </div>
-      <div class="card warn">
-        <div class="section-lbl" style="color:var(--warn)">Points de vigilance</div>
-        <div id="vigilance-content" style="font-size:12px;color:#c8c8c8;line-height:1.7"></div>
+      <div class="rx-scaled">
+        <span class="rx-tag scaled">SCALED</span>
+        <span class="rx-detail">3×5 élastique Medium — même tempo</span>
       </div>
-      <button class="btn-primary" onclick="setTab('warm')">C'est parti → Échauffement</button>
+      <div class="series-grid" id="grid-tractions"></div>
+      <div class="exo-note"><textarea placeholder="Notes (sensation, charge, asymétrie...)" rows="2" id="note-tractions"></textarea></div>
+      <a class="exo-video" href="https://www.youtube.com/results?search_query=traction+pronation+trail" target="_blank">▶ Standards mouvement</a>
     </div>
+  </div>
 
-    <!-- WARMUP -->
-    <div class="tab-pane" id="tab-warm">
-      <div id="warmup-list"></div>
-      <button class="btn-secondary" onclick="setTab('main')">→ Bloc principal</button>
+  <div class="exo-card" id="exo-trxrow">
+    <div class="exo-header" onclick="toggleExo('trxrow')">
+      <span class="exo-tag">A2</span>
+      <span class="exo-name">TRX Row (rowing horizontal)</span>
+      <span class="exo-badge-zp">✓ ZP OK</span>
     </div>
-
-    <!-- MAIN -->
-    <div class="tab-pane" id="tab-main">
-      <div id="exo-list"></div>
-      <button class="btn-secondary" onclick="setTab('cool')">→ Retour au calme</button>
-    </div>
-
-    <!-- COOLDOWN -->
-    <div class="tab-pane" id="tab-cool">
-      <div id="cooldown-list"></div>
-      <button class="btn-secondary" onclick="setTab('end')">→ Bilan final</button>
-    </div>
-
-    <!-- END / BILAN -->
-    <div class="tab-pane" id="tab-end">
-      <div class="card">
-        <div class="section-lbl">Bilan de Séance</div>
-        <!-- RPE -->
-        <div class="scale-row">
-          <div class="scale-lbl">Ressenti général /10</div>
-          <div class="scale-btns" id="scale-rpe"></div>
-        </div>
-        <!-- JAMBES -->
-        <div class="scale-row">
-          <div class="scale-lbl">Jambes /10</div>
-          <div class="scale-btns" id="scale-jambes"></div>
-        </div>
-        <!-- ZP -->
-        <div class="scale-row">
-          <div class="scale-lbl">Zone pubienne /10</div>
-          <div class="scale-btns" id="scale-zp"></div>
-        </div>
-        <div id="zp-alert" style="display:none" class="zp-alert">ZP ≥ 4 — adapte ou stoppe les exos qui tirent sur la zone.</div>
-        <textarea class="final-textarea" id="final-note" placeholder="Charges réelles · durée totale · sensations globales..."></textarea>
-        <button class="btn-primary" onclick="submitSession()">Terminer et générer le résumé</button>
+    <div class="exo-body" id="body-trxrow" style="display:none;">
+      <div class="exo-desc">OBLIGATOIRE chaque séance. Angle du corps moins incliné qu'en bloc force = charge allégée. Focus : rétraction scapulaire complète, pause 1s en haut.</div>
+      <div class="rx-scaled">
+        <span class="rx-tag rx">RX</span>
+        <span class="rx-detail">3×12 — tempo 2-1-2 — repos 60s</span>
       </div>
-
-      <div class="card">
-        <div class="section-lbl">Export copiable</div>
-        <pre class="export-pre" id="export-preview"></pre>
-        <button class="btn-copy" id="copy-btn">▤ Copier dans le presse-papier</button>
-      </div>
-
-      <button class="btn-hist" id="hist-toggle" onclick="toggleHist()">▼ Historique séances (0)</button>
-      <div id="hist-list" style="display:none"></div>
+      <div class="series-grid" id="grid-trxrow"></div>
+      <div class="exo-note"><textarea placeholder="Notes..." rows="2" id="note-trxrow"></textarea></div>
     </div>
+  </div>
 
-  </div><!-- /content -->
-</div><!-- /app -->
+  <div class="exo-card" id="exo-facepull">
+    <div class="exo-header" onclick="toggleExo('facepull')">
+      <span class="exo-tag">A3</span>
+      <span class="exo-name">Face Pull élastique Medium</span>
+      <span class="exo-badge-zp">✓ ZP OK</span>
+    </div>
+    <div class="exo-body" id="body-facepull" style="display:none;">
+      <div class="exo-desc">Santé coiffe des rotateurs + posture. Tirer vers le visage, coudes hauts, rotation externe en fin de mouvement.</div>
+      <div class="rx-scaled">
+        <span class="rx-tag rx">RX</span>
+        <span class="rx-detail">3×15 — léger, sensation, repos 60s</span>
+      </div>
+      <div class="series-grid" id="grid-facepull"></div>
+      <div class="exo-note"><textarea placeholder="Notes..." rows="2" id="note-facepull"></textarea></div>
+    </div>
+  </div>
+
+  <!-- BLOC B -->
+  <div class="bloc-header">B — POUSSÉE + BRAS</div>
+
+  <div class="exo-card" id="exo-incline">
+    <div class="exo-header" onclick="toggleExo('incline')">
+      <span class="exo-tag">B1</span>
+      <span class="exo-name">Développé incliné haltères</span>
+      <span class="exo-badge-zp">✓ ZP OK</span>
+    </div>
+    <div class="exo-body" id="body-incline" style="display:none;">
+      <div class="exo-desc">En S1 tu étais à 2×15kg RPE 8 → maintenir la charge, on reste en récup. Amplitude complète, pas de rebond en bas.</div>
+      <div class="rx-scaled">
+        <span class="rx-tag rx">RX</span>
+        <span class="rx-detail">3×8 à 2×15kg — repos 90s</span>
+      </div>
+      <div class="rx-scaled">
+        <span class="rx-tag scaled">SCALED</span>
+        <span class="rx-detail">3×8 à 10kg si courbatures pecs</span>
+      </div>
+      <div class="series-grid" id="grid-incline"></div>
+      <div class="exo-note"><textarea placeholder="Notes (charge, RPE, ressenti)..." rows="2" id="note-incline"></textarea></div>
+    </div>
+  </div>
+
+  <div class="exo-card" id="exo-elev">
+    <div class="exo-header" onclick="toggleExo('elev')">
+      <span class="exo-tag">B2</span>
+      <span class="exo-name">Élévations latérales</span>
+      <span class="exo-badge-zp">✓ ZP OK</span>
+    </div>
+    <div class="exo-body" id="body-elev" style="display:none;">
+      <div class="exo-desc">Moyen deltoïde + stabilité glénohumérale. Léger en Bloc 0. Coudes légèrement fléchis, pas d'à-coup, pincer en haut.</div>
+      <div class="rx-scaled">
+        <span class="rx-tag rx">RX</span>
+        <span class="rx-detail">3×12 à 5kg — repos 60s</span>
+      </div>
+      <div class="series-grid" id="grid-elev"></div>
+      <div class="exo-note"><textarea placeholder="Notes..." rows="2" id="note-elev"></textarea></div>
+    </div>
+  </div>
+
+  <div class="exo-card" id="exo-curls">
+    <div class="exo-header" onclick="toggleExo('curls')">
+      <span class="exo-tag">B3</span>
+      <span class="exo-name">Curls haltères alternés</span>
+      <span class="exo-badge-zp">✓ ZP OK</span>
+    </div>
+    <div class="exo-body" id="body-curls" style="display:none;">
+      <div class="exo-desc">En S1 : 2×10kg RPE 8. On maintient. Supination complète en haut, descente contrôlée 2s.</div>
+      <div class="rx-scaled">
+        <span class="rx-tag rx">RX</span>
+        <span class="rx-detail">3×10 à 10kg alternés — repos 60s</span>
+      </div>
+      <div class="series-grid" id="grid-curls"></div>
+      <div class="exo-note"><textarea placeholder="Notes..." rows="2" id="note-curls"></textarea></div>
+    </div>
+  </div>
+
+  <div class="exo-card" id="exo-dips">
+    <div class="exo-header" onclick="toggleExo('dips')">
+      <span class="exo-tag">B4</span>
+      <span class="exo-name">Dips BW</span>
+      <span class="exo-badge-zp">✓ ZP OK</span>
+    </div>
+    <div class="exo-body" id="body-dips" style="display:none;">
+      <div class="exo-desc">S1 : RPE 7. On garde BW, volume réduit. Coudes pas écartés, amplitude incomplète si douleur épaule.</div>
+      <div class="rx-scaled">
+        <span class="rx-tag rx">RX</span>
+        <span class="rx-detail">3×6 BW — repos 60s</span>
+      </div>
+      <div class="rx-scaled">
+        <span class="rx-tag scaled">SCALED</span>
+        <span class="rx-detail">Dips sur chaise si épaules sensibles</span>
+      </div>
+      <div class="series-grid" id="grid-dips"></div>
+      <div class="exo-note"><textarea placeholder="Notes..." rows="2" id="note-dips"></textarea></div>
+    </div>
+  </div>
+
+  <!-- BLOC C -->
+  <div class="bloc-header">C — GAINAGE DOUX</div>
+
+  <div class="exo-card" id="exo-planche">
+    <div class="exo-header" onclick="toggleExo('planche')">
+      <span class="exo-tag">C1</span>
+      <span class="exo-name">Planche iso — coudes</span>
+      <span class="exo-badge-zp">✓ ZP — vérifier</span>
+    </div>
+    <div class="exo-body" id="body-planche" style="display:none;">
+      <div class="exo-desc">En S1 tu étais à RPE 2 → augmenter la durée ce coup-ci. Si ZP remonte pendant, raccourcir la tenue. Respiration nasale continue.</div>
+      <div class="rx-scaled">
+        <span class="rx-tag rx">RX</span>
+        <span class="rx-detail">3×45s — repos 60s</span>
+      </div>
+      <div class="rx-scaled">
+        <span class="rx-tag scaled">SCALED</span>
+        <span class="rx-detail">3×30s sur genoux si ZP remonte</span>
+      </div>
+      <div class="series-grid" id="grid-planche"></div>
+      <div class="exo-note"><textarea placeholder="ZP pendant ? Durée tenue..." rows="2" id="note-planche"></textarea></div>
+    </div>
+  </div>
+
+  <div class="exo-card" id="exo-pallof">
+    <div class="exo-header" onclick="toggleExo('pallof')">
+      <span class="exo-tag">C2</span>
+      <span class="exo-name">Pallof Press élastique Hard</span>
+      <span class="exo-badge-zp">✓ ZP OK</span>
+    </div>
+    <div class="exo-body" id="body-pallof" style="display:none;">
+      <div class="exo-desc">En S1 tu étais à Medium RPE 2 → passer Hard comme prévu. Anti-rotation pure, gainage transverse. Bassin neutre, ne pas pivoter.</div>
+      <div class="rx-scaled">
+        <span class="rx-tag rx">RX</span>
+        <span class="rx-detail">3×12 chaque côté — élastique Hard — repos 60s</span>
+      </div>
+      <div class="series-grid" id="grid-pallof"></div>
+      <div class="exo-note"><textarea placeholder="Notes..." rows="2" id="note-pallof"></textarea></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ====== BILAN ====== -->
+<div class="tab-content" id="tab-bilan">
+
+  <div class="bilan-card">
+    <div class="bilan-label">RPE Global /10</div>
+    <input type="range" min="1" max="10" value="6" class="rpe-slider" id="rpe-global" oninput="updateRPE('rpe-global','rpe-global-val')">
+    <div class="rpe-val" id="rpe-global-val">6</div>
+  </div>
+
+  <div class="bilan-card">
+    <div class="bilan-label">Jambes /10 (récup trail)</div>
+    <input type="range" min="1" max="10" value="5" class="rpe-slider" id="rpe-jambes" oninput="updateRPE('rpe-jambes','rpe-jambes-val')">
+    <div class="rpe-val" id="rpe-jambes-val">5</div>
+  </div>
+
+  <div class="bilan-card">
+    <div class="bilan-label">Zone Pubienne /10</div>
+    <input type="range" min="0" max="10" value="2" class="rpe-slider" id="rpe-zp" oninput="updateRPE('rpe-zp','rpe-zp-val')">
+    <div class="rpe-val" id="rpe-zp-val">2</div>
+  </div>
+
+  <div class="bilan-card">
+    <div class="bilan-label">Notes libres</div>
+    <textarea class="notes-ta" id="notes-libres" placeholder="Ressentis, observations, charge à ajuster en S3..."></textarea>
+  </div>
+
+  <button class="export-btn" onclick="genExport()">GÉNÉRER EXPORT</button>
+  <div class="export-block" id="export-block"></div>
+
+</div>
 
 <script>
-// ═══════════════════════════════════════════════════════════════
-// ÉTAT GLOBAL
-// ═══════════════════════════════════════════════════════════════
-const HIST_KEY = "history:sessions:v2";
-const TOTAL_SERIES = EXOS.reduce((a, e) => a + e.series, 0);
+// ——— DATE ———
+const now = new Date();
+document.getElementById('date-badge').textContent = now.toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'});
 
-let state = {
-  seriesDone: {},   // "A1-0": true/false
-  notes: {},        // "A1": "texte"
-  warmDone: {},     // 0: true/false
-  coolDone: {},     // 0: true/false
-  rpe: null,
-  jambes: null,
-  zp: null,
-  finalNote: "",
+// ——— ONGLETS ———
+function switchTab(id) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  const idx = ['prep','wod','bilan'].indexOf(id);
+  document.querySelectorAll('.tab')[idx].classList.add('active');
+}
+
+// ——— TOGGLE CHECK ———
+function toggleCheck(el) {
+  el.classList.toggle('done');
+}
+
+// ——— EXERCICES / SÉRIES ———
+const EXOS = {
+  tractions: {label:'Tractions', series:3, reps:'5', charge:'BW / élastique'},
+  trxrow:    {label:'TRX Row', series:3, reps:'12', charge:'TRX'},
+  facepull:  {label:'Face Pull', series:3, reps:'15', charge:'Medium'},
+  incline:   {label:'Dev. Incliné', series:3, reps:'8', charge:'2×15kg'},
+  elev:      {label:'Élév. Lat.', series:3, reps:'12', charge:'5kg'},
+  curls:     {label:'Curls', series:3, reps:'10', charge:'10kg'},
+  dips:      {label:'Dips', series:3, reps:'6', charge:'BW'},
+  planche:   {label:'Planche', series:3, reps:'45s', charge:'Iso'},
+  pallof:    {label:'Pallof Press', series:3, reps:'12/c', charge:'Hard'},
 };
 
-let history = [];
-let showHist = false;
-
-// TIMER
-let timerSec   = 90;
-let timerPreset= 90;
-let timerRunning = false;
-let timerInterval = null;
-
-// ═══════════════════════════════════════════════════════════════
-// STORAGE
-// ═══════════════════════════════════════════════════════════════
-async function loadHistory() {
-  try {
-    const h = await window.storage.get(HIST_KEY);
-    if (h) history = JSON.parse(h.value);
-  } catch(e) {}
-}
-
-async function saveHistory(snap) {
-  try {
-    const next = [snap, ...history.filter(s => s.id !== snap.id)];
-    await window.storage.set(HIST_KEY, JSON.stringify(next));
-    history = next;
-  } catch(e) {}
-}
-
-// ═══════════════════════════════════════════════════════════════
-// TIMER
-// ═══════════════════════════════════════════════════════════════
-function fmtTime(s) {
-  return String(Math.floor(s/60)).padStart(2,"0") + ":" + String(s%60).padStart(2,"0");
-}
-
-function updateTimerDisplay() {
-  const el = document.getElementById("timer-display");
-  el.textContent = fmtTime(timerSec);
-  el.classList.toggle("running", timerRunning);
-  document.getElementById("timer-toggle").textContent = timerRunning ? "⏸ PAUSE" : "▶ START";
-}
-
-function playBeep() {
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    [[880,0],[1100,.45]].forEach(([f,d]) => {
-      const o = ctx.createOscillator(), g = ctx.createGain();
-      o.connect(g); g.connect(ctx.destination);
-      o.frequency.value = f;
-      g.gain.setValueAtTime(.3, ctx.currentTime + d);
-      g.gain.exponentialRampToValueAtTime(.001, ctx.currentTime + d + .4);
-      o.start(ctx.currentTime + d);
-      o.stop(ctx.currentTime + d + .5);
-    });
-  } catch(e) {}
-}
-
-function setPreset(sec) {
-  clearInterval(timerInterval); timerRunning = false;
-  timerPreset = sec; timerSec = sec;
-  document.querySelectorAll(".preset-btn").forEach(b => b.classList.toggle("active", +b.dataset.sec === sec));
-  updateTimerDisplay();
-}
-
-function startWith(sec) {
-  clearInterval(timerInterval);
-  timerPreset = sec; timerSec = sec; timerRunning = true;
-  timerInterval = setInterval(() => {
-    timerSec--;
-    if (timerSec <= 0) {
-      clearInterval(timerInterval); timerRunning = false;
-      timerSec = timerPreset; playBeep();
-    }
-    updateTimerDisplay();
-  }, 1000);
-  updateTimerDisplay();
-}
-
-document.getElementById("timer-toggle").addEventListener("click", () => {
-  timerRunning = !timerRunning;
-  if (timerRunning) {
-    timerInterval = setInterval(() => {
-      timerSec--;
-      if (timerSec <= 0) {
-        clearInterval(timerInterval); timerRunning = false;
-        timerSec = timerPreset; playBeep();
-      }
-      updateTimerDisplay();
-    }, 1000);
-  } else { clearInterval(timerInterval); }
-  updateTimerDisplay();
+let seriesState = {};
+Object.keys(EXOS).forEach(id => {
+  const ex = EXOS[id];
+  seriesState[id] = Array(ex.series).fill(false);
+  const grid = document.getElementById('grid-'+id);
+  if (!grid) return;
+  for (let i = 0; i < ex.series; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'serie-cell';
+    cell.innerHTML = `<span class="serie-num">${i+1}</span><span class="serie-label">${ex.reps}</span>`;
+    cell.onclick = () => {
+      seriesState[id][i] = !seriesState[id][i];
+      cell.classList.toggle('done', seriesState[id][i]);
+      updateProgress();
+    };
+    grid.appendChild(cell);
+  }
 });
 
-document.getElementById("timer-reset").addEventListener("click", () => {
-  clearInterval(timerInterval); timerRunning = false;
-  timerSec = timerPreset; updateTimerDisplay();
-});
-
-document.querySelectorAll(".preset-btn").forEach(b => {
-  b.addEventListener("click", () => setPreset(+b.dataset.sec));
-});
-
-// ═══════════════════════════════════════════════════════════════
-// TABS
-// ═══════════════════════════════════════════════════════════════
-function setTab(name) {
-  document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b.dataset.tab === name));
-  document.querySelectorAll(".tab-pane").forEach(p => p.classList.toggle("active", p.id === "tab-" + name));
-  if (name === "end") updateExport();
-}
-
-document.querySelectorAll(".tab-btn").forEach(b => b.addEventListener("click", () => setTab(b.dataset.tab)));
-
-// ═══════════════════════════════════════════════════════════════
-// PROGRESS
-// ═══════════════════════════════════════════════════════════════
 function updateProgress() {
-  const done = Object.values(state.seriesDone).filter(Boolean).length;
-  const pct = Math.round(done / TOTAL_SERIES * 100);
-  document.getElementById("progress-bar-fill").style.width = pct + "%";
-  document.getElementById("progress-label").textContent = done + " / " + TOTAL_SERIES + " séries · " + pct + "%";
+  const total = Object.values(seriesState).reduce((s,a) => s+a.length, 0);
+  const done = Object.values(seriesState).reduce((s,a) => s+a.filter(Boolean).length, 0);
+  document.getElementById('prog-bar').style.width = (done/total*100)+'%';
+  document.getElementById('prog-count').textContent = done;
+  document.getElementById('prog-total').textContent = total;
+}
+updateProgress();
+
+function toggleExo(id) {
+  const body = document.getElementById('body-'+id);
+  body.style.display = body.style.display === 'none' ? 'block' : 'none';
 }
 
-// ═══════════════════════════════════════════════════════════════
-// BUILD UI
-// ═══════════════════════════════════════════════════════════════
-function buildHeader() {
-  document.getElementById("session-label").textContent = SESSION_INFO.label;
-  document.getElementById("session-title").textContent = SESSION_INFO.title;
-  document.getElementById("session-badge").textContent = SESSION_INFO.badge;
-  document.getElementById("session-banner").innerHTML = "<strong>Adaptation :</strong> " + SESSION_INFO.banner;
+// ——— TIMER ———
+let timerDuration = 90, timerRemaining = 90, timerInterval = null, timerRunning = false;
+function setPreset(s) {
+  if (timerRunning) return;
+  timerDuration = s; timerRemaining = s;
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active-preset'));
+  event.target.classList.add('active-preset');
+  updateTimerDisplay();
 }
-
-function buildPrep() {
-  const list = document.getElementById("prep-list");
-  list.innerHTML = EXOS.map(e => `
-    <div class="prep-item">
-      <span class="prep-id">${e.id}</span>
-      <div><div class="prep-name">${e.name}</div><div class="prep-detail">${e.prep}</div></div>
-    </div>
-  `).join("");
-  document.getElementById("vigilance-content").innerHTML = VIGILANCE_HTML;
+function updateTimerDisplay() {
+  const m = Math.floor(timerRemaining/60).toString().padStart(2,'0');
+  const s = (timerRemaining%60).toString().padStart(2,'0');
+  const el = document.getElementById('timer-disp');
+  el.textContent = m+':'+s;
+  el.className = 'timer-display' + (timerRunning ? ' running' : timerRemaining===0 ? ' done' : '');
 }
-
-function buildWarmup() {
-  const list = document.getElementById("warmup-list");
-  list.innerHTML = WARMUP.map((w, i) => `
-    <div class="check-item${state.warmDone[i] ? " done" : ""}" onclick="toggleWarm(${i})">
-      <div class="check-circle">${state.warmDone[i] ? "✓" : ""}</div>
-      <div class="check-text">${w}</div>
-    </div>
-  `).join("");
-}
-
-function buildCooldown() {
-  const list = document.getElementById("cooldown-list");
-  list.innerHTML = COOLDOWN.map((c, i) => `
-    <div class="check-item${state.coolDone[i] ? " done" : ""}" onclick="toggleCool(${i})">
-      <div class="check-circle">${state.coolDone[i] ? "✓" : ""}</div>
-      <div class="check-text">${c}</div>
-    </div>
-  `).join("");
-}
-
-function buildExos() {
-  const container = document.getElementById("exo-list");
-  const blocs = [...new Set(EXOS.map(e => e.bloc))];
-  container.innerHTML = "";
-
-  blocs.forEach(bloc => {
-    const divider = document.createElement("div");
-    divider.className = "bloc-divider";
-    divider.innerHTML = `<div class="bloc-line"></div><div class="bloc-name">Bloc ${bloc} — ${BLOC_LABELS[bloc]||""}</div><div class="bloc-line"></div>`;
-    container.appendChild(divider);
-
-    EXOS.filter(e => e.bloc === bloc).forEach(exo => {
-      const allDone = Array.from({length: exo.series}, (_,i) => state.seriesDone[exo.id+"-"+i]).every(Boolean);
-      const card = document.createElement("div");
-      card.className = "exo-card" + (allDone ? " done" : "");
-      card.id = "exo-card-" + exo.id;
-
-      const tagsHtml = exo.tags.map(t =>
-        t === "ZP"  ? '<span class="tag-zp">ZP Watch</span>' :
-        t === "ECC" ? '<span class="tag-ecc">Excentrique</span>' : ""
-      ).join("");
-
-      const seriesHtml = Array.from({length: 4}, (_,i) => {
-        if (i < exo.series) {
-          const key = exo.id + "-" + i;
-          const done = state.seriesDone[key];
-          return `<div class="serie-box${done?" done":""}" onclick="toggleSerie('${key}',${exo.recup},'${exo.id}')">
-            <div class="snum">${done ? "✓" : "S"+(i+1)}</div>
-            ${!done ? `<div class="sreps">${exo.reps}</div>` : ""}
-          </div>`;
-        } else {
-          return `<div class="serie-box empty"></div>`;
-        }
-      }).join("");
-
-      card.innerHTML = `
-        <div class="exo-inner">
-          <div class="exo-id">${exo.id}</div>
-          <div class="exo-name">${exo.name}</div>
-          <div class="exo-params">${exo.params}</div>
-          <div class="exo-cues">${exo.cues}</div>
-          <a href="${exo.url}" target="_blank" rel="noreferrer" class="exo-video">▶ Vidéo technique</a>
-          ${tagsHtml ? `<div class="exo-tags">${tagsHtml}</div>` : ""}
-        </div>
-        <div class="series-grid">${seriesHtml}</div>
-        <div class="note-wrap">
-          <textarea class="note-input" placeholder="Charge réelle · RPE · sensations..." rows="2" oninput="debouncedNote('${exo.id}', this.value)">${state.notes[exo.id]||""}</textarea>
-        </div>
-      `;
-      container.appendChild(card);
-    });
-  });
-}
-
-function buildScales() {
-  // RPE & Jambes: 1-10
-  [["scale-rpe","rpe","acc"],["scale-jambes","jambes","acc"]].forEach(([id, key, type]) => {
-    const el = document.getElementById(id);
-    el.innerHTML = Array.from({length:10},(_,i)=>i+1).map(v => {
-      const sel = state[key] === v;
-      const cls = sel ? "scale-btn sel-acc" : "scale-btn";
-      return `<button class="${cls}" onclick="setScale('${key}',${v})">${v}</button>`;
-    }).join("");
-  });
-  // ZP: 0-9
-  const zpEl = document.getElementById("scale-zp");
-  zpEl.innerHTML = Array.from({length:10},(_,i)=>i).map(v => {
-    const sel = state.zp === v;
-    let cls = "scale-btn";
-    if (sel && v < 4)  cls = "scale-btn sel-grn";
-    if (sel && v >= 4) cls = "scale-btn sel-warn";
-    return `<button class="${cls}" onclick="setScale('zp',${v})">${v}</button>`;
-  }).join("");
-
-  document.getElementById("zp-alert").style.display = (state.zp !== null && state.zp >= 4) ? "block" : "none";
-}
-
-function buildHistList() {
-  const sameType = history.filter(h => h.type === SESSION_INFO.type);
-  document.getElementById("hist-toggle").textContent = (showHist ? "▲" : "▼") + " Historique séances " + SESSION_INFO.type.split("-")[0] + " (" + sameType.length + ")";
-  const list = document.getElementById("hist-list");
-  if (!showHist) { list.style.display = "none"; return; }
-  list.style.display = "block";
-  if (sameType.length === 0) {
-    list.innerHTML = `<div style="font-size:12px;color:var(--mut);padding:12px 0;text-align:center">Aucune séance précédente.</div>`;
-    return;
+function toggleTimer() {
+  if (timerRunning) {
+    clearInterval(timerInterval); timerRunning = false;
+    document.getElementById('timer-start-btn').textContent = 'START';
+    updateTimerDisplay();
+  } else {
+    if (timerRemaining === 0) timerRemaining = timerDuration;
+    timerRunning = true;
+    document.getElementById('timer-start-btn').textContent = 'STOP';
+    timerInterval = setInterval(() => {
+      timerRemaining--;
+      updateTimerDisplay();
+      if (timerRemaining <= 0) {
+        clearInterval(timerInterval); timerRunning = false;
+        document.getElementById('timer-start-btn').textContent = 'START';
+        beep();
+      }
+    }, 1000);
   }
-  list.innerHTML = sameType.map(h => `
-    <div class="hist-item">
-      <div class="hist-date">${h.date} — ${h.label}</div>
-      <div class="hist-scores">
-        <div class="hist-score"><span>${h.rpe}/10</span>Ressenti</div>
-        <div class="hist-score"><span>${h.jambes}/10</span>Jambes</div>
-        <div class="hist-score"><span>${h.zp}/10</span>ZP</div>
-      </div>
-      ${h.charges ? `<div style="font-size:10px;color:var(--mut);margin-top:6px;line-height:1.6">${h.charges}</div>` : ""}
-      ${h.notes   ? `<div style="font-size:10px;color:var(--mut);margin-top:4px">${h.notes}</div>` : ""}
-    </div>
-  `).join("");
 }
-
-// ═══════════════════════════════════════════════════════════════
-// INTERACTIONS
-// ═══════════════════════════════════════════════════════════════
-function toggleSerie(key, recup, exoId) {
-  state.seriesDone[key] = !state.seriesDone[key];
-  startWith(recup);
-  // Rebuild exo card
-  const exo = EXOS.find(e => e.id === exoId);
-  if (!exo) return;
-  const allDone = Array.from({length: exo.series}, (_,i) => state.seriesDone[exo.id+"-"+i]).every(Boolean);
-  const card = document.getElementById("exo-card-" + exoId);
-  if (card) card.className = "exo-card" + (allDone ? " done" : "");
-  const seriesGrid = card.querySelector(".series-grid");
-  if (seriesGrid) {
-    seriesGrid.innerHTML = Array.from({length:4},(_,i)=>{
-      if (i < exo.series) {
-        const k = exo.id+"-"+i;
-        const done = state.seriesDone[k];
-        return `<div class="serie-box${done?" done":""}" onclick="toggleSerie('${k}',${exo.recup},'${exo.id}')">
-          <div class="snum">${done?"✓":"S"+(i+1)}</div>
-          ${!done?`<div class="sreps">${exo.reps}</div>`:""}
-        </div>`;
-      } else { return `<div class="serie-box empty"></div>`; }
-    }).join("");
-  }
-  updateProgress();
-  updateExport();
+function resetTimer() {
+  clearInterval(timerInterval); timerRunning = false;
+  timerRemaining = timerDuration;
+  document.getElementById('timer-start-btn').textContent = 'START';
+  updateTimerDisplay();
 }
-
-function toggleWarm(i) {
-  state.warmDone[i] = !state.warmDone[i];
-  buildWarmup();
-}
-
-function toggleCool(i) {
-  state.coolDone[i] = !state.coolDone[i];
-  buildCooldown();
-}
-
-const noteDebounce = {};
-function debouncedNote(exoId, val) {
-  state.notes[exoId] = val;
-  clearTimeout(noteDebounce[exoId]);
-  noteDebounce[exoId] = setTimeout(() => updateExport(), 300);
-}
-
-function setScale(key, val) {
-  state[key] = val;
-  buildScales();
-  updateExport();
-}
-
-function toggleHist() {
-  showHist = !showHist;
-  buildHistList();
-}
-
-// ═══════════════════════════════════════════════════════════════
-// EXPORT
-// ═══════════════════════════════════════════════════════════════
-function buildExport() {
-  const lines = [`═══ SÉANCE ${SESSION_INFO.label} — ${SESSION_INFO.title} — ${SESSION_INFO.dateLabel} ═══`, ""];
-  EXOS.forEach(e => {
-    lines.push(e.id + " — " + e.name);
-    for (let i = 0; i < e.series; i++)
-      lines.push("  S" + (i+1) + " : " + (state.seriesDone[e.id+"-"+i] ? "✓" : "—"));
-    if (state.notes[e.id]) lines.push("  Note : " + state.notes[e.id]);
-    lines.push("");
-  });
-  lines.push("Ressenti général : " + (state.rpe    ?? "-") + "/10");
-  lines.push("Jambes : "           + (state.jambes ?? "-") + "/10");
-  lines.push("Zone pubienne : "    + (state.zp     ?? "-") + "/10");
-  if (state.finalNote) lines.push("Notes : " + state.finalNote);
-  return lines.join("\n");
-}
-
-function updateExport() {
-  const txt = buildExport();
-  const el = document.getElementById("export-preview");
-  if (el) el.textContent = txt;
-}
-
-document.getElementById("copy-btn").addEventListener("click", () => {
-  navigator.clipboard.writeText(buildExport()).then(() => {
-    const btn = document.getElementById("copy-btn");
-    btn.textContent = "Copié ✓";
-    setTimeout(() => btn.textContent = "▤ Copier dans le presse-papier", 2000);
-  }).catch(()=>{});
-});
-
-document.getElementById("final-note").addEventListener("input", function() {
-  state.finalNote = this.value;
-  updateExport();
-});
-
-// ═══════════════════════════════════════════════════════════════
-// SUBMIT
-// ═══════════════════════════════════════════════════════════════
-async function submitSession() {
-  if (state.rpe    === null) { alert("Note ton ressenti général /10"); return; }
-  if (state.jambes === null) { alert("Note tes jambes /10");           return; }
-  if (state.zp     === null) { alert("Note ta ZP /10");                return; }
-
-  const snap = {
-    id:      SESSION_INFO.id,
-    date:    SESSION_INFO.dateLabel,
-    type:    SESSION_INFO.type,
-    label:   SESSION_INFO.title,
-    rpe:     state.rpe,
-    jambes:  state.jambes,
-    zp:      state.zp,
-    notes:   state.finalNote,
-    charges: Object.entries(state.notes).map(([k,v]) => k+": "+v).join(" | "),
-  };
-
-  await saveHistory(snap);
-
-  // Show finish screen
-  document.getElementById("app").style.display = "none";
-  const fs = document.getElementById("finish-screen");
-  fs.classList.add("active");
-
-  const sNum = SESSION_INFO.label.split(" · ")[0];
-  document.getElementById("finish-title").textContent = "Séance " + sNum + " terminée";
-  document.getElementById("finish-sub").textContent = SESSION_INFO.dateLabel + " · " + SESSION_INFO.title;
-
-  document.getElementById("finish-scores").innerHTML = [["Ressenti",state.rpe],["Jambes",state.jambes],["ZP fin",state.zp]].map(([l,v]) =>
-    `<div class="finish-score-box"><div class="finish-score-val">${v}/10</div><div class="finish-score-lbl">${l}</div></div>`
-  ).join("");
-
-  if (state.zp >= 4) {
-    document.getElementById("finish-zp-alert").innerHTML = `<div class="zp-alert" style="margin-bottom:12px">ZP ≥ 4 — mentionne-le dans le chat avant la prochaine séance.</div>`;
-  }
-
-  const exportTxt = buildExport();
-  document.getElementById("finish-export").textContent = exportTxt;
-  document.getElementById("finish-copy").addEventListener("click", () => {
-    navigator.clipboard.writeText(exportTxt).then(() => {
-      document.getElementById("finish-copy").textContent = "Copié ✓";
-    }).catch(()=>{});
-  });
-}
-
-// ═══════════════════════════════════════════════════════════════
-// WAKE LOCK
-// ═══════════════════════════════════════════════════════════════
-let wakeLock = null;
-async function acquireWakeLock() {
+function beep() {
   try {
-    if ("wakeLock" in navigator) wakeLock = await navigator.wakeLock.request("screen");
-  } catch(e) {}
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    const o = ctx.createOscillator(); const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.frequency.value = 880; o.type = 'sine';
+    g.gain.setValueAtTime(0.5, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.6);
+    o.start(); o.stop(ctx.currentTime+0.6);
+  } catch(e){}
 }
-acquireWakeLock();
-document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "visible") acquireWakeLock();
-});
+updateTimerDisplay();
 
-// ═══════════════════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════════════════
-async function init() {
-  await loadHistory();
-  buildHeader();
-  buildPrep();
-  buildWarmup();
-  buildCooldown();
-  buildExos();
-  buildScales();
-  buildHistList();
-  updateProgress();
-  updateExport();
+// ——— RPE ———
+function updateRPE(sliderId, valId) {
+  document.getElementById(valId).textContent = document.getElementById(sliderId).value;
+}
 
-  // Fix preset buttons labels
-  const labels = ["0'45","1'00","1'30","2'00"];
-  const secs   = [45, 60, 90, 120];
-  document.querySelectorAll(".preset-btn").forEach((b, i) => {
-    b.textContent = labels[i];
-    b.dataset.sec = secs[i];
-    b.classList.toggle("active", secs[i] === 90);
-    b.addEventListener("click", () => setPreset(secs[i]));
+// ——— EXPORT ———
+function genExport() {
+  const rpe = document.getElementById('rpe-global').value;
+  const jambes = document.getElementById('rpe-jambes').value;
+  const zp = document.getElementById('rpe-zp').value;
+  const notes = document.getElementById('notes-libres').value || '—';
+  let lines = [`[RENFO] S2 — Bloc 0 Transition — ${now.toLocaleDateString('fr-FR')}`,
+    `RPE : ${rpe}/10 | Jambes : ${jambes}/10 | ZP : ${zp}/10`, ''];
+  Object.entries(EXOS).forEach(([id, ex]) => {
+    const done = seriesState[id].filter(Boolean).length;
+    const note = document.getElementById('note-'+id)?.value || '';
+    lines.push(`${ex.label} : ${done}/${ex.series} séries à ${ex.charge}`);
+    if (note) lines.push(`  → ${note}`);
   });
-  setPreset(90);
-}
+  lines.push(''); lines.push(`Notes : ${notes}`);
+  const block = document.getElementById('export-block');
+  block.style.display = 'block';
+  block.textContent = lines.join('\n');
 
-init();
+  // Sauvegarde storage
+  try {
+    const history = JSON.parse(localStorage.getItem('history:sessions:v2')||'[]');
+    history.unshift({date: now.toISOString(), bloc:'Bloc 0', rpe, jambes, zp, notes, export: lines.join('\n')});
+    localStorage.setItem('history:sessions:v2', JSON.stringify(history.slice(0,30)));
+  } catch(e){}
+}
 </script>
 </body>
 </html>
