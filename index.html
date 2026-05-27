@@ -14,7 +14,6 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;min-height:100vh;padding-bottom:80px;}
 
-/* HEADER */
 .header{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:2px solid var(--acc);padding:12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 .header-title{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;color:var(--acc);}
 .badge{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;letter-spacing:1px;text-transform:uppercase;}
@@ -22,46 +21,39 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;min-
 .badge-date{background:var(--surf2);border:1px solid var(--bdr);color:var(--mut);}
 .badge-zp{background:#1a1010;border:1px solid var(--warn);color:var(--warn);}
 
-/* BANDEAU ADAPTATION */
 .adapt-banner{margin:12px 16px;background:var(--surf);border:1px solid var(--bdr);border-left:3px solid var(--purp);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--mut);line-height:1.5;}
 .adapt-banner strong{color:var(--txt);}
 
-/* PROGRESS BAR */
-.prog-wrap{margin:0 16px 12px;background:var(--surf2);border-radius:6px;height:6px;overflow:hidden;}
+.prog-wrap{margin:0 16px 4px;background:var(--surf2);border-radius:6px;height:6px;overflow:hidden;}
 .prog-bar{height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));border-radius:6px;transition:width .4s ease;}
-.prog-label{font-size:11px;color:var(--mut);text-align:right;margin:4px 16px 0;letter-spacing:.5px;}
+.prog-label{font-size:11px;color:var(--mut);text-align:right;margin:4px 16px 10px;letter-spacing:.5px;}
 
-/* ONGLETS */
 .tabs{display:flex;padding:0 16px;gap:4px;margin-bottom:16px;}
 .tab{flex:1;padding:10px 0;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1.5px;text-align:center;background:var(--surf);border:1px solid var(--bdr);border-radius:8px;cursor:pointer;color:var(--mut);transition:all .2s;}
 .tab.active{background:var(--acc);color:#000;border-color:var(--acc);}
 
-/* CONTENU ONGLETS */
 .tab-content{display:none;padding:0 16px;}
 .tab-content.active{display:block;}
 
-/* TIMER RÉCUP */
+/* TIMER */
 .timer-sticky{position:sticky;top:58px;z-index:90;margin:0 16px 16px;background:var(--surf);border:1px solid var(--bdr);border-radius:10px;padding:12px 14px;}
 .timer-display{font-family:'Bebas Neue',sans-serif;font-size:52px;color:var(--acc);text-align:center;line-height:1;letter-spacing:3px;}
 .timer-display.running{color:var(--grn);}
 .timer-display.done{color:var(--acc2);}
-.timer-presets{display:flex;gap:6px;margin:8px 0 10px;justify-content:center;}
-.preset-btn{padding:5px 12px;background:var(--surf2);border:1px solid var(--bdr);border-radius:6px;color:var(--mut);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;}
+.timer-label{font-size:10px;color:var(--mut);text-align:center;margin-bottom:6px;letter-spacing:1px;text-transform:uppercase;min-height:14px;}
+.timer-presets{display:flex;gap:5px;margin:8px 0 10px;justify-content:center;}
+.preset-btn{padding:5px 10px;background:var(--surf2);border:1px solid var(--bdr);border-radius:6px;color:var(--mut);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;}
 .preset-btn:hover,.preset-btn.active-preset{background:var(--acc);color:#000;border-color:var(--acc);}
 .timer-controls{display:flex;gap:8px;justify-content:center;}
 .timer-btn{padding:8px 24px;border-radius:8px;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;cursor:pointer;border:none;transition:all .2s;}
 .timer-btn-start{background:var(--acc);color:#000;}
-.timer-btn-start:hover{opacity:.9;}
 .timer-btn-reset{background:var(--surf2);border:1px solid var(--bdr);color:var(--mut);}
 
-/* SECTIONS */
 .section-label{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:var(--mut);text-transform:uppercase;margin:0 0 8px;padding:0 2px;}
 
-/* MATÉRIEL */
 .mat-list{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
 .mat-tag{background:var(--surf2);border:1px solid var(--bdr);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--txt);}
 
-/* CHECKLIST */
 .check-list{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
 .check-item{display:flex;align-items:flex-start;gap:10px;background:var(--surf);border:1px solid var(--bdr);border-radius:8px;padding:10px 12px;cursor:pointer;transition:all .2s;}
 .check-item.done{opacity:.5;}
@@ -71,15 +63,26 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;min-
 .check-text{font-size:13px;line-height:1.4;}
 .check-sub{font-size:11px;color:var(--mut);margin-top:2px;}
 
-/* BLOC EXERCICE */
-.bloc-header{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:var(--acc2);margin:16px 0 8px;padding:0 2px;}
-.exo-card{background:var(--surf);border:1px solid var(--bdr);border-radius:10px;margin-bottom:10px;overflow:hidden;}
+/* SUPERSETS */
+.bloc-header{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:var(--acc2);margin:20px 0 6px;padding:0 2px;}
+.bloc-desc{font-size:11px;color:var(--mut);margin-bottom:10px;line-height:1.5;padding:0 2px;}
+
+/* Superset wrapper */
+.superset-wrap{background:var(--surf);border:1px solid var(--bdr);border-radius:12px;margin-bottom:14px;overflow:hidden;}
+.superset-header{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--surf2);border-bottom:1px solid var(--bdr);}
+.superset-tag{font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1px;color:var(--acc2);background:#1a0d08;border:1px solid var(--acc2);padding:2px 8px;border-radius:4px;}
+.superset-title{font-size:12px;color:var(--mut);flex:1;}
+.superset-recap{font-size:11px;color:var(--mut);}
+
+/* Exo dans superset */
+.exo-card{border-bottom:1px solid var(--bdr);}
+.exo-card:last-child{border-bottom:none;}
 .exo-header{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;}
-.exo-tag{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--acc);min-width:28px;}
-.exo-name{font-size:14px;font-weight:600;flex:1;}
+.exo-tag{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--acc);min-width:34px;line-height:1;}
+.exo-name{font-size:15px;font-weight:600;flex:1;}
 .exo-meta{font-size:11px;color:var(--mut);}
 .exo-badge-zp{font-size:10px;background:#1a2010;border:1px solid var(--grn);color:var(--grn);padding:2px 8px;border-radius:10px;letter-spacing:.5px;}
-.exo-body{padding:0 14px 12px;border-top:1px solid var(--bdr);}
+.exo-body{padding:0 14px 12px;background:var(--bg);}
 .exo-desc{font-size:12px;color:var(--mut);margin:8px 0 10px;line-height:1.5;}
 .series-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
 .serie-cell{background:var(--surf2);border:1px solid var(--bdr);border-radius:8px;padding:8px 4px;text-align:center;cursor:pointer;transition:all .2s;}
@@ -87,14 +90,19 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;min-
 .serie-cell.done .serie-num{color:var(--grn);}
 .serie-num{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--acc);display:block;}
 .serie-label{font-size:10px;color:var(--mut);display:block;margin-top:2px;}
-.exo-video{display:inline-flex;align-items:center;gap:5px;margin-top:8px;font-size:11px;color:var(--acc2);text-decoration:none;}
 .exo-note{margin-top:8px;}
 .exo-note textarea{width:100%;background:var(--surf2);border:1px solid var(--bdr);border-radius:6px;padding:8px;color:var(--txt);font-family:'DM Sans',sans-serif;font-size:12px;resize:none;}
-.rx-scaled{display:flex;gap:8px;margin-top:8px;}
-.rx-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;letter-spacing:1px;}
+.rx-row{display:flex;align-items:baseline;gap:8px;margin-top:6px;}
+.rx-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;letter-spacing:1px;white-space:nowrap;}
 .rx{background:#1c1c10;border:1px solid var(--acc);color:var(--acc);}
 .scaled{background:#1a1a1a;border:1px solid var(--mut);color:var(--mut);}
-.rx-detail{font-size:12px;color:var(--txt);margin-top:4px;}
+.rx-detail{font-size:12px;color:var(--txt);}
+
+/* Exo simple (pas dans superset) */
+.exo-card-solo{background:var(--surf);border:1px solid var(--bdr);border-radius:12px;margin-bottom:14px;overflow:hidden;}
+
+.vigilance-card{background:#1a1010;border:1px solid var(--warn);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--warn);line-height:1.6;}
+.vigilance-card strong{color:var(--txt);}
 
 /* BILAN */
 .bilan-card{background:var(--surf);border:1px solid var(--bdr);border-radius:10px;padding:14px;margin-bottom:12px;}
@@ -104,15 +112,10 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;min-
 .notes-ta{width:100%;background:var(--surf2);border:1px solid var(--bdr);border-radius:8px;padding:10px;color:var(--txt);font-family:'DM Sans',sans-serif;font-size:13px;resize:none;min-height:80px;}
 .export-btn{width:100%;padding:12px;background:var(--acc);color:#000;border:none;border-radius:10px;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;cursor:pointer;margin-top:8px;}
 .export-block{background:var(--surf2);border:1px solid var(--bdr);border-radius:8px;padding:12px;font-size:11px;font-family:monospace;color:var(--mut);white-space:pre-wrap;margin-top:10px;display:none;}
-
-/* CARD VIGILANCE */
-.vigilance-card{background:#1a1010;border:1px solid var(--warn);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--warn);line-height:1.6;}
-.vigilance-card strong{color:var(--txt);}
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
 <div class="header">
   <span class="header-title">S2 — TRANSITION</span>
   <span class="badge badge-bloc0">BLOC 0</span>
@@ -120,16 +123,13 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;min-
   <span class="badge badge-zp">ZP 2-3/10</span>
 </div>
 
-<!-- BANDEAU -->
 <div class="adapt-banner">
-  <strong>Bloc 0 — Récup post-100K</strong> · Courbatures + ZP légère · <strong>Séance haut du corps + gainage doux uniquement</strong> — zéro hinge, zéro impact, zéro squat. Charge réduite à 50-60%. Objectif : entretien tissulaire, relance circulatoire.
+  <strong>Bloc 0 — Récup post-100K</strong> · Courbatures + ZP légère · <strong>Haut du corps + gainage doux — 45 min chrono</strong> · Supersets agoniste/antagoniste pour optimiser le temps · Zéro hinge, zéro impact.
 </div>
 
-<!-- PROGRESS -->
 <div class="prog-wrap"><div class="prog-bar" id="prog-bar" style="width:0%"></div></div>
 <div class="prog-label"><span id="prog-count">0</span> / <span id="prog-total">0</span> séries</div>
 
-<!-- ONGLETS -->
 <div class="tabs">
   <div class="tab active" onclick="switchTab('prep')">PRÉP.</div>
   <div class="tab" onclick="switchTab('wod')">SÉANCE</div>
@@ -140,39 +140,55 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;min-
 <div class="tab-content active" id="tab-prep">
 
   <div class="vigilance-card">
-    ⚠️ <strong>ZP légère + courbatures</strong> — Écarter tout mouvement en hinge, squat, fente ou impact. Si ZP monte en cours de séance, passer directement au bilan.
+    ⚠️ <strong>ZP légère + courbatures post-100K</strong> — Aucun hinge, squat, fente ou impact. Si ZP monte ≥4/10 en cours de séance → stop gainage, passer au bilan.
   </div>
 
   <div class="section-label">Matériel</div>
   <div class="mat-list">
     <span class="mat-tag">Haltères 10 / 15 kg</span>
     <span class="mat-tag">TRX</span>
-    <span class="mat-tag">Élastique Medium</span>
+    <span class="mat-tag">Élastique Medium + Hard</span>
     <span class="mat-tag">Barre de traction</span>
     <span class="mat-tag">Banc inclinable</span>
   </div>
 
-  <div class="section-label">Échauffement — 6 min</div>
-  <div class="check-list" id="chk-echauff">
+  <div class="section-label">Échauffement — 5 min</div>
+  <div class="check-list">
     <div class="check-item" onclick="toggleCheck(this)">
       <div class="check-circle"></div>
-      <div><div class="check-text">Mobilité épaules — Cercles bras croisés + ouvertures</div><div class="check-sub">1 min · lent et ample</div></div>
+      <div><div class="check-text">Mobilité épaules — cercles bras + ouvertures poitrine</div><div class="check-sub">1 min · lent, ample</div></div>
     </div>
     <div class="check-item" onclick="toggleCheck(this)">
       <div class="check-circle"></div>
-      <div><div class="check-text">Rotateurs coiffe — rotation externe élastique (léger)</div><div class="check-sub">2×15 chaque côté</div></div>
+      <div><div class="check-text">Rotation externe coiffe — élastique léger</div><div class="check-sub">2×15 chaque côté</div></div>
     </div>
     <div class="check-item" onclick="toggleCheck(this)">
       <div class="check-circle"></div>
-      <div><div class="check-text">Activation dorsaux — TRX row très léger, tempo lent</div><div class="check-sub">2×10 — sentir le travail sans forcer</div></div>
+      <div><div class="check-text">TRX Row très léger — tempo lent, activation dorsaux</div><div class="check-sub">2×8 — sentir sans forcer</div></div>
     </div>
     <div class="check-item" onclick="toggleCheck(this)">
       <div class="check-circle"></div>
-      <div><div class="check-text">Gainage léger — planche sur genoux ou coudes 30s</div><div class="check-sub">2 séries — vérifier ZP</div></div>
+      <div><div class="check-text">Dead hang passif — décompression rachis</div><div class="check-sub">2×20s sur la barre</div></div>
     </div>
-    <div class="check-item" onclick="toggleCheck(this)">
-      <div class="check-circle"></div>
-      <div><div class="check-text">Dead hang — 20-30s passif sur la barre</div><div class="check-sub">Décompression rachis + mobilité épaule</div></div>
+  </div>
+
+  <div class="section-label">Logique supersets</div>
+  <div class="check-list">
+    <div class="check-item" style="cursor:default;">
+      <div class="check-circle" style="border-color:var(--acc2);"></div>
+      <div><div class="check-text"><strong>SS1 — Agoniste/Antagoniste</strong> : Tractions + Développé incliné</div><div class="check-sub">Enchaîner les 2 exos sans pause · repos 60s après la paire · potentialisation réciproque dos↔pecs</div></div>
+    </div>
+    <div class="check-item" style="cursor:default;">
+      <div class="check-circle" style="border-color:var(--acc2);"></div>
+      <div><div class="check-text"><strong>SS2 — Complémentaire</strong> : TRX Row + Face Pull</div><div class="check-sub">Enchaîner les 2 · repos 45s · tirage horizontal + coiffe = même chaîne postérieure</div></div>
+    </div>
+    <div class="check-item" style="cursor:default;">
+      <div class="check-circle" style="border-color:var(--acc2);"></div>
+      <div><div class="check-text"><strong>SS3 — Non-compétitif</strong> : Curls + Planche iso</div><div class="check-sub">Enchaîner les 2 · repos 45s · bras récupèrent pendant le gainage</div></div>
+    </div>
+    <div class="check-item" style="cursor:default;">
+      <div class="check-circle" style="border-color:var(--mut);"></div>
+      <div><div class="check-text"><strong>Finisher solo</strong> : Dips + Pallof Press + Élév. lat.</div><div class="check-sub">Séries simples · repos 30s · volume réduit, fini en boulet</div></div>
     </div>
   </div>
 
@@ -181,13 +197,15 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;min-
 <!-- ====== SÉANCE ====== -->
 <div class="tab-content" id="tab-wod">
 
-  <!-- TIMER -->
   <div class="timer-sticky">
-    <div class="timer-display" id="timer-disp">01:30</div>
+    <div class="timer-label" id="timer-label">RÉCUPÉRATION</div>
+    <div class="timer-display" id="timer-disp">01:00</div>
     <div class="timer-presets">
-      <button class="preset-btn" onclick="setPreset(45)">45s</button>
-      <button class="preset-btn active-preset" onclick="setPreset(90)">90s</button>
-      <button class="preset-btn" onclick="setPreset(120)">2min</button>
+      <button class="preset-btn" onclick="setPreset(30,this)">30s</button>
+      <button class="preset-btn" onclick="setPreset(45,this)">45s</button>
+      <button class="preset-btn active-preset" onclick="setPreset(60,this)">60s</button>
+      <button class="preset-btn" onclick="setPreset(90,this)">90s</button>
+      <button class="preset-btn" onclick="setPreset(120,this)">2min</button>
     </div>
     <div class="timer-controls">
       <button class="timer-btn timer-btn-start" id="timer-start-btn" onclick="toggleTimer()">START</button>
@@ -195,182 +213,173 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;min-
     </div>
   </div>
 
-  <!-- BLOC A -->
-  <div class="bloc-header">A — TIRAGE (fil conducteur)</div>
+  <!-- SS1 -->
+  <div class="bloc-header">SS1 — AGONISTE / ANTAGONISTE</div>
+  <div class="bloc-desc">Enchaîner A1 → A2 sans pause · Repos 60s après la paire · 3 tours</div>
 
-  <div class="exo-card" id="exo-tractions">
-    <div class="exo-header" onclick="toggleExo('tractions')">
-      <span class="exo-tag">A1</span>
-      <span class="exo-name">Tractions pronation</span>
-      <span class="exo-badge-zp">✓ ZP OK</span>
+  <div class="superset-wrap">
+    <div class="superset-header">
+      <span class="superset-tag">SUPERSET</span>
+      <span class="superset-title">Tractions + Développé incliné</span>
+      <span class="superset-recap">3 × (5 + 8)</span>
     </div>
-    <div class="exo-body" id="body-tractions" style="display:none;">
-      <div class="exo-desc">Fil conducteur de tout le macrocycle. Bloc 0 = volume réduit, tempo lent, amplitude complète. Si courbatures dorsaux, réduire à 4 reps.</div>
-      <div class="rx-scaled">
-        <span class="rx-tag rx">RX</span>
-        <span class="rx-detail">3×5 — tempo 2-0-2 — repos 90s</span>
+
+    <div class="exo-card">
+      <div class="exo-header" onclick="toggleExo('tractions')">
+        <span class="exo-tag">A1</span>
+        <span class="exo-name">Tractions pronation</span>
+        <span class="exo-badge-zp">✓ ZP OK</span>
       </div>
-      <div class="rx-scaled">
-        <span class="rx-tag scaled">SCALED</span>
-        <span class="rx-detail">3×5 élastique Medium — même tempo</span>
+      <div class="exo-body" id="body-tractions" style="display:none;">
+        <div class="exo-desc">Fil conducteur du macrocycle. Tempo 2-0-2, amplitude complète. Enchaîner directement avec A2 sans poser les mains.</div>
+        <div class="rx-row"><span class="rx-tag rx">RX</span><span class="rx-detail">3×5 BW — tempo 2-0-2</span></div>
+        <div class="rx-row"><span class="rx-tag scaled">SCALED</span><span class="rx-detail">3×5 élastique Medium</span></div>
+        <div class="series-grid" id="grid-tractions"></div>
+        <div class="exo-note"><textarea placeholder="Sensation, amplitude, asymétrie..." rows="2" id="note-tractions"></textarea></div>
       </div>
-      <div class="series-grid" id="grid-tractions"></div>
-      <div class="exo-note"><textarea placeholder="Notes (sensation, charge, asymétrie...)" rows="2" id="note-tractions"></textarea></div>
-      <a class="exo-video" href="https://www.youtube.com/results?search_query=traction+pronation+trail" target="_blank">▶ Standards mouvement</a>
+    </div>
+
+    <div class="exo-card">
+      <div class="exo-header" onclick="toggleExo('incline')">
+        <span class="exo-tag">A2</span>
+        <span class="exo-name">Développé incliné haltères</span>
+        <span class="exo-badge-zp">✓ ZP OK</span>
+      </div>
+      <div class="exo-body" id="body-incline" style="display:none;">
+        <div class="exo-desc">Directement après les tractions. S1 : 2×15kg RPE 8 — maintenir la charge. Amplitude complète, pas de rebond.</div>
+        <div class="rx-row"><span class="rx-tag rx">RX</span><span class="rx-detail">3×8 à 2×15kg · puis repos 60s</span></div>
+        <div class="rx-row"><span class="rx-tag scaled">SCALED</span><span class="rx-detail">3×8 à 10kg si courbatures pecs</span></div>
+        <div class="series-grid" id="grid-incline"></div>
+        <div class="exo-note"><textarea placeholder="Charge, RPE, ressenti..." rows="2" id="note-incline"></textarea></div>
+      </div>
     </div>
   </div>
 
-  <div class="exo-card" id="exo-trxrow">
-    <div class="exo-header" onclick="toggleExo('trxrow')">
-      <span class="exo-tag">A2</span>
-      <span class="exo-name">TRX Row (rowing horizontal)</span>
-      <span class="exo-badge-zp">✓ ZP OK</span>
+  <!-- SS2 -->
+  <div class="bloc-header">SS2 — CHAÎNE POSTÉRIEURE</div>
+  <div class="bloc-desc">Enchaîner B1 → B2 sans pause · Repos 45s après la paire · 3 tours</div>
+
+  <div class="superset-wrap">
+    <div class="superset-header">
+      <span class="superset-tag">SUPERSET</span>
+      <span class="superset-title">TRX Row + Face Pull</span>
+      <span class="superset-recap">3 × (12 + 15)</span>
     </div>
-    <div class="exo-body" id="body-trxrow" style="display:none;">
-      <div class="exo-desc">OBLIGATOIRE chaque séance. Angle du corps moins incliné qu'en bloc force = charge allégée. Focus : rétraction scapulaire complète, pause 1s en haut.</div>
-      <div class="rx-scaled">
-        <span class="rx-tag rx">RX</span>
-        <span class="rx-detail">3×12 — tempo 2-1-2 — repos 60s</span>
+
+    <div class="exo-card">
+      <div class="exo-header" onclick="toggleExo('trxrow')">
+        <span class="exo-tag">B1</span>
+        <span class="exo-name">TRX Row</span>
+        <span class="exo-badge-zp">✓ ZP OK</span>
       </div>
-      <div class="series-grid" id="grid-trxrow"></div>
-      <div class="exo-note"><textarea placeholder="Notes..." rows="2" id="note-trxrow"></textarea></div>
+      <div class="exo-body" id="body-trxrow" style="display:none;">
+        <div class="exo-desc">Rowing horizontal obligatoire chaque séance. Angle modéré (Bloc 0). Rétraction scapulaire complète, pause 1s en haut. Enchaîner directement avec B2.</div>
+        <div class="rx-row"><span class="rx-tag rx">RX</span><span class="rx-detail">3×12 — tempo 2-1-2</span></div>
+        <div class="series-grid" id="grid-trxrow"></div>
+        <div class="exo-note"><textarea placeholder="Notes..." rows="2" id="note-trxrow"></textarea></div>
+      </div>
+    </div>
+
+    <div class="exo-card">
+      <div class="exo-header" onclick="toggleExo('facepull')">
+        <span class="exo-tag">B2</span>
+        <span class="exo-name">Face Pull élastique Medium</span>
+        <span class="exo-badge-zp">✓ ZP OK</span>
+      </div>
+      <div class="exo-body" id="body-facepull" style="display:none;">
+        <div class="exo-desc">Coiffe + deltoïde postérieur. Coudes hauts, rotation externe en fin de mouvement. Potentialise le B1 sur la même chaîne. Repos 45s après.</div>
+        <div class="rx-row"><span class="rx-tag rx">RX</span><span class="rx-detail">3×15 · puis repos 45s</span></div>
+        <div class="series-grid" id="grid-facepull"></div>
+        <div class="exo-note"><textarea placeholder="Notes..." rows="2" id="note-facepull"></textarea></div>
+      </div>
     </div>
   </div>
 
-  <div class="exo-card" id="exo-facepull">
-    <div class="exo-header" onclick="toggleExo('facepull')">
-      <span class="exo-tag">A3</span>
-      <span class="exo-name">Face Pull élastique Medium</span>
-      <span class="exo-badge-zp">✓ ZP OK</span>
+  <!-- SS3 -->
+  <div class="bloc-header">SS3 — NON-COMPÉTITIF</div>
+  <div class="bloc-desc">Enchaîner C1 → C2 sans pause · Repos 45s · Les bras récupèrent pendant le gainage</div>
+
+  <div class="superset-wrap">
+    <div class="superset-header">
+      <span class="superset-tag">SUPERSET</span>
+      <span class="superset-title">Curls + Planche iso</span>
+      <span class="superset-recap">3 × (10 + 45s)</span>
     </div>
-    <div class="exo-body" id="body-facepull" style="display:none;">
-      <div class="exo-desc">Santé coiffe des rotateurs + posture. Tirer vers le visage, coudes hauts, rotation externe en fin de mouvement.</div>
-      <div class="rx-scaled">
-        <span class="rx-tag rx">RX</span>
-        <span class="rx-detail">3×15 — léger, sensation, repos 60s</span>
+
+    <div class="exo-card">
+      <div class="exo-header" onclick="toggleExo('curls')">
+        <span class="exo-tag">C1</span>
+        <span class="exo-name">Curls haltères alternés</span>
+        <span class="exo-badge-zp">✓ ZP OK</span>
       </div>
-      <div class="series-grid" id="grid-facepull"></div>
-      <div class="exo-note"><textarea placeholder="Notes..." rows="2" id="note-facepull"></textarea></div>
+      <div class="exo-body" id="body-curls" style="display:none;">
+        <div class="exo-desc">S1 : 2×10kg RPE 8. Maintenir. Supination complète en haut, descente contrôlée 2s. Enchaîner immédiatement avec la planche.</div>
+        <div class="rx-row"><span class="rx-tag rx">RX</span><span class="rx-detail">3×10 à 10kg alternés</span></div>
+        <div class="series-grid" id="grid-curls"></div>
+        <div class="exo-note"><textarea placeholder="Notes..." rows="2" id="note-curls"></textarea></div>
+      </div>
+    </div>
+
+    <div class="exo-card">
+      <div class="exo-header" onclick="toggleExo('planche')">
+        <span class="exo-tag">C2</span>
+        <span class="exo-name">Planche iso coudes</span>
+        <span class="exo-badge-zp">✓ ZP — surveiller</span>
+      </div>
+      <div class="exo-body" id="body-planche" style="display:none;">
+        <div class="exo-desc">S1 : RPE 2 — on monte la durée. Si ZP remonte pendant, raccourcir et noter. Respiration nasale continue. Repos 45s après.</div>
+        <div class="rx-row"><span class="rx-tag rx">RX</span><span class="rx-detail">3×45s · puis repos 45s</span></div>
+        <div class="rx-row"><span class="rx-tag scaled">SCALED</span><span class="rx-detail">3×30s sur genoux si ZP remonte</span></div>
+        <div class="series-grid" id="grid-planche"></div>
+        <div class="exo-note"><textarea placeholder="ZP pendant ? Durée tenue..." rows="2" id="note-planche"></textarea></div>
+      </div>
     </div>
   </div>
 
-  <!-- BLOC B -->
-  <div class="bloc-header">B — POUSSÉE + BRAS</div>
+  <!-- FINISHER -->
+  <div class="bloc-header">FINISHER — SOLO</div>
+  <div class="bloc-desc">Séries simples · Repos 30s · Vider les réservoirs proprement</div>
 
-  <div class="exo-card" id="exo-incline">
-    <div class="exo-header" onclick="toggleExo('incline')">
-      <span class="exo-tag">B1</span>
-      <span class="exo-name">Développé incliné haltères</span>
-      <span class="exo-badge-zp">✓ ZP OK</span>
-    </div>
-    <div class="exo-body" id="body-incline" style="display:none;">
-      <div class="exo-desc">En S1 tu étais à 2×15kg RPE 8 → maintenir la charge, on reste en récup. Amplitude complète, pas de rebond en bas.</div>
-      <div class="rx-scaled">
-        <span class="rx-tag rx">RX</span>
-        <span class="rx-detail">3×8 à 2×15kg — repos 90s</span>
-      </div>
-      <div class="rx-scaled">
-        <span class="rx-tag scaled">SCALED</span>
-        <span class="rx-detail">3×8 à 10kg si courbatures pecs</span>
-      </div>
-      <div class="series-grid" id="grid-incline"></div>
-      <div class="exo-note"><textarea placeholder="Notes (charge, RPE, ressenti)..." rows="2" id="note-incline"></textarea></div>
-    </div>
-  </div>
-
-  <div class="exo-card" id="exo-elev">
-    <div class="exo-header" onclick="toggleExo('elev')">
-      <span class="exo-tag">B2</span>
-      <span class="exo-name">Élévations latérales</span>
-      <span class="exo-badge-zp">✓ ZP OK</span>
-    </div>
-    <div class="exo-body" id="body-elev" style="display:none;">
-      <div class="exo-desc">Moyen deltoïde + stabilité glénohumérale. Léger en Bloc 0. Coudes légèrement fléchis, pas d'à-coup, pincer en haut.</div>
-      <div class="rx-scaled">
-        <span class="rx-tag rx">RX</span>
-        <span class="rx-detail">3×12 à 5kg — repos 60s</span>
-      </div>
-      <div class="series-grid" id="grid-elev"></div>
-      <div class="exo-note"><textarea placeholder="Notes..." rows="2" id="note-elev"></textarea></div>
-    </div>
-  </div>
-
-  <div class="exo-card" id="exo-curls">
-    <div class="exo-header" onclick="toggleExo('curls')">
-      <span class="exo-tag">B3</span>
-      <span class="exo-name">Curls haltères alternés</span>
-      <span class="exo-badge-zp">✓ ZP OK</span>
-    </div>
-    <div class="exo-body" id="body-curls" style="display:none;">
-      <div class="exo-desc">En S1 : 2×10kg RPE 8. On maintient. Supination complète en haut, descente contrôlée 2s.</div>
-      <div class="rx-scaled">
-        <span class="rx-tag rx">RX</span>
-        <span class="rx-detail">3×10 à 10kg alternés — repos 60s</span>
-      </div>
-      <div class="series-grid" id="grid-curls"></div>
-      <div class="exo-note"><textarea placeholder="Notes..." rows="2" id="note-curls"></textarea></div>
-    </div>
-  </div>
-
-  <div class="exo-card" id="exo-dips">
+  <div class="exo-card-solo">
     <div class="exo-header" onclick="toggleExo('dips')">
-      <span class="exo-tag">B4</span>
+      <span class="exo-tag">D1</span>
       <span class="exo-name">Dips BW</span>
       <span class="exo-badge-zp">✓ ZP OK</span>
     </div>
     <div class="exo-body" id="body-dips" style="display:none;">
-      <div class="exo-desc">S1 : RPE 7. On garde BW, volume réduit. Coudes pas écartés, amplitude incomplète si douleur épaule.</div>
-      <div class="rx-scaled">
-        <span class="rx-tag rx">RX</span>
-        <span class="rx-detail">3×6 BW — repos 60s</span>
-      </div>
-      <div class="rx-scaled">
-        <span class="rx-tag scaled">SCALED</span>
-        <span class="rx-detail">Dips sur chaise si épaules sensibles</span>
-      </div>
+      <div class="exo-desc">S1 : RPE 7. On garde BW, volume réduit. Coudes pas trop écartés. Amplitude incomplète si gêne épaule.</div>
+      <div class="rx-row"><span class="rx-tag rx">RX</span><span class="rx-detail">3×6 BW — repos 30s</span></div>
+      <div class="rx-row"><span class="rx-tag scaled">SCALED</span><span class="rx-detail">Dips sur chaise si épaules sensibles</span></div>
       <div class="series-grid" id="grid-dips"></div>
       <div class="exo-note"><textarea placeholder="Notes..." rows="2" id="note-dips"></textarea></div>
     </div>
   </div>
 
-  <!-- BLOC C -->
-  <div class="bloc-header">C — GAINAGE DOUX</div>
-
-  <div class="exo-card" id="exo-planche">
-    <div class="exo-header" onclick="toggleExo('planche')">
-      <span class="exo-tag">C1</span>
-      <span class="exo-name">Planche iso — coudes</span>
-      <span class="exo-badge-zp">✓ ZP — vérifier</span>
-    </div>
-    <div class="exo-body" id="body-planche" style="display:none;">
-      <div class="exo-desc">En S1 tu étais à RPE 2 → augmenter la durée ce coup-ci. Si ZP remonte pendant, raccourcir la tenue. Respiration nasale continue.</div>
-      <div class="rx-scaled">
-        <span class="rx-tag rx">RX</span>
-        <span class="rx-detail">3×45s — repos 60s</span>
-      </div>
-      <div class="rx-scaled">
-        <span class="rx-tag scaled">SCALED</span>
-        <span class="rx-detail">3×30s sur genoux si ZP remonte</span>
-      </div>
-      <div class="series-grid" id="grid-planche"></div>
-      <div class="exo-note"><textarea placeholder="ZP pendant ? Durée tenue..." rows="2" id="note-planche"></textarea></div>
-    </div>
-  </div>
-
-  <div class="exo-card" id="exo-pallof">
+  <div class="exo-card-solo">
     <div class="exo-header" onclick="toggleExo('pallof')">
-      <span class="exo-tag">C2</span>
+      <span class="exo-tag">D2</span>
       <span class="exo-name">Pallof Press élastique Hard</span>
       <span class="exo-badge-zp">✓ ZP OK</span>
     </div>
     <div class="exo-body" id="body-pallof" style="display:none;">
-      <div class="exo-desc">En S1 tu étais à Medium RPE 2 → passer Hard comme prévu. Anti-rotation pure, gainage transverse. Bassin neutre, ne pas pivoter.</div>
-      <div class="rx-scaled">
-        <span class="rx-tag rx">RX</span>
-        <span class="rx-detail">3×12 chaque côté — élastique Hard — repos 60s</span>
-      </div>
+      <div class="exo-desc">S1 : Medium RPE 2 → Hard comme prévu. Anti-rotation pure. Bassin neutre, ne pas pivoter. Repos 30s.</div>
+      <div class="rx-row"><span class="rx-tag rx">RX</span><span class="rx-detail">3×12 chaque côté — Hard — repos 30s</span></div>
       <div class="series-grid" id="grid-pallof"></div>
       <div class="exo-note"><textarea placeholder="Notes..." rows="2" id="note-pallof"></textarea></div>
+    </div>
+  </div>
+
+  <div class="exo-card-solo">
+    <div class="exo-header" onclick="toggleExo('elev')">
+      <span class="exo-tag">D3</span>
+      <span class="exo-name">Élévations latérales</span>
+      <span class="exo-badge-zp">✓ ZP OK</span>
+    </div>
+    <div class="exo-body" id="body-elev" style="display:none;">
+      <div class="exo-desc">Finir le deltoïde moyen. Coudes légèrement fléchis, pas d'à-coup. Léger en Bloc 0. Repos 30s.</div>
+      <div class="rx-row"><span class="rx-tag rx">RX</span><span class="rx-detail">3×12 à 5kg — repos 30s</span></div>
+      <div class="series-grid" id="grid-elev"></div>
+      <div class="exo-note"><textarea placeholder="Notes..." rows="2" id="note-elev"></textarea></div>
     </div>
   </div>
 
@@ -378,65 +387,55 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;min-
 
 <!-- ====== BILAN ====== -->
 <div class="tab-content" id="tab-bilan">
-
   <div class="bilan-card">
     <div class="bilan-label">RPE Global /10</div>
     <input type="range" min="1" max="10" value="6" class="rpe-slider" id="rpe-global" oninput="updateRPE('rpe-global','rpe-global-val')">
     <div class="rpe-val" id="rpe-global-val">6</div>
   </div>
-
   <div class="bilan-card">
     <div class="bilan-label">Jambes /10 (récup trail)</div>
     <input type="range" min="1" max="10" value="5" class="rpe-slider" id="rpe-jambes" oninput="updateRPE('rpe-jambes','rpe-jambes-val')">
     <div class="rpe-val" id="rpe-jambes-val">5</div>
   </div>
-
   <div class="bilan-card">
     <div class="bilan-label">Zone Pubienne /10</div>
     <input type="range" min="0" max="10" value="2" class="rpe-slider" id="rpe-zp" oninput="updateRPE('rpe-zp','rpe-zp-val')">
     <div class="rpe-val" id="rpe-zp-val">2</div>
   </div>
-
   <div class="bilan-card">
     <div class="bilan-label">Notes libres</div>
-    <textarea class="notes-ta" id="notes-libres" placeholder="Ressentis, observations, charge à ajuster en S3..."></textarea>
+    <textarea class="notes-ta" id="notes-libres" placeholder="Ressentis, charges à ajuster, supersets OK ou trop dense ?..."></textarea>
   </div>
-
   <button class="export-btn" onclick="genExport()">GÉNÉRER EXPORT</button>
   <div class="export-block" id="export-block"></div>
-
 </div>
 
 <script>
-// ——— DATE ———
+// DATE
 const now = new Date();
 document.getElementById('date-badge').textContent = now.toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'});
 
-// ——— ONGLETS ———
+// ONGLETS
 function switchTab(id) {
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-'+id).classList.add('active');
-  const idx = ['prep','wod','bilan'].indexOf(id);
-  document.querySelectorAll('.tab')[idx].classList.add('active');
+  ['prep','wod','bilan'].forEach((n,i) => { if(n===id) document.querySelectorAll('.tab')[i].classList.add('active'); });
 }
 
-// ——— TOGGLE CHECK ———
-function toggleCheck(el) {
-  el.classList.toggle('done');
-}
+function toggleCheck(el) { el.classList.toggle('done'); }
 
-// ——— EXERCICES / SÉRIES ———
+// EXOS config : récup auto en secondes par exo
 const EXOS = {
-  tractions: {label:'Tractions', series:3, reps:'5', charge:'BW / élastique'},
-  trxrow:    {label:'TRX Row', series:3, reps:'12', charge:'TRX'},
-  facepull:  {label:'Face Pull', series:3, reps:'15', charge:'Medium'},
-  incline:   {label:'Dev. Incliné', series:3, reps:'8', charge:'2×15kg'},
-  elev:      {label:'Élév. Lat.', series:3, reps:'12', charge:'5kg'},
-  curls:     {label:'Curls', series:3, reps:'10', charge:'10kg'},
-  dips:      {label:'Dips', series:3, reps:'6', charge:'BW'},
-  planche:   {label:'Planche', series:3, reps:'45s', charge:'Iso'},
-  pallof:    {label:'Pallof Press', series:3, reps:'12/c', charge:'Hard'},
+  tractions: {label:'Tractions',       series:3, reps:'5',   charge:'BW',    recup:60},
+  incline:   {label:'Dev. Incliné',    series:3, reps:'8',   charge:'2×15kg',recup:60},
+  trxrow:    {label:'TRX Row',         series:3, reps:'12',  charge:'TRX',   recup:45},
+  facepull:  {label:'Face Pull',       series:3, reps:'15',  charge:'Medium',recup:45},
+  curls:     {label:'Curls',           series:3, reps:'10',  charge:'10kg',  recup:45},
+  planche:   {label:'Planche',         series:3, reps:'45s', charge:'Iso',   recup:45},
+  dips:      {label:'Dips',            series:3, reps:'6',   charge:'BW',    recup:30},
+  pallof:    {label:'Pallof Press',    series:3, reps:'12/c',charge:'Hard',  recup:30},
+  elev:      {label:'Élév. Latérales', series:3, reps:'12',  charge:'5kg',   recup:30},
 };
 
 let seriesState = {};
@@ -453,12 +452,9 @@ Object.keys(EXOS).forEach(id => {
       seriesState[id][i] = !seriesState[id][i];
       cell.classList.toggle('done', seriesState[id][i]);
       updateProgress();
-      // Lancer le timer récup automatiquement quand on coche une série
       if (seriesState[id][i]) {
-        if (timerRunning) { clearInterval(timerInterval); timerRunning = false; }
-        timerRemaining = timerDuration;
-        updateTimerDisplay();
-        toggleTimer();
+        // Timer auto avec durée propre à l'exo
+        startAutoTimer(ex.recup, ex.label);
       }
     };
     grid.appendChild(cell);
@@ -466,8 +462,8 @@ Object.keys(EXOS).forEach(id => {
 });
 
 function updateProgress() {
-  const total = Object.values(seriesState).reduce((s,a) => s+a.length, 0);
-  const done = Object.values(seriesState).reduce((s,a) => s+a.filter(Boolean).length, 0);
+  const total = Object.values(seriesState).reduce((s,a)=>s+a.length,0);
+  const done  = Object.values(seriesState).reduce((s,a)=>s+a.filter(Boolean).length,0);
   document.getElementById('prog-bar').style.width = (done/total*100)+'%';
   document.getElementById('prog-count').textContent = done;
   document.getElementById('prog-total').textContent = total;
@@ -475,19 +471,36 @@ function updateProgress() {
 updateProgress();
 
 function toggleExo(id) {
-  const body = document.getElementById('body-'+id);
-  body.style.display = body.style.display === 'none' ? 'block' : 'none';
+  const b = document.getElementById('body-'+id);
+  b.style.display = b.style.display==='none' ? 'block' : 'none';
 }
 
-// ——— TIMER ———
-let timerDuration = 90, timerRemaining = 90, timerInterval = null, timerRunning = false;
-function setPreset(s) {
-  if (timerRunning) return;
+// TIMER
+let timerDuration = 60, timerRemaining = 60, timerInterval = null, timerRunning = false;
+
+function setPreset(s, btn) {
+  if (timerRunning) { clearInterval(timerInterval); timerRunning = false; document.getElementById('timer-start-btn').textContent='START'; }
   timerDuration = s; timerRemaining = s;
-  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active-preset'));
-  event.target.classList.add('active-preset');
+  document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('active-preset'));
+  if(btn) btn.classList.add('active-preset');
+  document.getElementById('timer-label').textContent = 'RÉCUPÉRATION';
   updateTimerDisplay();
 }
+
+function startAutoTimer(seconds, label) {
+  if (timerRunning) { clearInterval(timerInterval); timerRunning=false; }
+  timerDuration = seconds; timerRemaining = seconds;
+  // Sync le bouton preset correspondant
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active-preset'));
+  const presets = [30,45,60,90,120];
+  const btns = document.querySelectorAll('.preset-btn');
+  const idx = presets.indexOf(seconds);
+  if (idx>=0) btns[idx].classList.add('active-preset');
+  document.getElementById('timer-label').textContent = 'RÉCUP — ' + label.toUpperCase();
+  updateTimerDisplay();
+  toggleTimer();
+}
+
 function updateTimerDisplay() {
   const m = Math.floor(timerRemaining/60).toString().padStart(2,'0');
   const s = (timerRemaining%60).toString().padStart(2,'0');
@@ -495,94 +508,101 @@ function updateTimerDisplay() {
   el.textContent = m+':'+s;
   el.className = 'timer-display' + (timerRunning ? ' running' : timerRemaining===0 ? ' done' : '');
 }
+
 function toggleTimer() {
   if (timerRunning) {
-    clearInterval(timerInterval); timerRunning = false;
-    document.getElementById('timer-start-btn').textContent = 'START';
+    clearInterval(timerInterval); timerRunning=false;
+    document.getElementById('timer-start-btn').textContent='START';
     updateTimerDisplay();
   } else {
-    if (timerRemaining === 0) timerRemaining = timerDuration;
-    timerRunning = true;
-    document.getElementById('timer-start-btn').textContent = 'STOP';
-    timerInterval = setInterval(() => {
+    if (timerRemaining===0) timerRemaining=timerDuration;
+    timerRunning=true;
+    document.getElementById('timer-start-btn').textContent='STOP';
+    timerInterval = setInterval(()=>{
       timerRemaining--;
       updateTimerDisplay();
-      if (timerRemaining <= 0) {
-        clearInterval(timerInterval); timerRunning = false;
-        document.getElementById('timer-start-btn').textContent = 'START';
+      if (timerRemaining<=0) {
+        clearInterval(timerInterval); timerRunning=false;
+        document.getElementById('timer-start-btn').textContent='START';
+        document.getElementById('timer-label').textContent='✓ RÉCUP TERMINÉE';
         beep();
       }
-    }, 1000);
+    },1000);
   }
 }
+
 function resetTimer() {
-  clearInterval(timerInterval); timerRunning = false;
-  timerRemaining = timerDuration;
-  document.getElementById('timer-start-btn').textContent = 'START';
+  clearInterval(timerInterval); timerRunning=false;
+  timerRemaining=timerDuration;
+  document.getElementById('timer-start-btn').textContent='START';
+  document.getElementById('timer-label').textContent='RÉCUPÉRATION';
   updateTimerDisplay();
 }
+
 function beep() {
   try {
-    const ctx = new (window.AudioContext||window.webkitAudioContext)();
-    const o = ctx.createOscillator(); const g = ctx.createGain();
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const o=ctx.createOscillator(), g=ctx.createGain();
     o.connect(g); g.connect(ctx.destination);
-    o.frequency.value = 880; o.type = 'sine';
-    g.gain.setValueAtTime(0.5, ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.6);
-    o.start(); o.stop(ctx.currentTime+0.6);
+    o.frequency.value=880; o.type='sine';
+    g.gain.setValueAtTime(0.6,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.8);
+    o.start(); o.stop(ctx.currentTime+0.8);
+    // Double beep
+    setTimeout(()=>{
+      const o2=ctx.createOscillator(), g2=ctx.createGain();
+      o2.connect(g2); g2.connect(ctx.destination);
+      o2.frequency.value=1100; o2.type='sine';
+      g2.gain.setValueAtTime(0.5,ctx.currentTime);
+      g2.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.5);
+      o2.start(); o2.stop(ctx.currentTime+0.5);
+    },300);
   } catch(e){}
 }
 updateTimerDisplay();
 
-// ——— WAKE LOCK ———
-let wakeLock = null;
-async function requestWakeLock() {
-  try {
-    if ('wakeLock' in navigator) {
-      wakeLock = await navigator.wakeLock.request('screen');
-      wakeLock.addEventListener('release', () => { wakeLock = null; });
-    }
-  } catch(e) {}
+// WAKE LOCK
+let wakeLock=null;
+async function requestWakeLock(){
+  try{ if('wakeLock' in navigator){ wakeLock=await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release',()=>{wakeLock=null;}); } }catch(e){}
 }
-async function releaseWakeLock() {
-  if (wakeLock) { try { await wakeLock.release(); } catch(e){} wakeLock = null; }
+async function releaseWakeLock(){
+  if(wakeLock){try{await wakeLock.release();}catch(e){} wakeLock=null;}
 }
-// Activer au chargement, réactiver si page redevient visible
 requestWakeLock();
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') requestWakeLock();
-});
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') requestWakeLock(); });
 
-// ——— RPE ———
-function updateRPE(sliderId, valId) {
-  document.getElementById(valId).textContent = document.getElementById(sliderId).value;
+// RPE
+function updateRPE(sliderId,valId){
+  document.getElementById(valId).textContent=document.getElementById(sliderId).value;
 }
 
-// ——— EXPORT ———
-function genExport() {
-  const rpe = document.getElementById('rpe-global').value;
-  const jambes = document.getElementById('rpe-jambes').value;
-  const zp = document.getElementById('rpe-zp').value;
-  const notes = document.getElementById('notes-libres').value || '—';
-  let lines = [`[RENFO] S2 — Bloc 0 Transition — ${now.toLocaleDateString('fr-FR')}`,
-    `RPE : ${rpe}/10 | Jambes : ${jambes}/10 | ZP : ${zp}/10`, ''];
-  Object.entries(EXOS).forEach(([id, ex]) => {
-    const done = seriesState[id].filter(Boolean).length;
-    const note = document.getElementById('note-'+id)?.value || '';
+// EXPORT
+function genExport(){
+  const rpe=document.getElementById('rpe-global').value;
+  const jambes=document.getElementById('rpe-jambes').value;
+  const zp=document.getElementById('rpe-zp').value;
+  const notes=document.getElementById('notes-libres').value||'—';
+  let lines=[
+    `[RENFO] S2 — Bloc 0 Transition — ${now.toLocaleDateString('fr-FR')}`,
+    `RPE : ${rpe}/10 | Jambes : ${jambes}/10 | ZP : ${zp}/10`,
+    `Format : Supersets SS1/SS2/SS3 + Finisher solo`,''
+  ];
+  Object.entries(EXOS).forEach(([id,ex])=>{
+    const done=seriesState[id].filter(Boolean).length;
+    const note=document.getElementById('note-'+id)?.value||'';
     lines.push(`${ex.label} : ${done}/${ex.series} séries à ${ex.charge}`);
-    if (note) lines.push(`  → ${note}`);
+    if(note) lines.push(`  → ${note}`);
   });
   lines.push(''); lines.push(`Notes : ${notes}`);
-  const block = document.getElementById('export-block');
-  block.style.display = 'block';
-  block.textContent = lines.join('\n');
-
-  // Sauvegarde storage
-  try {
-    const history = JSON.parse(localStorage.getItem('history:sessions:v2')||'[]');
-    history.unshift({date: now.toISOString(), bloc:'Bloc 0', rpe, jambes, zp, notes, export: lines.join('\n')});
-    localStorage.setItem('history:sessions:v2', JSON.stringify(history.slice(0,30)));
-  } catch(e){}
+  const block=document.getElementById('export-block');
+  block.style.display='block';
+  block.textContent=lines.join('\n');
+  try{
+    const h=JSON.parse(localStorage.getItem('history:sessions:v2')||'[]');
+    h.unshift({date:now.toISOString(),bloc:'Bloc 0',rpe,jambes,zp,notes,export:lines.join('\n')});
+    localStorage.setItem('history:sessions:v2',JSON.stringify(h.slice(0,30)));
+  }catch(e){}
 }
 </script>
 </body>
