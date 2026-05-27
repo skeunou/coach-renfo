@@ -453,6 +453,13 @@ Object.keys(EXOS).forEach(id => {
       seriesState[id][i] = !seriesState[id][i];
       cell.classList.toggle('done', seriesState[id][i]);
       updateProgress();
+      // Lancer le timer récup automatiquement quand on coche une série
+      if (seriesState[id][i]) {
+        if (timerRunning) { clearInterval(timerInterval); timerRunning = false; }
+        timerRemaining = timerDuration;
+        updateTimerDisplay();
+        toggleTimer();
+      }
     };
     grid.appendChild(cell);
   }
@@ -526,6 +533,25 @@ function beep() {
   } catch(e){}
 }
 updateTimerDisplay();
+
+// ——— WAKE LOCK ———
+let wakeLock = null;
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', () => { wakeLock = null; });
+    }
+  } catch(e) {}
+}
+async function releaseWakeLock() {
+  if (wakeLock) { try { await wakeLock.release(); } catch(e){} wakeLock = null; }
+}
+// Activer au chargement, réactiver si page redevient visible
+requestWakeLock();
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') requestWakeLock();
+});
 
 // ——— RPE ———
 function updateRPE(sliderId, valId) {
