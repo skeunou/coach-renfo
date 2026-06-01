@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>S3 — Bloc 0 Transition</title>
+<title>S4 — Pré St Jacques J-10</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -17,12 +17,13 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;min-
 .header{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:2px solid var(--acc);padding:12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 .header-title{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;color:var(--acc);flex:1;}
 .badge{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;padding:4px 10px;border-radius:20px;}
-.badge-phase{background:rgba(167,139,250,.15);color:var(--purp);border:1px solid var(--purp);}
+.badge-phase{background:rgba(255,149,0,.15);color:var(--warn);border:1px solid var(--warn);}
 .badge-date{background:var(--surf2);color:var(--mut);}
 .badge-zp{background:rgba(74,222,128,.15);color:var(--grn);border:1px solid var(--grn);}
 
-.banner{margin:14px 14px 0;padding:12px 14px;background:var(--surf);border:1px solid var(--bdr);border-left:3px solid var(--purp);border-radius:10px;font-size:13.5px;color:var(--mut);line-height:1.6;}
+.banner{margin:14px 14px 0;padding:12px 14px;background:var(--surf);border:1px solid var(--bdr);border-left:3px solid var(--warn);border-radius:10px;font-size:13.5px;color:var(--mut);line-height:1.6;}
 .banner strong{color:var(--txt);}
+.banner .highlight{color:var(--warn);font-weight:600;}
 
 .progress-wrap{margin:12px 14px 0;padding:10px 14px;background:var(--surf);border-radius:10px;border:1px solid var(--bdr);}
 .progress-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
@@ -37,7 +38,6 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;min-
 .tab-content{display:none;padding:14px;}
 .tab-content.active{display:block;}
 
-/* TIMER RÉCUP */
 .timer-sticky{position:sticky;top:58px;z-index:90;background:var(--bg);padding:8px 14px 4px;border-bottom:1px solid var(--bdr);}
 .timer-box{background:var(--surf);border:1px solid var(--bdr);border-radius:10px;padding:10px 14px;display:flex;flex-direction:column;gap:7px;}
 .timer-display{font-family:'Bebas Neue',sans-serif;font-size:52px;color:var(--acc);text-align:center;line-height:1;letter-spacing:2px;}
@@ -50,18 +50,14 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;min-
 .timer-start{background:var(--acc);color:#000;}
 .timer-stop{background:var(--surf2);color:var(--mut);border:1px solid var(--bdr);}
 
-/* BLOCS */
 .bloc{margin-bottom:6px;background:var(--surf);border:1px solid var(--bdr);border-radius:10px;overflow:hidden;}
-.bloc-header{padding:11px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--bdr);cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.bloc-header{padding:11px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--bdr);}
 .bloc-letter{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--acc);line-height:1;min-width:28px;}
 .bloc-info{flex:1;}
 .bloc-type{font-size:11px;color:var(--purp);text-transform:uppercase;letter-spacing:1px;}
 .bloc-exos-preview{font-size:12px;color:var(--mut);margin-top:2px;}
 .bloc-repos{font-size:11px;color:var(--purp);background:rgba(167,139,250,.1);padding:3px 8px;border-radius:10px;border:1px solid rgba(167,139,250,.2);white-space:nowrap;}
-.bloc-repos-orange{color:var(--acc2);background:rgba(255,107,53,.1);border-color:rgba(255,107,53,.2);}
-.bloc-body{padding:0;}
 
-/* COMBO */
 .combo{border-bottom:1px solid var(--bdr);}
 .combo:last-child{border-bottom:none;}
 .combo-header{padding:10px 14px 6px;display:flex;align-items:center;gap:8px;}
@@ -76,8 +72,8 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;min-
 .std-rx{font-size:11px;padding:3px 8px;background:rgba(232,255,71,.08);color:var(--acc);border-radius:6px;border:1px solid rgba(232,255,71,.2);}
 .std-sc{font-size:11px;padding:3px 8px;background:var(--surf2);color:var(--mut);border-radius:6px;border:1px solid var(--bdr);}
 .combo-note{font-size:12px;color:var(--mut);line-height:1.5;padding:6px 10px;background:var(--surf2);border-radius:6px;margin-bottom:8px;}
+.combo-note .warn-text{color:var(--warn);}
 
-/* GRILLE SÉRIES */
 .series-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
 .serie-cell{padding:10px 6px;background:var(--surf2);border:1px solid var(--bdr);border-radius:8px;text-align:center;cursor:pointer;transition:.2s;-webkit-tap-highlight-color:transparent;user-select:none;}
 .serie-cell.done{background:rgba(74,222,128,.12);border-color:rgba(74,222,128,.4);}
@@ -86,12 +82,10 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;min-
 .serie-reps{font-size:11px;color:var(--txt);margin-top:2px;line-height:1.3;}
 .serie-cell.done .serie-reps{color:var(--grn);}
 
-/* TABATA */
 .tabata-bloc{margin-bottom:6px;background:var(--surf);border:1px solid var(--acc2);border-radius:10px;overflow:hidden;}
 .tabata-header{padding:11px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--bdr);background:rgba(255,107,53,.06);}
 .tabata-title{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--acc2);letter-spacing:1px;}
 .tabata-sub{font-size:11px;color:var(--mut);margin-top:2px;}
-
 .tabata-timer-box{margin:12px 14px;background:var(--surf2);border:1px solid var(--bdr);border-radius:10px;padding:12px 14px;text-align:center;}
 .tabata-display{font-family:'Bebas Neue',sans-serif;font-size:64px;line-height:1;letter-spacing:2px;}
 .tabata-phase{font-size:13px;letter-spacing:2px;text-transform:uppercase;margin-top:4px;}
@@ -100,13 +94,11 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;min-
 .tabata-btn{flex:1;padding:10px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;border-radius:8px;border:none;cursor:pointer;}
 .tbtn-start{background:var(--acc2);color:#fff;}
 .tbtn-stop{background:var(--surf);color:var(--mut);border:1px solid var(--bdr);}
-
 .tabata-exo{padding:10px 14px;border-top:1px solid var(--bdr);}
 .tabata-exo-tag{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--acc2);margin-bottom:4px;}
 .tabata-exo-name{font-size:14px;font-weight:600;margin-bottom:4px;}
 .tabata-exo-note{font-size:12px;color:var(--mut);line-height:1.5;padding:6px 10px;background:var(--surf2);border-radius:6px;}
 
-/* PREP */
 .prep-section{margin-bottom:16px;}
 .prep-title{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:var(--acc);margin-bottom:10px;}
 .checklist-item{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;background:var(--surf);border:1px solid var(--bdr);border-radius:8px;margin-bottom:6px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
@@ -118,12 +110,13 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;min-
 .check-text{font-size:13.5px;line-height:1.5;}
 .materiel-list{display:flex;flex-wrap:wrap;gap:6px;}
 .mat-item{padding:5px 10px;background:var(--surf);border:1px solid var(--bdr);border-radius:6px;font-size:12px;}
-
-.ss-info{padding:10px 14px;font-size:12.5px;color:var(--mut);line-height:1.6;background:rgba(167,139,250,.04);border-bottom:1px solid var(--bdr);}
+.ss-info{padding:10px 14px;font-size:12.5px;color:var(--mut);line-height:1.6;background:rgba(255,149,0,.04);border-bottom:1px solid var(--bdr);}
 .ss-info:last-child{border-bottom:none;}
-.ss-info strong{color:var(--purp);}
+.ss-info strong{color:var(--warn);}
 
-/* BILAN */
+.rpe-alert{margin:0 14px 14px;padding:10px 14px;background:rgba(255,149,0,.08);border:1px solid rgba(255,149,0,.3);border-radius:10px;font-size:13px;color:var(--warn);line-height:1.6;}
+.rpe-alert strong{font-size:15px;display:block;margin-bottom:4px;}
+
 .bilan-field{margin-bottom:14px;}
 .bilan-label{font-size:12px;color:var(--mut);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
 .score-row{display:flex;gap:8px;align-items:center;}
@@ -132,21 +125,19 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;min-
 textarea{width:100%;padding:10px;background:var(--surf2);border:1px solid var(--bdr);border-radius:8px;color:var(--txt);font-family:'DM Sans',sans-serif;font-size:13px;resize:vertical;min-height:80px;}
 .export-btn{width:100%;padding:13px;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;background:var(--acc);color:#000;border:none;border-radius:10px;cursor:pointer;margin-top:6px;}
 .export-out{margin-top:10px;padding:12px;background:var(--surf2);border:1px solid var(--bdr);border-radius:8px;font-size:12px;font-family:monospace;white-space:pre-wrap;word-break:break-all;display:none;}
-
-.divider{height:1px;background:var(--bdr);margin:10px 0;}
 </style>
 </head>
 <body>
 
 <div class="header">
-  <div class="header-title">S3 — RENFO</div>
-  <span class="badge badge-phase">BLOC 0 · TRANSITION</span>
-  <span class="badge badge-date">FIN MAI 2026</span>
+  <div class="header-title">S4 — RENFO</div>
+  <span class="badge badge-phase">PRÉ 100K · J-10</span>
+  <span class="badge badge-date">~3 JUIN 2026</span>
   <span class="badge badge-zp">ZP OK</span>
 </div>
 
 <div class="banner">
-  <strong>Bloc 0 — Récup post-100K.</strong> Haut du corps + gainage uniquement. Zéro hinge, zéro impact. RPE cible 6-7 max. Si ZP remonte en séance → stopper les exos concernés immédiatement.
+  <strong>J-10 avant St Jacques 100K.</strong> Objectif unique : <span class="highlight">arriver frais le 13 juin.</span> Même structure que S3, charges identiques, RPE plafonné à 6. Si tu approches 7 → tu t'arrêtes. Pas d'héroïsme aujourd'hui. La vraie progression commence le 14 juin.
 </div>
 
 <div class="progress-wrap">
@@ -163,7 +154,7 @@ textarea{width:100%;padding:10px;background:var(--surf2);border:1px solid var(--
   <button class="tab" onclick="switchTab('bilan',this)">BILAN</button>
 </div>
 
-<!-- ===== PRÉP ===== -->
+<!-- PRÉP -->
 <div class="tab-content active" id="tab-prep">
 
   <div class="prep-section">
@@ -184,7 +175,7 @@ textarea{width:100%;padding:10px;background:var(--surf2);border:1px solid var(--
     <div class="prep-title">ÉCHAUFFEMENT — 5 MIN</div>
     <div class="checklist-item" onclick="toggleCheck(this)">
       <div class="check-box"><svg class="check-icon" viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1" stroke="#000" stroke-width="2" fill="none"/></svg></div>
-      <div class="check-text">1 min — Cerclages épaules (20 avant + 20 arrière, amplitude max)</div>
+      <div class="check-text">1 min — Cerclages épaules (20 avant + 20 arrière)</div>
     </div>
     <div class="checklist-item" onclick="toggleCheck(this)">
       <div class="check-box"><svg class="check-icon" viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1" stroke="#000" stroke-width="2" fill="none"/></svg></div>
@@ -196,28 +187,32 @@ textarea{width:100%;padding:10px;background:var(--surf2);border:1px solid var(--
     </div>
     <div class="checklist-item" onclick="toggleCheck(this)">
       <div class="check-box"><svg class="check-icon" viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1" stroke="#000" stroke-width="2" fill="none"/></svg></div>
-      <div class="check-text">1 min — Tractions élastique vert × 8 reps tempo lent (activation)</div>
+      <div class="check-text">1 min — Tractions élastique vert × 6 reps tempo lent</div>
     </div>
     <div class="checklist-item" onclick="toggleCheck(this)">
       <div class="check-box"><svg class="check-icon" viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1" stroke="#000" stroke-width="2" fill="none"/></svg></div>
-      <div class="check-text">1 min — 5 push-ups lents + planche 20s (activation gainage)</div>
+      <div class="check-text">1 min — 5 push-ups lents + planche 20s</div>
     </div>
   </div>
 
   <div class="prep-section">
-    <div class="prep-title">LOGIQUE DE SÉANCE</div>
+    <div class="prep-title">CONSIGNE DU JOUR</div>
     <div class="ss-block" style="background:var(--surf);border:1px solid var(--bdr);border-radius:10px;overflow:hidden;">
-      <div class="ss-info"><strong>A — Agoniste/Antagoniste (repos 60s)</strong><br>Tirage vertical + Poussée. Aucune compétition neuromusculaire. Les dorsaux activés potentialisent la poussée. 2 combos × 3 séries.</div>
-      <div class="ss-info"><strong>B — Complémentaire chaîne post. épaule (repos 45s)</strong><br>Rowing + rotation externe coiffe. Même chaîne, fatigue profonde sans surcharge. 2 combos × 3 séries.</div>
-      <div class="ss-info"><strong>C — Non-compétitif gainage + bras (repos 45s)</strong><br>Groupes sans lien. Le gainage laisse récupérer les bras du bloc B. 2 combos × 3 séries.</div>
-      <div class="ss-info"><strong>Finisher — 2 × Tabata abdos</strong><br>20s effort / 10s repos × 8 rounds = 4 min par exercice. Dead bug puis Shoulder tap. Gainage profond, zéro stress ZP.</div>
+      <div class="ss-info"><strong>RPE max 6 — règle absolue</strong><br>Si tu sens que tu approches 7 sur une série : tu t'arrêtes là, tu ne fais pas la série suivante. Mieux vaut finir avec de l'énergie que d'arriver cramé au départ du 100K.</div>
+      <div class="ss-info"><strong>Charges identiques à S3</strong><br>Pas d'augmentation aujourd'hui. Même poids, mêmes reps. L'objectif c'est la sensation neuromusculaire, pas la progression.</div>
+      <div class="ss-info"><strong>Écoute ton corps</strong><br>Douleur ZP, fatigue inhabituelle, jambes lourdes → tu réduis ou tu stop. Le 13 juin est dans 10 jours.</div>
     </div>
   </div>
 
 </div>
 
-<!-- ===== SÉANCE ===== -->
+<!-- SÉANCE -->
 <div class="tab-content" id="tab-seance">
+
+  <div class="rpe-alert">
+    <strong>⚠ RPE MAX 6 AUJOURD'HUI</strong>
+    J-10 avant le 100K. Si tu approches 7 sur une série → stop, passe à la suite.
+  </div>
 
   <div class="timer-sticky">
     <div class="timer-box">
@@ -239,7 +234,7 @@ textarea{width:100%;padding:10px;background:var(--surf2);border:1px solid var(--
 
   <div style="padding:14px 0 0;">
 
-  <!-- ===== BLOC A ===== -->
+  <!-- BLOC A -->
   <div class="bloc">
     <div class="bloc-header">
       <span class="bloc-letter">A</span>
@@ -251,7 +246,6 @@ textarea{width:100%;padding:10px;background:var(--surf2);border:1px solid var(--
     </div>
     <div class="bloc-body">
 
-      <!-- A1 -->
       <div class="combo">
         <div class="combo-header">
           <span class="combo-tag">A1</span>
@@ -267,25 +261,15 @@ textarea{width:100%;padding:10px;background:var(--surf2);border:1px solid var(--
             <span class="std-sc">SC tractions — élastique vert × 6</span>
             <span class="std-sc">SC push-ups — standard × 10</span>
           </div>
-          <div class="combo-note">Enchaîner sans pause entre les 2 exos. Supination = dorsaux + biceps maximisés. Pieds surélevés = charge sur deltoïdes antérieurs et pectoraux hauts. Repos 60s après la paire.</div>
+          <div class="combo-note"><span class="warn-text">Identique S3.</span> Si tu sens que les tractions passent trop facilement → c'est bien, ne va pas plus loin aujourd'hui.</div>
           <div class="series-grid">
-            <div class="serie-cell" onclick="toggleSerie(this,'A1',1,60,'A1')">
-              <div class="serie-num">SÉRIE 1</div>
-              <div class="serie-reps">5 tractions<br>8 push-ups</div>
-            </div>
-            <div class="serie-cell" onclick="toggleSerie(this,'A1',2,60,'A1')">
-              <div class="serie-num">SÉRIE 2</div>
-              <div class="serie-reps">5 tractions<br>8 push-ups</div>
-            </div>
-            <div class="serie-cell" onclick="toggleSerie(this,'A1',3,60,'A1')">
-              <div class="serie-num">SÉRIE 3</div>
-              <div class="serie-reps">5 tractions<br>8 push-ups</div>
-            </div>
+            <div class="serie-cell" onclick="toggleSerie(this,'A1',1,60,'A1')"><div class="serie-num">SÉRIE 1</div><div class="serie-reps">5 tractions<br>8 push-ups</div></div>
+            <div class="serie-cell" onclick="toggleSerie(this,'A1',2,60,'A1')"><div class="serie-num">SÉRIE 2</div><div class="serie-reps">5 tractions<br>8 push-ups</div></div>
+            <div class="serie-cell" onclick="toggleSerie(this,'A1',3,60,'A1')"><div class="serie-num">SÉRIE 3</div><div class="serie-reps">5 tractions<br>8 push-ups</div></div>
           </div>
         </div>
       </div>
 
-      <!-- A2 -->
       <div class="combo">
         <div class="combo-header">
           <span class="combo-tag">A2</span>
@@ -301,20 +285,11 @@ textarea{width:100%;padding:10px;background:var(--surf2);border:1px solid var(--
             <span class="std-sc">SC tractions — élastique vert × 6</span>
             <span class="std-sc">SC développé — 2×12kg</span>
           </div>
-          <div class="combo-note">Pronation vs supination = sollicitation dorsaux différente. Développé plat : coudes à 45° du corps, excentrique 2s. Même repos 60s.</div>
+          <div class="combo-note"><span class="warn-text">Identique S3.</span> Excentrique 2s sur le développé. Contrôle > vitesse.</div>
           <div class="series-grid">
-            <div class="serie-cell" onclick="toggleSerie(this,'A2',1,60,'A2')">
-              <div class="serie-num">SÉRIE 1</div>
-              <div class="serie-reps">5 tractions<br>8 reps · 2×15kg</div>
-            </div>
-            <div class="serie-cell" onclick="toggleSerie(this,'A2',2,60,'A2')">
-              <div class="serie-num">SÉRIE 2</div>
-              <div class="serie-reps">5 tractions<br>8 reps · 2×15kg</div>
-            </div>
-            <div class="serie-cell" onclick="toggleSerie(this,'A2',3,60,'A2')">
-              <div class="serie-num">SÉRIE 3</div>
-              <div class="serie-reps">5 tractions<br>8 reps · 2×15kg</div>
-            </div>
+            <div class="serie-cell" onclick="toggleSerie(this,'A2',1,60,'A2')"><div class="serie-num">SÉRIE 1</div><div class="serie-reps">5 tractions<br>8 reps · 2×15kg</div></div>
+            <div class="serie-cell" onclick="toggleSerie(this,'A2',2,60,'A2')"><div class="serie-num">SÉRIE 2</div><div class="serie-reps">5 tractions<br>8 reps · 2×15kg</div></div>
+            <div class="serie-cell" onclick="toggleSerie(this,'A2',3,60,'A2')"><div class="serie-num">SÉRIE 3</div><div class="serie-reps">5 tractions<br>8 reps · 2×15kg</div></div>
           </div>
         </div>
       </div>
@@ -322,7 +297,7 @@ textarea{width:100%;padding:10px;background:var(--surf2);border:1px solid var(--
     </div>
   </div>
 
-  <!-- ===== BLOC B ===== -->
+  <!-- BLOC B -->
   <div class="bloc">
     <div class="bloc-header">
       <span class="bloc-letter">B</span>
@@ -334,7 +309,6 @@ textarea{width:100%;padding:10px;background:var(--surf2);border:1px solid var(--
     </div>
     <div class="bloc-body">
 
-      <!-- B1 -->
       <div class="combo">
         <div class="combo-header">
           <span class="combo-tag">B1</span>
@@ -350,25 +324,15 @@ textarea{width:100%;padding:10px;background:var(--surf2);border:1px solid var(--
             <span class="std-sc">SC rowing — 10kg</span>
             <span class="std-sc">SC rot. ext. — Light</span>
           </div>
-          <div class="combo-note">Rowing : appui genou+main sur banc, coude tiré vers hanche, éviter rotation tronc. Rotation externe : coude 90° collé au corps, mouvement lent et contrôlé. Excellent pour la coiffe post-effort.</div>
+          <div class="combo-note"><span class="warn-text">Identique S3.</span> Coude tiré vers hanche, éviter la rotation du tronc. Rotation externe : mouvement lent, coude fixe.</div>
           <div class="series-grid">
-            <div class="serie-cell" onclick="toggleSerie(this,'B1',1,45,'B1')">
-              <div class="serie-num">SÉRIE 1</div>
-              <div class="serie-reps">12r/c · 15kg<br>15r/c · Medium</div>
-            </div>
-            <div class="serie-cell" onclick="toggleSerie(this,'B1',2,45,'B1')">
-              <div class="serie-num">SÉRIE 2</div>
-              <div class="serie-reps">12r/c · 15kg<br>15r/c · Medium</div>
-            </div>
-            <div class="serie-cell" onclick="toggleSerie(this,'B1',3,45,'B1')">
-              <div class="serie-num">SÉRIE 3</div>
-              <div class="serie-reps">12r/c · 15kg<br>15r/c · Medium</div>
-            </div>
+            <div class="serie-cell" onclick="toggleSerie(this,'B1',1,45,'B1')"><div class="serie-num">SÉRIE 1</div><div class="serie-reps">12r/c · 15kg<br>15r/c · Medium</div></div>
+            <div class="serie-cell" onclick="toggleSerie(this,'B1',2,45,'B1')"><div class="serie-num">SÉRIE 2</div><div class="serie-reps">12r/c · 15kg<br>15r/c · Medium</div></div>
+            <div class="serie-cell" onclick="toggleSerie(this,'B1',3,45,'B1')"><div class="serie-num">SÉRIE 3</div><div class="serie-reps">12r/c · 15kg<br>15r/c · Medium</div></div>
           </div>
         </div>
       </div>
 
-      <!-- B2 -->
       <div class="combo">
         <div class="combo-header">
           <span class="combo-tag">B2</span>
@@ -377,27 +341,18 @@ textarea{width:100%;padding:10px;background:var(--surf2);border:1px solid var(--
         </div>
         <div class="combo-detail">
           <div class="std-row">
-            <span class="std-rx">TRX Row — corps incliné × 12 reps</span>
+            <span class="std-rx">TRX Row — × 12 reps</span>
             <span class="std-rx">Y/T/W — Light × 8 reps/forme</span>
           </div>
           <div class="std-row">
             <span class="std-sc">SC TRX — angle moins incliné</span>
             <span class="std-sc">SC Y/T/W — sans élastique</span>
           </div>
-          <div class="combo-note">TRX Row : corps gainé, ligne droite épaules-chevilles, tirer poitrine vers les anneaux. Y/T/W allongé sur banc incliné : Y bras en V, T bras en croix, W coudes fléchis. 8 reps de chaque lettre enchaînées = 1 série. Renforcement scapulaire complet.</div>
+          <div class="combo-note"><span class="warn-text">Identique S3.</span> Y/T/W : 8 reps de chaque forme enchaînées = 1 série. Amplitude max, mouvement lent.</div>
           <div class="series-grid">
-            <div class="serie-cell" onclick="toggleSerie(this,'B2',1,45,'B2')">
-              <div class="serie-num">SÉRIE 1</div>
-              <div class="serie-reps">12 TRX<br>8+8+8 Y/T/W</div>
-            </div>
-            <div class="serie-cell" onclick="toggleSerie(this,'B2',2,45,'B2')">
-              <div class="serie-num">SÉRIE 2</div>
-              <div class="serie-reps">12 TRX<br>8+8+8 Y/T/W</div>
-            </div>
-            <div class="serie-cell" onclick="toggleSerie(this,'B2',3,45,'B2')">
-              <div class="serie-num">SÉRIE 3</div>
-              <div class="serie-reps">12 TRX<br>8+8+8 Y/T/W</div>
-            </div>
+            <div class="serie-cell" onclick="toggleSerie(this,'B2',1,45,'B2')"><div class="serie-num">SÉRIE 1</div><div class="serie-reps">12 TRX<br>8+8+8 Y/T/W</div></div>
+            <div class="serie-cell" onclick="toggleSerie(this,'B2',2,45,'B2')"><div class="serie-num">SÉRIE 2</div><div class="serie-reps">12 TRX<br>8+8+8 Y/T/W</div></div>
+            <div class="serie-cell" onclick="toggleSerie(this,'B2',3,45,'B2')"><div class="serie-num">SÉRIE 3</div><div class="serie-reps">12 TRX<br>8+8+8 Y/T/W</div></div>
           </div>
         </div>
       </div>
@@ -405,7 +360,7 @@ textarea{width:100%;padding:10px;background:var(--surf2);border:1px solid var(--
     </div>
   </div>
 
-  <!-- ===== BLOC C ===== -->
+  <!-- BLOC C -->
   <div class="bloc">
     <div class="bloc-header">
       <span class="bloc-letter">C</span>
@@ -417,7 +372,6 @@ textarea{width:100%;padding:10px;background:var(--surf2);border:1px solid var(--
     </div>
     <div class="bloc-body">
 
-      <!-- C1 -->
       <div class="combo">
         <div class="combo-header">
           <span class="combo-tag">C1</span>
@@ -430,28 +384,18 @@ textarea{width:100%;padding:10px;background:var(--surf2);border:1px solid var(--
             <span class="std-rx">Curls — 10kg × 10 reps</span>
           </div>
           <div class="std-row">
-            <span class="std-sc">SC dead bug — réduit amplitude</span>
+            <span class="std-sc">SC dead bug — amplitude réduite</span>
             <span class="std-sc">SC curls — 8kg</span>
           </div>
-          <div class="combo-note">Dead bug : dos collé au sol, lombaires plaqués. Étendre bras + jambe opposée lentement, expirer. Zéro pression ZP si lombaires plaqués. Curls : coudes fixes, supination en haut, excentrique 2s.</div>
+          <div class="combo-note"><span class="warn-text">Identique S3.</span> Dead bug : lombaires plaqués au sol en permanence. Curls : excentrique 2s.</div>
           <div class="series-grid">
-            <div class="serie-cell" onclick="toggleSerie(this,'C1',1,45,'C1')">
-              <div class="serie-num">SÉRIE 1</div>
-              <div class="serie-reps">10 dead bug<br>10 curls · 10kg</div>
-            </div>
-            <div class="serie-cell" onclick="toggleSerie(this,'C1',2,45,'C1')">
-              <div class="serie-num">SÉRIE 2</div>
-              <div class="serie-reps">10 dead bug<br>10 curls · 10kg</div>
-            </div>
-            <div class="serie-cell" onclick="toggleSerie(this,'C1',3,45,'C1')">
-              <div class="serie-num">SÉRIE 3</div>
-              <div class="serie-reps">10 dead bug<br>10 curls · 10kg</div>
-            </div>
+            <div class="serie-cell" onclick="toggleSerie(this,'C1',1,45,'C1')"><div class="serie-num">SÉRIE 1</div><div class="serie-reps">10 dead bug<br>10 curls · 10kg</div></div>
+            <div class="serie-cell" onclick="toggleSerie(this,'C1',2,45,'C1')"><div class="serie-num">SÉRIE 2</div><div class="serie-reps">10 dead bug<br>10 curls · 10kg</div></div>
+            <div class="serie-cell" onclick="toggleSerie(this,'C1',3,45,'C1')"><div class="serie-num">SÉRIE 3</div><div class="serie-reps">10 dead bug<br>10 curls · 10kg</div></div>
           </div>
         </div>
       </div>
 
-      <!-- C2 -->
       <div class="combo">
         <div class="combo-header">
           <span class="combo-tag">C2</span>
@@ -467,20 +411,11 @@ textarea{width:100%;padding:10px;background:var(--surf2);border:1px solid var(--
             <span class="std-sc">SC shoulder tap — genoux</span>
             <span class="std-sc">SC marteau — 8kg</span>
           </div>
-          <div class="combo-note">Shoulder tap : planche bras tendus, pieds écartés, toucher épaule opposée en minimisant la rotation du bassin. Gainage anti-rotation actif. Marteau curl : poignet neutre, cible brachioradial + long supinateur. Variation naturelle des curls de C1.</div>
+          <div class="combo-note"><span class="warn-text">Identique S3.</span> Shoulder tap : minimiser la rotation du bassin. Marteau curl : poignet neutre.</div>
           <div class="series-grid">
-            <div class="serie-cell" onclick="toggleSerie(this,'C2',1,45,'C2')">
-              <div class="serie-num">SÉRIE 1</div>
-              <div class="serie-reps">16 taps<br>10 marteau · 10kg</div>
-            </div>
-            <div class="serie-cell" onclick="toggleSerie(this,'C2',2,45,'C2')">
-              <div class="serie-num">SÉRIE 2</div>
-              <div class="serie-reps">16 taps<br>10 marteau · 10kg</div>
-            </div>
-            <div class="serie-cell" onclick="toggleSerie(this,'C2',3,45,'C2')">
-              <div class="serie-num">SÉRIE 3</div>
-              <div class="serie-reps">16 taps<br>10 marteau · 10kg</div>
-            </div>
+            <div class="serie-cell" onclick="toggleSerie(this,'C2',1,45,'C2')"><div class="serie-num">SÉRIE 1</div><div class="serie-reps">16 taps<br>10 marteau · 10kg</div></div>
+            <div class="serie-cell" onclick="toggleSerie(this,'C2',2,45,'C2')"><div class="serie-num">SÉRIE 2</div><div class="serie-reps">16 taps<br>10 marteau · 10kg</div></div>
+            <div class="serie-cell" onclick="toggleSerie(this,'C2',3,45,'C2')"><div class="serie-num">SÉRIE 3</div><div class="serie-reps">16 taps<br>10 marteau · 10kg</div></div>
           </div>
         </div>
       </div>
@@ -488,41 +423,34 @@ textarea{width:100%;padding:10px;background:var(--surf2);border:1px solid var(--
     </div>
   </div>
 
-  <!-- ===== FINISHER TABATA ===== -->
+  <!-- TABATA -->
   <div class="tabata-bloc">
     <div class="tabata-header">
       <div>
-        <div class="tabata-title">FINISHER — 2 × TABATA</div>
-        <div class="tabata-sub">20s effort · 10s repos · 8 rounds · 4 min/exercice</div>
+        <div class="tabata-title">FINISHER — 1 × TABATA</div>
+        <div class="tabata-sub">20s effort · 10s repos · 8 rounds · 4 min — Dead bug uniquement</div>
       </div>
     </div>
-
     <div class="tabata-timer-box">
       <div class="tabata-display" id="tab-display" style="color:var(--acc2)">00:20</div>
       <div class="tabata-phase" id="tab-phase" style="color:var(--acc2)">EFFORT</div>
-      <div class="tabata-round" id="tab-round">Round 1 / 8 — Exercice 1/2</div>
+      <div class="tabata-round" id="tab-round">Round 1 / 8</div>
       <div class="tabata-controls">
         <button class="tabata-btn tbtn-start" onclick="startTabata()">▶ DÉMARRER</button>
         <button class="tabata-btn tbtn-stop" onclick="stopTabata()">■ RESET</button>
       </div>
     </div>
-
     <div class="tabata-exo">
-      <div class="tabata-exo-tag">EXO 1</div>
+      <div class="tabata-exo-tag">EXO UNIQUE</div>
       <div class="tabata-exo-name">Dead bug</div>
-      <div class="tabata-exo-note">Dos au sol, lombaires plaqués. Alterner bras/jambe opposés à rythme contrôlé. 20s = environ 5-6 répétitions lentes. Priorité : qualité et lombaires plaqués plutôt que vitesse.</div>
-    </div>
-    <div class="tabata-exo" style="border-top:1px solid var(--bdr);">
-      <div class="tabata-exo-tag">EXO 2</div>
-      <div class="tabata-exo-name">Shoulder tap planche</div>
-      <div class="tabata-exo-note">Planche bras tendus. 20s = environ 8-10 taps. Contrôler la rotation du bassin. Si la qualité se dégrade → passer sur les genoux sans honte. 1 min de repos entre les 2 exercices.</div>
+      <div class="tabata-exo-note">1 seul Tabata aujourd'hui — on économise. Dos au sol, lombaires plaqués, alterner bras/jambe opposés lentement. Qualité > vitesse. 20s = 5-6 reps contrôlées.</div>
     </div>
   </div>
 
   </div>
 </div>
 
-<!-- ===== BILAN ===== -->
+<!-- BILAN -->
 <div class="tab-content" id="tab-bilan">
   <div class="bilan-field">
     <div class="bilan-label">RPE général /10</div>
@@ -547,234 +475,114 @@ textarea{width:100%;padding:10px;background:var(--surf2);border:1px solid var(--
   </div>
   <div class="bilan-field">
     <div class="bilan-label">Notes libres</div>
-    <textarea id="notes-val" placeholder="Ressenti, charges, ajustements, points d'attention…"></textarea>
+    <textarea id="notes-val" placeholder="Ressenti, charges, jambes, récup post-UBS…"></textarea>
   </div>
   <button class="export-btn" onclick="genExport()">📋 COPIER BILAN</button>
   <div class="export-out" id="export-out"></div>
 </div>
 
 <script>
-// TABS
-function switchTab(t, el) {
+function switchTab(t,el){
   document.querySelectorAll('.tab-content').forEach(function(e){e.classList.remove('active');});
   document.querySelectorAll('.tab').forEach(function(e){e.classList.remove('active');});
   document.getElementById('tab-'+t).classList.add('active');
   el.classList.add('active');
 }
+function toggleCheck(el){el.classList.toggle('checked');}
 
-// CHECKLIST
-function toggleCheck(el) { el.classList.toggle('checked'); }
-
-// TIMER RÉCUP
-var timerInterval = null;
-var timerRemain = 60;
-var timerRunning = false;
-var activePreset = 60;
-
-function fmt(s) {
-  var m = Math.floor(s/60), sec = s%60;
-  return (m<10?'0':'')+m+':'+(sec<10?'0':'')+sec;
-}
-function setPreset(s) {
-  clearInterval(timerInterval); timerRunning = false;
-  timerRemain = s; activePreset = s;
-  document.getElementById('timer-display').textContent = fmt(s);
-  document.getElementById('timer-label').textContent = 'RÉCUP';
+var timerInterval=null,timerRemain=60,timerRunning=false,activePreset=60;
+function fmt(s){var m=Math.floor(s/60),sec=s%60;return(m<10?'0':'')+m+':'+(sec<10?'0':'')+sec;}
+function setPreset(s){
+  clearInterval(timerInterval);timerRunning=false;timerRemain=s;activePreset=s;
+  document.getElementById('timer-display').textContent=fmt(s);
+  document.getElementById('timer-label').textContent='RÉCUP';
   document.querySelectorAll('.preset-btn').forEach(function(b){
-    var v = b.textContent==='2min'?120:parseInt(b.textContent);
-    b.classList.toggle('active-preset', v===s);
+    var v=b.textContent==='2min'?120:parseInt(b.textContent);
+    b.classList.toggle('active-preset',v===s);
   });
 }
-function startTimer() {
-  if (timerRunning) return;
-  if (timerRemain<=0) timerRemain = activePreset;
-  timerRunning = true;
-  timerInterval = setInterval(function(){
+function startTimer(){
+  if(timerRunning)return;
+  if(timerRemain<=0)timerRemain=activePreset;
+  timerRunning=true;
+  timerInterval=setInterval(function(){
     timerRemain--;
-    document.getElementById('timer-display').textContent = fmt(timerRemain);
-    if (timerRemain<=0) {
-      clearInterval(timerInterval); timerRunning = false;
-      document.getElementById('timer-label').textContent = '✓ RÉCUP TERMINÉE';
-      beep();
-    }
+    document.getElementById('timer-display').textContent=fmt(timerRemain);
+    if(timerRemain<=0){clearInterval(timerInterval);timerRunning=false;document.getElementById('timer-label').textContent='✓ RÉCUP TERMINÉE';beep();}
   },1000);
 }
-function stopTimer() {
-  clearInterval(timerInterval); timerRunning = false;
-  timerRemain = activePreset;
-  document.getElementById('timer-display').textContent = fmt(activePreset);
-  document.getElementById('timer-label').textContent = 'RÉCUP';
+function stopTimer(){
+  clearInterval(timerInterval);timerRunning=false;timerRemain=activePreset;
+  document.getElementById('timer-display').textContent=fmt(activePreset);
+  document.getElementById('timer-label').textContent='RÉCUP';
 }
-function startAutoTimer(dur, label) {
-  clearInterval(timerInterval); timerRunning = false;
-  timerRemain = dur; activePreset = dur;
-  document.getElementById('timer-display').textContent = fmt(dur);
-  document.getElementById('timer-label').textContent = 'RÉCUP — ' + label;
+function startAutoTimer(dur,label){
+  clearInterval(timerInterval);timerRunning=false;timerRemain=dur;activePreset=dur;
+  document.getElementById('timer-display').textContent=fmt(dur);
+  document.getElementById('timer-label').textContent='RÉCUP — '+label;
   document.querySelectorAll('.preset-btn').forEach(function(b){
-    var v = b.textContent==='2min'?120:parseInt(b.textContent);
-    b.classList.toggle('active-preset', v===dur);
+    var v=b.textContent==='2min'?120:parseInt(b.textContent);
+    b.classList.toggle('active-preset',v===dur);
   });
   startTimer();
 }
-function beep(freq1, freq2) {
-  freq1 = freq1||880; freq2 = freq2||1100;
-  try {
-    var ctx = new (window.AudioContext||window.webkitAudioContext)();
-    [freq1,freq2].forEach(function(f,i){
-      var o=ctx.createOscillator(), g=ctx.createGain();
-      o.connect(g); g.connect(ctx.destination);
-      o.frequency.value=f;
-      g.gain.setValueAtTime(0.3, ctx.currentTime+i*0.18);
-      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+i*0.18+0.3);
-      o.start(ctx.currentTime+i*0.18);
-      o.stop(ctx.currentTime+i*0.18+0.3);
-    });
-  } catch(e){}
-}
+function beep(f1,f2){f1=f1||880;f2=f2||1100;
+  try{var ctx=new(window.AudioContext||window.webkitAudioContext)();
+  [f1,f2].forEach(function(f,i){var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.value=f;g.gain.setValueAtTime(0.3,ctx.currentTime+i*0.18);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+i*0.18+0.3);o.start(ctx.currentTime+i*0.18);o.stop(ctx.currentTime+i*0.18+0.3);});}catch(e){}}
 
-// SÉRIES
-var totalSeries = 24;
-var doneSeries = {};
-function toggleSerie(el, exo, num, recup, label) {
-  var key = exo+'_'+num;
-  var wasDone = el.classList.contains('done');
+var totalSeries=24,doneSeries={};
+function toggleSerie(el,exo,num,recup,label){
+  var key=exo+'_'+num,wasDone=el.classList.contains('done');
   el.classList.toggle('done');
-  if (!wasDone) { doneSeries[key]=true; startAutoTimer(recup, label); }
-  else { delete doneSeries[key]; }
+  if(!wasDone){doneSeries[key]=true;startAutoTimer(recup,label);}
+  else{delete doneSeries[key];}
   updateProgress();
 }
-function updateProgress() {
-  var done = Object.keys(doneSeries).length;
-  document.getElementById('prog-count').textContent = done+' / '+totalSeries;
-  document.getElementById('prog-fill').style.width = Math.round(done/totalSeries*100)+'%';
+function updateProgress(){
+  var done=Object.keys(doneSeries).length;
+  document.getElementById('prog-count').textContent=done+' / '+totalSeries;
+  document.getElementById('prog-fill').style.width=Math.round(done/totalSeries*100)+'%';
 }
 
-// TABATA
-var tabInterval = null;
-var tabRunning = false;
-var tabPhase = 'effort'; // effort | repos
-var tabRound = 1;
-var tabExo = 1;
-var tabRemain = 20;
-var EFFORT = 20, REPOS = 10, ROUNDS = 8, EXOS = 2;
-
-function tabFmt(s){ return (s<10?'0':'')+s; }
+var tabInterval=null,tabRunning=false,tabPhase='effort',tabRound=1,tabRemain=20;
+function tabFmt(s){return(s<10?'0':'')+s;}
 function updateTabDisplay(){
-  var d = document.getElementById('tab-display');
-  var p = document.getElementById('tab-phase');
-  var r = document.getElementById('tab-round');
-  d.textContent = '00:'+tabFmt(tabRemain);
-  if (tabPhase==='effort') {
-    d.style.color='var(--acc2)';
-    p.style.color='var(--acc2)';
-    p.textContent='EFFORT';
-  } else {
-    d.style.color='var(--grn)';
-    p.style.color='var(--grn)';
-    p.textContent='REPOS';
-  }
-  if (tabRound > ROUNDS && tabExo >= EXOS) {
-    p.textContent='✓ TERMINÉ';
-    d.style.color='var(--grn)';
-    r.textContent='Bravo !';
-  } else {
-    r.textContent='Round '+tabRound+' / '+ROUNDS+' — Exercice '+tabExo+'/'+EXOS;
-  }
+  var d=document.getElementById('tab-display'),p=document.getElementById('tab-phase'),r=document.getElementById('tab-round');
+  d.textContent='00:'+tabFmt(tabRemain);
+  if(tabPhase==='effort'){d.style.color='var(--acc2)';p.style.color='var(--acc2)';p.textContent='EFFORT';}
+  else{d.style.color='var(--grn)';p.style.color='var(--grn)';p.textContent='REPOS';}
+  if(tabRound>8){p.textContent='✓ TERMINÉ';d.style.color='var(--grn)';r.textContent='Bravo !';}
+  else{r.textContent='Round '+tabRound+' / 8';}
 }
 function startTabata(){
-  if (tabRunning) return;
-  tabRunning = true;
-  tabInterval = setInterval(function(){
+  if(tabRunning)return;tabRunning=true;
+  tabInterval=setInterval(function(){
     tabRemain--;
-    if (tabRemain<0){
-      if (tabPhase==='effort'){
-        tabPhase='repos'; tabRemain=REPOS;
-        beep(660,660);
-      } else {
-        tabRound++;
-        if (tabRound>ROUNDS){
-          if (tabExo<EXOS){
-            tabExo++; tabRound=1; tabPhase='effort'; tabRemain=EFFORT;
-            beep(880,1100);
-            // 1 min repos entre exos
-            clearInterval(tabInterval); tabRunning=false;
-            tabRemain=60;
-            document.getElementById('tab-phase').textContent='REPOS 1 MIN';
-            document.getElementById('tab-display').textContent='01:00';
-            document.getElementById('tab-round').textContent='Exercice 2/2 — Appuie START';
-            // compte à rebours 1 min
-            var restCount=60;
-            var ri=setInterval(function(){
-              restCount--;
-              document.getElementById('tab-display').textContent='00:'+tabFmt(restCount);
-              if(restCount<=0){ clearInterval(ri); document.getElementById('tab-display').textContent='00:00'; }
-            },1000);
-            return;
-          } else {
-            clearInterval(tabInterval); tabRunning=false;
-            tabRound=ROUNDS; tabPhase='effort';
-            document.getElementById('tab-phase').textContent='✓ TERMINÉ';
-            document.getElementById('tab-display').style.color='var(--grn)';
-            document.getElementById('tab-display').textContent='FIN';
-            document.getElementById('tab-round').textContent='Bravo — 2 Tabata validés !';
-            beep(880,1100);
-            return;
-          }
-        }
-        tabPhase='effort'; tabRemain=EFFORT;
-        beep(880,880);
-      }
+    if(tabRemain<0){
+      if(tabPhase==='effort'){tabPhase='repos';tabRemain=10;beep(660,660);}
+      else{tabRound++;if(tabRound>8){clearInterval(tabInterval);tabRunning=false;document.getElementById('tab-phase').textContent='✓ TERMINÉ';document.getElementById('tab-display').style.color='var(--grn)';document.getElementById('tab-display').textContent='FIN';document.getElementById('tab-round').textContent='Tabata validé !';beep(880,1100);return;}tabPhase='effort';tabRemain=20;beep(880,880);}
     }
     updateTabDisplay();
   },1000);
 }
 function stopTabata(){
-  clearInterval(tabInterval); tabRunning=false;
-  tabPhase='effort'; tabRound=1; tabExo=1; tabRemain=EFFORT;
-  document.getElementById('tab-display').textContent='00:20';
-  document.getElementById('tab-display').style.color='var(--acc2)';
-  document.getElementById('tab-phase').textContent='EFFORT';
-  document.getElementById('tab-phase').style.color='var(--acc2)';
-  document.getElementById('tab-round').textContent='Round 1 / 8 — Exercice 1/2';
+  clearInterval(tabInterval);tabRunning=false;tabPhase='effort';tabRound=1;tabRemain=20;
+  document.getElementById('tab-display').textContent='00:20';document.getElementById('tab-display').style.color='var(--acc2)';
+  document.getElementById('tab-phase').textContent='EFFORT';document.getElementById('tab-phase').style.color='var(--acc2)';
+  document.getElementById('tab-round').textContent='Round 1 / 8';
 }
 
-// WAKE LOCK
 var wl=null;
-function reqWL(){
-  if('wakeLock' in navigator) navigator.wakeLock.request('screen').then(function(w){wl=w;}).catch(function(){});
-}
+function reqWL(){if('wakeLock' in navigator)navigator.wakeLock.request('screen').then(function(w){wl=w;}).catch(function(){});}
 reqWL();
-document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='visible') reqWL(); });
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')reqWL();});
 
-// EXPORT
 function genExport(){
-  var rpe=document.getElementById('rpe-val').value||'–';
-  var j=document.getElementById('jambes-val').value||'–';
-  var zp=document.getElementById('zp-val').value||'–';
-  var n=document.getElementById('notes-val').value||'';
+  var rpe=document.getElementById('rpe-val').value||'–',j=document.getElementById('jambes-val').value||'–',zp=document.getElementById('zp-val').value||'–',n=document.getElementById('notes-val').value||'';
   var done=Object.keys(doneSeries).length;
-  var txt=[
-    '=== S3 RENFO — BLOC 0 TRANSITION ===',
-    'Date : '+new Date().toLocaleDateString('fr-FR'),
-    '',
-    'Séries validées : '+done+' / '+totalSeries,
-    '',
-    'A1 — Tractions supination 3×5 + Push-ups pieds surélevés 3×8',
-    'A2 — Tractions pronation 3×5 + Développé plat 2×15kg 3×8',
-    'B1 — Rowing haltère 15kg 3×12 + Rotation externe Medium 3×15',
-    'B2 — TRX Row 3×12 + Y/T/W Light 3×8+8+8',
-    'C1 — Dead bug 3×10 + Curls 10kg 3×10',
-    'C2 — Shoulder tap 3×16 + Marteau curl 10kg 3×10',
-    'Finisher — 2×Tabata (Dead bug + Shoulder tap)',
-    '',
-    'RPE : '+rpe+'/10',
-    'Jambes : '+j+'/10',
-    'ZP : '+zp+'/10',
-    n?'\nNotes : '+n:''
-  ].join('\n');
-  document.getElementById('export-out').textContent=txt;
-  document.getElementById('export-out').style.display='block';
-  if(navigator.clipboard) navigator.clipboard.writeText(txt).catch(function(){});
+  var txt=['=== S4 RENFO — PRÉ ST JACQUES J-10 ===','Date : '+new Date().toLocaleDateString('fr-FR'),'','Séries validées : '+done+' / '+totalSeries,'','A1 — Tractions supination 3×5 + Push-ups pieds surélevés 3×8','A2 — Tractions pronation 3×5 + Développé plat 2×15kg 3×8','B1 — Rowing haltère 15kg 3×12 + Rotation externe Medium 3×15','B2 — TRX Row 3×12 + Y/T/W Light 3×(8+8+8)','C1 — Dead bug 3×10 + Curls 10kg 3×10','C2 — Shoulder tap 3×16 + Marteau curl 10kg 3×10','Finisher — 1×Tabata Dead bug','','RPE : '+rpe+'/10','Jambes : '+j+'/10','ZP : '+zp+'/10',n?'\nNotes : '+n:''].join('\n');
+  document.getElementById('export-out').textContent=txt;document.getElementById('export-out').style.display='block';
+  if(navigator.clipboard)navigator.clipboard.writeText(txt).catch(function(){});
 }
 </script>
 </body>
