@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>S4 — 30 min · J-8</title>
+<title>S5 — Dernière séance · J-5</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#0d0d0f;--surf:#141416;--surf2:#1c1c20;--bdr:#2a2a30;--acc:#e8ff47;--acc2:#ff6b35;--warn:#ff9500;--txt:#f0f0f0;--mut:#6b6b78;--grn:#4ade80;--red:#f87171;--purp:#a78bfa;}
@@ -12,10 +12,10 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;min-
 .header{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:2px solid var(--acc);padding:12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 .header-title{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;color:var(--acc);flex:1;}
 .badge{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;padding:4px 10px;border-radius:20px;}
-.badge-phase{background:rgba(255,149,0,.15);color:var(--warn);border:1px solid var(--warn);}
+.badge-phase{background:rgba(248,113,113,.15);color:var(--red);border:1px solid var(--red);}
 .badge-date{background:var(--surf2);color:var(--mut);}
-.banner{margin:14px 14px 0;padding:12px 14px;background:var(--surf);border:1px solid var(--bdr);border-left:3px solid var(--warn);border-radius:10px;font-size:13.5px;color:var(--mut);line-height:1.6;}
-.banner strong{color:var(--txt);} .banner .hl{color:var(--warn);font-weight:600;}
+.banner{margin:14px 14px 0;padding:14px;background:var(--surf);border:1px solid var(--bdr);border-left:3px solid var(--red);border-radius:10px;font-size:13.5px;color:var(--mut);line-height:1.7;}
+.banner strong{color:var(--txt);} .banner .hl{color:var(--red);font-weight:600;}
 .progress-wrap{margin:12px 14px 0;padding:10px 14px;background:var(--surf);border-radius:10px;border:1px solid var(--bdr);}
 .progress-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
 .progress-label{font-size:12px;color:var(--mut);letter-spacing:1px;text-transform:uppercase;}
@@ -63,12 +63,10 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;min-
 .serie-cell.done .serie-num{color:var(--grn);}
 .serie-reps{font-size:11px;color:var(--txt);margin-top:2px;line-height:1.3;}
 .serie-cell.done .serie-reps{color:var(--grn);}
-/* FINISHER */
 .finisher-bloc{margin-bottom:6px;background:var(--surf);border:1px solid var(--acc2);border-radius:10px;overflow:hidden;}
 .finisher-header{padding:11px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--bdr);background:rgba(255,107,53,.06);}
 .finisher-title{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--acc2);letter-spacing:1px;}
 .finisher-sub{font-size:11px;color:var(--mut);margin-top:2px;}
-/* TABATA */
 .tabata-timer-box{margin:12px 14px;background:var(--surf2);border:1px solid var(--bdr);border-radius:10px;padding:12px 14px;text-align:center;}
 .tabata-display{font-family:'Bebas Neue',sans-serif;font-size:64px;line-height:1;letter-spacing:2px;}
 .tabata-phase{font-size:13px;letter-spacing:2px;text-transform:uppercase;margin-top:4px;}
@@ -80,7 +78,6 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;min-
 .tabata-exo-tag{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--acc2);margin-bottom:4px;}
 .tabata-exo-name{font-size:14px;font-weight:600;margin-bottom:4px;}
 .tabata-exo-note{font-size:12px;color:var(--mut);line-height:1.5;padding:6px 10px;background:var(--surf2);border-radius:6px;}
-/* PREP */
 .prep-section{margin-bottom:16px;}
 .prep-title{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:var(--acc);margin-bottom:10px;}
 .checklist-item{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;background:var(--surf);border:1px solid var(--bdr);border-radius:8px;margin-bottom:6px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
@@ -92,8 +89,10 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;min-
 .check-text{font-size:13.5px;line-height:1.5;}
 .materiel-list{display:flex;flex-wrap:wrap;gap:6px;}
 .mat-item{padding:5px 10px;background:var(--surf);border:1px solid var(--bdr);border-radius:6px;font-size:12px;}
-.rpe-alert{margin:0 0 14px;padding:10px 14px;background:rgba(255,149,0,.08);border:1px solid rgba(255,149,0,.3);border-radius:10px;font-size:13px;color:var(--warn);line-height:1.6;}
+.rpe-alert{margin:0 0 14px;padding:12px 14px;background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.3);border-radius:10px;font-size:13px;color:var(--red);line-height:1.6;}
 .rpe-alert strong{font-size:15px;display:block;margin-bottom:4px;}
+.stop-box{margin:0 0 14px;padding:12px 14px;background:rgba(232,255,71,.05);border:1px solid rgba(232,255,71,.2);border-radius:10px;font-size:13px;color:var(--mut);line-height:1.6;}
+.stop-box strong{color:var(--acc);display:block;margin-bottom:4px;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;}
 .bilan-field{margin-bottom:14px;}
 .bilan-label{font-size:12px;color:var(--mut);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
 .score-row{display:flex;gap:8px;align-items:center;}
@@ -107,19 +106,19 @@ textarea{width:100%;padding:10px;background:var(--surf2);border:1px solid var(--
 <body>
 
 <div class="header">
-  <div class="header-title">S4 — 30 MIN</div>
-  <span class="badge badge-phase">PRÉ 100K · J-8</span>
-  <span class="badge badge-date">~5 JUIN 2026</span>
+  <div class="header-title">S5 — DERNIÈRE</div>
+  <span class="badge badge-phase">J-5 · ST JACQUES</span>
+  <span class="badge badge-date">8 JUIN 2026</span>
 </div>
 
 <div class="banner">
-  <strong>J-8 avant St Jacques.</strong> Version condensée — <span class="hl">l'essentiel uniquement.</span> RPE max 6. Bloc C supprimé. Tu gardes la sensation neuromusculaire sans te fatiguer. Le 13 juin est dans 8 jours.
+  <strong>Dernière séance avant le 100K.</strong> <span class="hl">RPE max 5. Pas de fatigue résiduelle.</span> Tu rappelles aux muscles ce qu'ils savent faire, c'est tout. Bloc A uniquement + B1 + 1 Tabata. 25 min chrono. À partir de demain : <span class="hl">zéro renfo jusqu'au 13 juin.</span>
 </div>
 
 <div class="progress-wrap">
   <div class="progress-top">
     <span class="progress-label">Progression</span>
-    <span class="progress-count" id="prog-count">0 / 15</span>
+    <span class="progress-count" id="prog-count">0 / 9</span>
   </div>
   <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
 </div>
@@ -139,23 +138,28 @@ textarea{width:100%;padding:10px;background:var(--surf2);border:1px solid var(--
       <span class="mat-item">🔗 TRX</span>
       <span class="mat-item">🏋️ Haltères 15kg</span>
       <span class="mat-item">🦾 Élastique Medium</span>
-      <span class="mat-item">🦾 Élastique Light</span>
-      <span class="mat-item">🪑 Banc inclinable</span>
     </div>
   </div>
   <div class="prep-section">
     <div class="prep-title">ÉCHAUFFEMENT — 3 MIN</div>
     <div class="checklist-item" onclick="toggleCheck(this)">
       <div class="check-box"><svg class="check-icon" viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1" stroke="#000" stroke-width="2" fill="none"/></svg></div>
-      <div class="check-text">1 min — Cerclages épaules + band pull-apart light × 15</div>
+      <div class="check-text">1 min — Cerclages épaules large + band pull-apart light × 10</div>
     </div>
     <div class="checklist-item" onclick="toggleCheck(this)">
       <div class="check-box"><svg class="check-icon" viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1" stroke="#000" stroke-width="2" fill="none"/></svg></div>
-      <div class="check-text">1 min — Face pull light × 15 reps lentes</div>
+      <div class="check-text">1 min — Face pull light × 12 reps très lentes</div>
     </div>
     <div class="checklist-item" onclick="toggleCheck(this)">
       <div class="check-box"><svg class="check-icon" viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1" stroke="#000" stroke-width="2" fill="none"/></svg></div>
-      <div class="check-text">1 min — 5 push-ups lents + 3 tractions élastique vert</div>
+      <div class="check-text">1 min — 3 tractions élastique vert lentes + 5 push-ups sol</div>
+    </div>
+  </div>
+  <div class="prep-section">
+    <div class="prep-title">RÈGLE DU JOUR</div>
+    <div class="ss-block" style="background:var(--surf);border:1px solid var(--bdr);border-radius:10px;overflow:hidden;">
+      <div style="padding:10px 14px;font-size:13px;color:var(--mut);line-height:1.7;border-bottom:1px solid var(--bdr);"><strong style="color:var(--red);">RPE 5 max — tu dois finir en ayant l'impression d'avoir encore des réserves.</strong><br>Si une série semble trop facile → c'est normal et c'est bien. Ne rajoute pas de charge.</div>
+      <div style="padding:10px 14px;font-size:13px;color:var(--mut);line-height:1.7;"><strong style="color:var(--acc);">Après cette séance → REPOS COMPLET jusqu'au 13 juin.</strong><br>Marche légère OK. Pas de renfo, pas de sortie longue. Tu arrives frais au départ.</div>
     </div>
   </div>
 </div>
@@ -164,8 +168,13 @@ textarea{width:100%;padding:10px;background:var(--surf2);border:1px solid var(--
 <div class="tab-content" id="tab-seance">
 
   <div class="rpe-alert">
-    <strong>⚠ RPE MAX 6 — J-8</strong>
-    Approches 7 → tu stop la série. Pas de négociation.
+    <strong>⚠ RPE MAX 5 — DERNIÈRE SÉANCE</strong>
+    Tu dois finir avec des réserves. Moindre doute → tu stops la série.
+  </div>
+
+  <div class="stop-box">
+    <strong>APRÈS CETTE SÉANCE</strong>
+    Zéro renfo jusqu'au 13 juin. Marche légère autorisée. Dors, mange, hydrate-toi.
   </div>
 
   <div class="timer-sticky">
@@ -188,77 +197,51 @@ textarea{width:100%;padding:10px;background:var(--surf2);border:1px solid var(--
 
   <div style="padding:14px 0 0;">
 
-  <!-- BLOC A -->
+  <!-- BLOC A — A1 seulement -->
   <div class="bloc">
     <div class="bloc-header">
       <span class="bloc-letter">A</span>
       <div class="bloc-info">
         <div class="bloc-type">Agoniste / Antagoniste</div>
-        <div class="bloc-sub">Tirage vertical + Poussée</div>
+        <div class="bloc-sub">Tirage vertical + Poussée — 1 combo uniquement</div>
       </div>
       <span class="bloc-repos">REPOS 60s</span>
     </div>
-
     <div class="combo">
       <div class="combo-header">
         <span class="combo-tag">A1</span>
-        <div class="combo-exos">Tractions supination <span>+</span> Push-ups pieds surélevés</div>
+        <div class="combo-exos">Tractions supination <span>+</span> Push-ups standard</div>
         <span class="badge-ok">✓ ZP</span>
       </div>
       <div class="combo-detail">
         <div class="std-row">
-          <span class="std-rx">Tractions — BW × 5</span>
-          <span class="std-rx">Push-ups — pieds banc × 8</span>
+          <span class="std-rx">Tractions — BW × 4 reps</span>
+          <span class="std-rx">Push-ups — × 8 reps</span>
         </div>
         <div class="std-row">
-          <span class="std-sc">SC — élastique vert × 6</span>
-          <span class="std-sc">SC — standard × 10</span>
+          <span class="std-sc">SC — élastique vert × 5</span>
+          <span class="std-sc">SC — genoux × 8</span>
         </div>
-        <div class="combo-note">Enchaîner sans pause. Stop si RPE approche 7.</div>
+        <div class="combo-note">4 reps au lieu de 5 — volontairement sous le max. Technique parfaite, amplitude complète. Tu dois finir sans être essoufflé.</div>
         <div class="series-grid">
-          <div class="serie-cell" onclick="toggleSerie(this,'A1',1,60,'A')"><div class="serie-num">SÉRIE 1</div><div class="serie-reps">5 tractions<br>8 push-ups</div></div>
-          <div class="serie-cell" onclick="toggleSerie(this,'A1',2,60,'A')"><div class="serie-num">SÉRIE 2</div><div class="serie-reps">5 tractions<br>8 push-ups</div></div>
-          <div class="serie-cell" onclick="toggleSerie(this,'A1',3,60,'A')"><div class="serie-num">SÉRIE 3</div><div class="serie-reps">5 tractions<br>8 push-ups</div></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="combo">
-      <div class="combo-header">
-        <span class="combo-tag">A2</span>
-        <div class="combo-exos">Tractions pronation <span>+</span> Développé plat haltères</div>
-        <span class="badge-ok">✓ ZP</span>
-      </div>
-      <div class="combo-detail">
-        <div class="std-row">
-          <span class="std-rx">Tractions — BW × 5</span>
-          <span class="std-rx">Développé — 2×15kg × 8</span>
-        </div>
-        <div class="std-row">
-          <span class="std-sc">SC — élastique vert × 6</span>
-          <span class="std-sc">SC — 2×12kg</span>
-        </div>
-        <div class="combo-note">Excentrique 2s sur le développé. Contrôle > vitesse.</div>
-        <div class="series-grid">
-          <div class="serie-cell" onclick="toggleSerie(this,'A2',1,60,'A')"><div class="serie-num">SÉRIE 1</div><div class="serie-reps">5 tractions<br>8 reps · 2×15kg</div></div>
-          <div class="serie-cell" onclick="toggleSerie(this,'A2',2,60,'A')"><div class="serie-num">SÉRIE 2</div><div class="serie-reps">5 tractions<br>8 reps · 2×15kg</div></div>
-          <div class="serie-cell" onclick="toggleSerie(this,'A2',3,60,'A')"><div class="serie-num">SÉRIE 3</div><div class="serie-reps">5 tractions<br>8 reps · 2×15kg</div></div>
+          <div class="serie-cell" onclick="toggleSerie(this,'A1',1,60,'A')"><div class="serie-num">SÉRIE 1</div><div class="serie-reps">4 tractions<br>8 push-ups</div></div>
+          <div class="serie-cell" onclick="toggleSerie(this,'A1',2,60,'A')"><div class="serie-num">SÉRIE 2</div><div class="serie-reps">4 tractions<br>8 push-ups</div></div>
+          <div class="serie-cell" onclick="toggleSerie(this,'A1',3,60,'A')"><div class="serie-num">SÉRIE 3</div><div class="serie-reps">4 tractions<br>8 push-ups</div></div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- BLOC B -->
+  <!-- BLOC B — B1 seulement -->
   <div class="bloc">
     <div class="bloc-header">
       <span class="bloc-letter">B</span>
       <div class="bloc-info">
-        <div class="bloc-type">Complémentaire — Chaîne post. épaule</div>
-        <div class="bloc-sub">Rowing + Coiffe</div>
+        <div class="bloc-type">Complémentaire — Rowing obligatoire</div>
+        <div class="bloc-sub">1 combo uniquement</div>
       </div>
       <span class="bloc-repos">REPOS 45s</span>
     </div>
-
     <div class="combo">
       <div class="combo-header">
         <span class="combo-tag">B1</span>
@@ -267,91 +250,44 @@ textarea{width:100%;padding:10px;background:var(--surf2);border:1px solid var(--
       </div>
       <div class="combo-detail">
         <div class="std-row">
-          <span class="std-rx">Rowing — 15kg × 12r/c</span>
-          <span class="std-rx">Rot. ext. — Medium × 15r/c</span>
+          <span class="std-rx">Rowing — 15kg × 10r/c</span>
+          <span class="std-rx">Rot. ext. — Medium × 12r/c</span>
         </div>
         <div class="std-row">
-          <span class="std-sc">SC — 10kg</span>
-          <span class="std-sc">SC — Light</span>
+          <span class="std-sc">SC — 10kg × 10</span>
+          <span class="std-sc">SC — Light × 12</span>
         </div>
-        <div class="combo-note">Coude tiré vers hanche. Rotation externe lente, coude fixe.</div>
+        <div class="combo-note">Rowing réduit à 10r au lieu de 12. Coude tiré vers hanche, pas de rotation du tronc. Lent et propre.</div>
         <div class="series-grid">
-          <div class="serie-cell" onclick="toggleSerie(this,'B1',1,45,'B')"><div class="serie-num">SÉRIE 1</div><div class="serie-reps">12r/c · 15kg<br>15r/c · Medium</div></div>
-          <div class="serie-cell" onclick="toggleSerie(this,'B1',2,45,'B')"><div class="serie-num">SÉRIE 2</div><div class="serie-reps">12r/c · 15kg<br>15r/c · Medium</div></div>
-          <div class="serie-cell" onclick="toggleSerie(this,'B1',3,45,'B')"><div class="serie-num">SÉRIE 3</div><div class="serie-reps">12r/c · 15kg<br>15r/c · Medium</div></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="combo">
-      <div class="combo-header">
-        <span class="combo-tag">B2</span>
-        <div class="combo-exos">TRX Row <span>+</span> Y/T/W élastique</div>
-        <span class="badge-ok">✓ ZP</span>
-      </div>
-      <div class="combo-detail">
-        <div class="std-row">
-          <span class="std-rx">TRX Row — × 12</span>
-          <span class="std-rx">Y/T/W — Light × 8/forme</span>
-        </div>
-        <div class="std-row">
-          <span class="std-sc">SC TRX — angle moins incliné</span>
-          <span class="std-sc">SC Y/T/W — sans élastique</span>
-        </div>
-        <div class="combo-note">Y/T/W : 8 reps chaque forme enchaînées. Amplitude max, lent.</div>
-        <div class="series-grid">
-          <div class="serie-cell" onclick="toggleSerie(this,'B2',1,45,'B')"><div class="serie-num">SÉRIE 1</div><div class="serie-reps">12 TRX<br>8+8+8 Y/T/W</div></div>
-          <div class="serie-cell" onclick="toggleSerie(this,'B2',2,45,'B')"><div class="serie-num">SÉRIE 2</div><div class="serie-reps">12 TRX<br>8+8+8 Y/T/W</div></div>
-          <div class="serie-cell" onclick="toggleSerie(this,'B2',3,45,'B')"><div class="serie-num">SÉRIE 3</div><div class="serie-reps">12 TRX<br>8+8+8 Y/T/W</div></div>
+          <div class="serie-cell" onclick="toggleSerie(this,'B1',1,45,'B')"><div class="serie-num">SÉRIE 1</div><div class="serie-reps">10r/c · 15kg<br>12r/c · Medium</div></div>
+          <div class="serie-cell" onclick="toggleSerie(this,'B1',2,45,'B')"><div class="serie-num">SÉRIE 2</div><div class="serie-reps">10r/c · 15kg<br>12r/c · Medium</div></div>
+          <div class="serie-cell" onclick="toggleSerie(this,'B1',3,45,'B')"><div class="serie-num">SÉRIE 3</div><div class="serie-reps">10r/c · 15kg<br>12r/c · Medium</div></div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- FINISHER -->
+  <!-- TABATA -->
   <div class="finisher-bloc">
     <div class="finisher-header">
       <div>
-        <div class="finisher-title">FINISHER</div>
-        <div class="finisher-sub">Dips × 3 séries · repos 30s · puis 1 Tabata Dead bug</div>
+        <div class="finisher-title">FINISHER — 1 TABATA</div>
+        <div class="finisher-sub">Dead bug · 20s/10s × 8 rounds · 4 min</div>
       </div>
     </div>
-
-    <!-- DIPS -->
-    <div class="combo" style="border-bottom:1px solid var(--bdr);">
-      <div class="combo-header">
-        <span class="combo-tag" style="color:var(--acc2);">F1</span>
-        <div class="combo-exos">Dips BW</div>
-        <span class="badge-ok">✓ ZP</span>
-      </div>
-      <div class="combo-detail">
-        <div class="std-row">
-          <span class="std-rx">RX — 3×6 reps</span>
-          <span class="std-sc">SC — élastique Medium 3×8</span>
-        </div>
-        <div class="combo-note">Descente lente, coudes arrière. Repos 30s entre séries.</div>
-        <div class="series-grid">
-          <div class="serie-cell" onclick="toggleSerie(this,'F1',1,30,'Dips')"><div class="serie-num">SÉRIE 1</div><div class="serie-reps">6 reps</div></div>
-          <div class="serie-cell" onclick="toggleSerie(this,'F1',2,30,'Dips')"><div class="serie-num">SÉRIE 2</div><div class="serie-reps">6 reps</div></div>
-          <div class="serie-cell" onclick="toggleSerie(this,'F1',3,30,'Dips')"><div class="serie-num">SÉRIE 3</div><div class="serie-reps">6 reps</div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- TABATA -->
     <div class="tabata-timer-box">
       <div class="tabata-display" id="tab-display" style="color:var(--acc2)">00:20</div>
       <div class="tabata-phase" id="tab-phase" style="color:var(--acc2)">EFFORT</div>
       <div class="tabata-round" id="tab-round">Round 1 / 8</div>
       <div class="tabata-controls">
-        <button class="tabata-btn tbtn-start" onclick="startTabata()">▶ TABATA</button>
+        <button class="tabata-btn tbtn-start" onclick="startTabata()">▶ DÉMARRER</button>
         <button class="tabata-btn tbtn-stop" onclick="stopTabata()">■ RESET</button>
       </div>
     </div>
     <div class="tabata-exo">
-      <div class="tabata-exo-tag">TABATA</div>
-      <div class="tabata-exo-name">Dead bug — 4 min</div>
-      <div class="tabata-exo-note">Dos au sol, lombaires plaqués. Alterner bras/jambe opposés lentement. 20s = ~5 reps contrôlées. Qualité absolue.</div>
+      <div class="tabata-exo-tag">TABATA UNIQUE</div>
+      <div class="tabata-exo-name">Dead bug</div>
+      <div class="tabata-exo-note">Lombaires plaqués au sol en permanence. Alterner bras/jambe opposés, expirer à chaque extension. 20s = 4-5 reps très contrôlées. Terminer propre, pas essoufflé.</div>
     </div>
   </div>
 
@@ -374,7 +310,7 @@ textarea{width:100%;padding:10px;background:var(--surf2);border:1px solid var(--
   </div>
   <div class="bilan-field">
     <div class="bilan-label">Notes libres</div>
-    <textarea id="notes-val" placeholder="Ressenti, charges, état général…"></textarea>
+    <textarea id="notes-val" placeholder="Ressenti global, état à J-5, confiance pour le 13 juin…"></textarea>
   </div>
   <button class="export-btn" onclick="genExport()">📋 COPIER BILAN</button>
   <div class="export-out" id="export-out"></div>
@@ -390,16 +326,16 @@ function startTimer(){if(timerRunning)return;if(timerRemain<=0)timerRemain=activ
 function stopTimer(){clearInterval(timerInterval);timerRunning=false;timerRemain=activePreset;document.getElementById('timer-display').textContent=fmt(activePreset);document.getElementById('timer-label').textContent='RÉCUP';}
 function startAutoTimer(dur,label){clearInterval(timerInterval);timerRunning=false;timerRemain=dur;activePreset=dur;document.getElementById('timer-display').textContent=fmt(dur);document.getElementById('timer-label').textContent='RÉCUP — '+label;document.querySelectorAll('.preset-btn').forEach(function(b){var v=b.textContent==='2min'?120:parseInt(b.textContent);b.classList.toggle('active-preset',v===dur);});startTimer();}
 function beep(f1,f2){f1=f1||880;f2=f2||1100;try{var ctx=new(window.AudioContext||window.webkitAudioContext)();[f1,f2].forEach(function(f,i){var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.value=f;g.gain.setValueAtTime(0.3,ctx.currentTime+i*0.18);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+i*0.18+0.3);o.start(ctx.currentTime+i*0.18);o.stop(ctx.currentTime+i*0.18+0.3);});}catch(e){}}
-var totalSeries=15,doneSeries={};
+var totalSeries=9,doneSeries={};
 function toggleSerie(el,exo,num,recup,label){var key=exo+'_'+num,wasDone=el.classList.contains('done');el.classList.toggle('done');if(!wasDone){doneSeries[key]=true;startAutoTimer(recup,label);}else{delete doneSeries[key];}updateProgress();}
 function updateProgress(){var done=Object.keys(doneSeries).length;document.getElementById('prog-count').textContent=done+' / '+totalSeries;document.getElementById('prog-fill').style.width=Math.round(done/totalSeries*100)+'%';}
 var tabInterval=null,tabRunning=false,tabPhase='effort',tabRound=1,tabRemain=20;
 function tabFmt(s){return(s<10?'0':'')+s;}
-function updateTabDisplay(){var d=document.getElementById('tab-display'),p=document.getElementById('tab-phase'),r=document.getElementById('tab-round');d.textContent='00:'+tabFmt(tabRemain);if(tabPhase==='effort'){d.style.color='var(--acc2)';p.style.color='var(--acc2)';p.textContent='EFFORT';}else{d.style.color='var(--grn)';p.style.color='var(--grn)';p.textContent='REPOS';}if(tabRound>8){p.textContent='✓ TERMINÉ';d.style.color='var(--grn)';r.textContent='Bravo !';}else{r.textContent='Round '+tabRound+' / 8';}}
-function startTabata(){if(tabRunning)return;tabRunning=true;tabInterval=setInterval(function(){tabRemain--;if(tabRemain<0){if(tabPhase==='effort'){tabPhase='repos';tabRemain=10;beep(660,660);}else{tabRound++;if(tabRound>8){clearInterval(tabInterval);tabRunning=false;document.getElementById('tab-phase').textContent='✓ TERMINÉ';document.getElementById('tab-display').style.color='var(--grn)';document.getElementById('tab-display').textContent='FIN';document.getElementById('tab-round').textContent='Tabata validé !';beep(880,1100);return;}tabPhase='effort';tabRemain=20;beep(880,880);}}updateTabDisplay();},1000);}
+function updateTabDisplay(){var d=document.getElementById('tab-display'),p=document.getElementById('tab-phase'),r=document.getElementById('tab-round');d.textContent='00:'+tabFmt(tabRemain);if(tabPhase==='effort'){d.style.color='var(--acc2)';p.style.color='var(--acc2)';p.textContent='EFFORT';}else{d.style.color='var(--grn)';p.style.color='var(--grn)';p.textContent='REPOS';}if(tabRound>8){p.textContent='✓ TERMINÉ';d.style.color='var(--grn)';r.textContent='C\'est dans les jambes. Bonne chance le 13 !';}else{r.textContent='Round '+tabRound+' / 8';}}
+function startTabata(){if(tabRunning)return;tabRunning=true;tabInterval=setInterval(function(){tabRemain--;if(tabRemain<0){if(tabPhase==='effort'){tabPhase='repos';tabRemain=10;beep(660,660);}else{tabRound++;if(tabRound>8){clearInterval(tabInterval);tabRunning=false;document.getElementById('tab-phase').textContent='✓ TERMINÉ';document.getElementById('tab-display').style.color='var(--grn)';document.getElementById('tab-display').textContent='FIN';document.getElementById('tab-round').textContent="C'est dans les jambes. Bonne chance le 13 !";beep(880,1100);return;}tabPhase='effort';tabRemain=20;beep(880,880);}}updateTabDisplay();},1000);}
 function stopTabata(){clearInterval(tabInterval);tabRunning=false;tabPhase='effort';tabRound=1;tabRemain=20;document.getElementById('tab-display').textContent='00:20';document.getElementById('tab-display').style.color='var(--acc2)';document.getElementById('tab-phase').textContent='EFFORT';document.getElementById('tab-phase').style.color='var(--acc2)';document.getElementById('tab-round').textContent='Round 1 / 8';}
 var wl=null;function reqWL(){if('wakeLock' in navigator)navigator.wakeLock.request('screen').then(function(w){wl=w;}).catch(function(){});}reqWL();document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')reqWL();});
-function genExport(){var rpe=document.getElementById('rpe-val').value||'–',j=document.getElementById('jambes-val').value||'–',zp=document.getElementById('zp-val').value||'–',n=document.getElementById('notes-val').value||'';var done=Object.keys(doneSeries).length;var txt=['=== S4 RENFO — PRÉ ST JACQUES J-8 — 30 MIN ===','Date : '+new Date().toLocaleDateString('fr-FR'),'','Séries : '+done+' / '+totalSeries,'','A1 — Tractions supination 3×5 + Push-ups pieds surélevés 3×8','A2 — Tractions pronation 3×5 + Développé plat 2×15kg 3×8','B1 — Rowing haltère 15kg 3×12 + Rotation externe Medium 3×15','B2 — TRX Row 3×12 + Y/T/W Light 3×(8+8+8)','F1 — Dips BW 3×6','Tabata — Dead bug 8 rounds','','RPE : '+rpe+'/10','Jambes : '+j+'/10','ZP : '+zp+'/10',n?'\nNotes : '+n:''].join('\n');document.getElementById('export-out').textContent=txt;document.getElementById('export-out').style.display='block';if(navigator.clipboard)navigator.clipboard.writeText(txt).catch(function(){});}
+function genExport(){var rpe=document.getElementById('rpe-val').value||'–',j=document.getElementById('jambes-val').value||'–',zp=document.getElementById('zp-val').value||'–',n=document.getElementById('notes-val').value||'';var done=Object.keys(doneSeries).length;var txt=['=== S5 RENFO — DERNIÈRE SÉANCE PRÉ-100K · J-5 ===','Date : '+new Date().toLocaleDateString('fr-FR'),'','Séries : '+done+' / '+totalSeries,'','A1 — Tractions supination 3×4 + Push-ups standard 3×8','B1 — Rowing haltère 15kg 3×10 + Rotation externe Medium 3×12','Tabata — Dead bug 8 rounds','','RPE : '+rpe+'/10','Jambes : '+j+'/10','ZP : '+zp+'/10',n?'\nNotes : '+n:'','','→ REPOS COMPLET jusqu\'au 13 juin'].join('\n');document.getElementById('export-out').textContent=txt;document.getElementById('export-out').style.display='block';if(navigator.clipboard)navigator.clipboard.writeText(txt).catch(function(){});}
 </script>
 </body>
 </html>
