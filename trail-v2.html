@@ -35,7 +35,6 @@
   .topline{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
   .blockbadge{font-size:12px;font-weight:700;color:var(--ink);background:var(--acid);border-radius:999px;padding:5px 11px}
 
-  /* hero today */
   .hero{margin-bottom:16px;border-left:6px solid var(--orange)}
   .hero .type{font-size:12px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--orange-d)}
   .hero h1{font-size:40px;line-height:.95;margin:6px 0 10px}
@@ -49,11 +48,11 @@
   .btn-go{background:var(--ink);color:#fff}
   .btn-acid{background:var(--acid);color:#1a1d12}
   .btn-orange{background:var(--orange);color:#fff}
+  .btn-red{background:#fff;color:var(--red);border:1px solid #f0c3c0}
   .btn-ghost{background:transparent;color:var(--mut);font-weight:600;border:1px solid var(--line)}
   .btn-row{display:flex;gap:8px;margin-top:8px}
   .btn-row .btn{flex:1}
 
-  /* week strip */
   .weeklbl{margin:6px 0 9px;display:flex;justify-content:space-between;align-items:center}
   .week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
   .day{background:var(--paper);border:1px solid var(--line);border-radius:13px;padding:9px 3px;text-align:center;cursor:pointer;position:relative}
@@ -63,7 +62,6 @@
   .day .dnum{font-family:'Bebas Neue',sans-serif;font-size:20px;line-height:1;margin:2px 0 5px}
   .day .pip{width:8px;height:8px;border-radius:50%;margin:0 auto}
 
-  /* strava card */
   .strava{display:flex;align-items:center;gap:13px;margin-top:16px}
   .strava .ic{width:42px;height:42px;border-radius:12px;background:#fc4c02;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Bebas Neue',sans-serif;font-size:20px;flex:0 0 auto}
   .strava .t{flex:1}
@@ -71,7 +69,6 @@
   .strava .t .s{font-size:12px;color:var(--mut)}
   .strava .go{font-size:13px;font-weight:700;color:var(--blue)}
 
-  /* horizon */
   .jcount{text-align:center;margin:8px 0 22px}
   .jcount .lab{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--mut);font-weight:700}
   .jcount .v{font-family:'Bebas Neue',sans-serif;font-size:78px;line-height:.85;color:var(--ink)}
@@ -91,8 +88,7 @@
 
   .capnote{margin-top:14px;font-size:12.5px;color:var(--ink2);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:11px 13px;line-height:1.45}
 
-  /* historique */
-  .logitem{display:flex;align-items:center;gap:13px;padding:13px 0;border-bottom:1px solid var(--line)}
+  .logitem{display:flex;align-items:center;gap:13px;padding:13px 0;border-bottom:1px solid var(--line);cursor:pointer}
   .logitem:last-child{border-bottom:none}
   .logitem .pip{width:10px;height:10px;border-radius:50%;flex:0 0 auto}
   .logitem .m{flex:1}
@@ -101,12 +97,16 @@
   .logitem .r{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--ink2)}
   .empty{text-align:center;color:var(--mut);padding:40px 20px;line-height:1.6}
 
-  /* sheet (session detail + validate) */
+  /* sheet */
   .sheet{position:fixed;inset:0;background:rgba(20,25,20,.4);display:none;align-items:flex-end;z-index:50}
   .sheet.on{display:flex;animation:fade .2s}
   .sheet .panel{background:var(--bg);width:100%;max-height:92vh;overflow:auto;border-radius:24px 24px 0 0;padding:22px 18px calc(env(safe-area-inset-bottom) + 22px);animation:up .25s ease}
   @keyframes up{from{transform:translateY(40px)}to{transform:none}}
   .grab{width:42px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 16px}
+
+  .summary{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}
+  .summary .row{display:flex;justify-content:space-between;font-size:14px;padding:4px 0}
+  .summary .row span{color:var(--mut)} .summary .row b{font-weight:700}
 
   .field{margin-bottom:16px}
   .field label{display:flex;justify-content:space-between;font-size:13.5px;font-weight:700;margin-bottom:8px}
@@ -120,28 +120,46 @@
   .ok{background:#eef7f0;border:1px solid #cfe9d6;border-radius:12px;padding:11px 13px;font-size:13px;color:#1d6b3c;line-height:1.45}
   .alert{background:#fff4f3;border:1px solid #f6cfca;border-radius:12px;padding:11px 13px;font-size:13px;color:#9a3027;line-height:1.45;margin-top:8px}
 
-  /* bottom nav */
+  /* nav */
   .nav{position:fixed;left:0;right:0;bottom:0;height:calc(var(--nav) + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-top:1px solid var(--line);display:flex;z-index:40}
   .nav button{flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:var(--mut);font-family:'DM Sans',sans-serif}
   .nav button.on{color:var(--ink)}
   .nav .ni{font-size:19px;line-height:1}
   .nav .nl{font-size:10.5px;font-weight:700;letter-spacing:.4px}
-  .nav button.on .nl{color:var(--ink)}
+
+  /* ===== PLAYER overlay ===== */
+  #player{position:fixed;inset:0;background:var(--bg);z-index:80;display:none;flex-direction:column;padding:max(18px,env(safe-area-inset-top)) 20px max(18px,env(safe-area-inset-bottom))}
+  #player.on{display:flex}
+  .pbar{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+  .pbar .x{background:none;border:none;color:var(--mut);font-weight:600;font-size:14px;cursor:pointer}
+  .pprog{flex:0 0 auto;height:5px;border-radius:3px;background:var(--line);overflow:hidden;margin-bottom:6px}
+  .pprog i{display:block;height:100%;background:var(--ink);width:0;transition:width .3s}
+  .pbody{flex:1 1 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:16px;min-height:0}
+  .pclock{font-family:'Bebas Neue',sans-serif;font-size:118px;line-height:.82;letter-spacing:2px;color:var(--ink)}
+  .pclock.warn{color:var(--orange)} .pclock.hot{color:var(--red)}
+  .pname{font-size:44px;line-height:.95}
+  .preps{font-size:20px;color:var(--ink2);font-weight:700}
+  .pcue{font-size:14px;color:var(--mut);line-height:1.45;max-width:330px}
+  .pmin{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--mut);font-weight:700}
+  .counter{display:flex;align-items:center;justify-content:center;gap:24px}
+  .counter .v{font-family:'Bebas Neue',sans-serif;font-size:90px;line-height:.8;min-width:84px;text-align:center}
+  .rbtn{width:62px;height:62px;border-radius:50%;border:2px solid var(--line);background:var(--paper);font-size:32px;color:var(--ink);line-height:1;cursor:pointer;font-family:'Bebas Neue',sans-serif}
+  .plist{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:12px 16px;width:100%;max-width:340px;text-align:left}
+  .plist .li{display:flex;gap:11px;padding:7px 0;border-bottom:1px solid var(--line);font-size:14px}
+  .plist .li:last-child{border-bottom:none}
+  .plist .li .k{font-family:'Bebas Neue',sans-serif;font-size:19px;color:var(--acid-d);min-width:22px}
+  .pact{flex:0 0 auto;padding-top:12px}
 </style>
 </head>
 <body>
 <div class="app">
 
-  <!-- ============ AUJOURD'HUI ============ -->
+  <!-- AUJOURD'HUI -->
   <section class="view on" id="v-today">
     <div class="topline">
-      <div>
-        <div class="eyebrow" id="todayDate">—</div>
-        <div class="bigtitle bebas">AUJOURD'HUI</div>
-      </div>
+      <div><div class="eyebrow" id="todayDate">—</div><div class="bigtitle bebas">AUJOURD'HUI</div></div>
       <div class="blockbadge" id="blockBadge">—</div>
     </div>
-
     <div class="card hero" id="heroCard">
       <div class="type" id="heroType">—</div>
       <h1 class="bebas" id="heroTitle">—</h1>
@@ -149,18 +167,16 @@
       <div class="specs" id="heroSpecs"></div>
       <div id="heroActions"></div>
     </div>
-
     <div class="weeklbl"><span class="eyebrow">Ta semaine</span><span class="eyebrow" id="weekRange">—</span></div>
     <div class="week" id="weekStrip"></div>
-
     <div class="card strava" onclick="goStrava()">
       <div class="ic">≈</div>
       <div class="t"><div class="l">Charge récente</div><div class="s" id="stravaState">Strava à connecter</div></div>
-      <div class="go" id="stravaGo">Connecter →</div>
+      <div class="go">Connecter →</div>
     </div>
   </section>
 
-  <!-- ============ HORIZON ============ -->
+  <!-- HORIZON -->
   <section class="view" id="v-horizon">
     <div class="topline"><div><div class="eyebrow">Objectif final</div><div class="bigtitle bebas">L'HORIZON</div></div></div>
     <div class="jcount">
@@ -172,39 +188,46 @@
     <div class="capnote">Plafond volume : <b>4 000–5 000 m D+/mois</b>. Le plan ne dépasse jamais ça — la grimpe se construit par l'économie (VAM) et la durabilité, pas par le volume brut.</div>
   </section>
 
-  <!-- ============ HISTORIQUE ============ -->
+  <!-- HISTORIQUE -->
   <section class="view" id="v-log">
     <div class="topline">
       <div><div class="eyebrow">Suivi</div><div class="bigtitle bebas">HISTORIQUE</div></div>
-      <div class="blockbadge" style="background:var(--bg);border:1px solid var(--line)" id="syncState">Local</div>
+      <div class="blockbadge" style="background:var(--bg);border:1px solid var(--line)">Local</div>
     </div>
-    <div class="card" id="logCard"><div class="empty" id="logEmpty">Aucune séance validée pour l'instant.<br>Valide ta première depuis l'accueil.</div><div id="logList"></div></div>
+    <div class="card"><div class="empty" id="logEmpty">Aucune séance validée pour l'instant.<br>Valide ta première depuis l'accueil.</div><div id="logList"></div></div>
   </section>
-
 </div>
 
-<!-- ============ SHEET ============ -->
+<!-- SHEET -->
 <div class="sheet" id="sheet" onclick="if(event.target===this)closeSheet()">
   <div class="panel">
     <div class="grab"></div>
     <div class="eyebrow" id="shType">—</div>
     <h2 class="bebas" style="font-size:34px;line-height:1;margin:5px 0 4px" id="shTitle">—</h2>
     <div class="sub" id="shDate" style="margin-bottom:14px;color:var(--mut);font-weight:600"></div>
-    <div class="sub" id="shWhy" style="margin-bottom:16px"></div>
-    <div class="specs" id="shSpecs" style="margin-bottom:16px"></div>
-    <div id="shPlayer"></div>
+    <div id="shDetail">
+      <div class="sub" id="shWhy" style="margin-bottom:16px"></div>
+      <div class="specs" id="shSpecs" style="margin-bottom:16px"></div>
+    </div>
+    <div id="shSummary"></div>
+    <div id="shPlayBtn"></div>
     <div id="shForm" style="display:none;margin-top:8px">
       <div id="shFields"></div>
-      <button class="btn btn-acid" onclick="saveSession()">ENREGISTRER LA SÉANCE</button>
+      <button class="btn btn-acid" onclick="saveSession()">ENREGISTRER</button>
     </div>
-    <div class="btn-row" id="shTop">
-      <button class="btn btn-ghost" onclick="closeSheet()">Fermer</button>
-      <button class="btn btn-go" id="shValidateBtn" onclick="openForm()">VALIDER</button>
-    </div>
+    <div id="shButtons" class="btn-row"></div>
   </div>
 </div>
 
-<!-- ============ NAV ============ -->
+<!-- PLAYER -->
+<section id="player">
+  <div class="pbar"><span class="pmin" id="pSeg">—</span><button class="x" onclick="quitPlayer()">Quitter</button></div>
+  <div class="pprog"><i id="pProg"></i></div>
+  <div class="pbody" id="pBody"></div>
+  <div class="pact" id="pAct"></div>
+</section>
+
+<!-- NAV -->
 <nav class="nav">
   <button class="on" id="nav-today" onclick="nav('today')"><span class="ni">◎</span><span class="nl">Aujourd'hui</span></button>
   <button id="nav-horizon" onclick="nav('horizon')"><span class="ni">⛰</span><span class="nl">Horizon</span></button>
@@ -212,254 +235,337 @@
 </nav>
 
 <script>
-/* ===================== PLAN ENGINE (règles, déterministe) ===================== */
-// Player Moteur Grimpe déjà déployé (sera remplacé par génération par bloc)
-var PLAYER_URL = "proto.html";
+/* ================= AUDIO + WAKELOCK ================= */
+var actx=null;
+function unlockAudio(){ if(!actx){try{actx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}} }
+function beep(f,d){ if(!actx)return; try{var o=actx.createOscillator(),g=actx.createGain();o.type='sine';o.frequency.value=f;o.connect(g);g.connect(actx.destination);g.gain.setValueAtTime(.0001,actx.currentTime);g.gain.exponentialRampToValueAtTime(.5,actx.currentTime+.02);g.gain.exponentialRampToValueAtTime(.0001,actx.currentTime+d);o.start();o.stop(actx.currentTime+d);}catch(e){} }
+function dbeep(){ beep(880,.16); setTimeout(function(){beep(1100,.2);},170); }
+var wl=null; async function reqWake(){ try{ if('wakeLock' in navigator) wl=await navigator.wakeLock.request('screen'); }catch(e){} }
+document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='visible' && document.getElementById('player').classList.contains('on')) reqWake(); });
 
-// Macrocycle juin 2026 -> UT4M juillet 2027. Dates de courses = mois (jours exacts à caler).
-var UT4M_DATE = "2027-07-16"; // placeholder ajustable
-var BLOCKS = [
-  {id:"trans", name:"Transition", start:"2026-06-14", end:"2026-07-13", intent:"Récup active post-100K. Tissu, sommeil, zéro charge.", phase:"recup"},
-  {id:"base1", name:"Reprise base", start:"2026-07-14", end:"2026-08-31", intent:"Reconstruire l'aérobie + fondation force.", phase:"base"},
-  {id:"force", name:"Force & côtes", start:"2026-09-01", end:"2026-10-31", intent:"Économie de grimpe (VAM) + force structurelle.", phase:"force"},
-  {id:"baseH", name:"Base hivernale", start:"2026-11-01", end:"2026-12-31", intent:"Volume aérobie facile + durabilité excentrique.", phase:"base"},
-  {id:"build", name:"Build spécifique", start:"2027-01-01", end:"2027-02-28", intent:"Montée en charge, côtes longues, spécificité trail.", phase:"build"},
-  {id:"chianti", name:"Affûtage Chianti", start:"2027-03-01", end:"2027-03-21", intent:"Affûtage 46K. Fraîcheur + rappels d'intensité.", phase:"affutage"},
-  {id:"paladru", name:"Bloc Paladru", start:"2027-03-22", end:"2027-04-25", intent:"Pic d'endurance — le gros test 84K.", phase:"build"},
-  {id:"maxi", name:"Bloc Maxi-Race", start:"2027-04-26", end:"2027-05-23", intent:"Spécificité longue finale.", phase:"build"},
-  {id:"specUT", name:"Spécifique UT4M", start:"2027-05-24", end:"2027-06-27", intent:"Bloc clé : simulation 4×20 km multi-jours.", phase:"build"},
-  {id:"affUT", name:"Affûtage UT4M", start:"2027-06-28", end:"2027-07-16", intent:"Affûtage final. Fraîcheur maximale.", phase:"affutage"}
+/* ================= PLAN ENGINE ================= */
+var UT4M_DATE="2027-07-16"; // placeholder ajustable
+var BLOCKS=[
+  {id:"trans",name:"Transition",start:"2026-06-14",end:"2026-07-13",intent:"Récup active post-100K.",phase:"recup"},
+  {id:"base1",name:"Reprise base",start:"2026-07-14",end:"2026-08-31",intent:"Aérobie + fondation force.",phase:"base"},
+  {id:"force",name:"Force & côtes",start:"2026-09-01",end:"2026-10-31",intent:"Économie de grimpe + force.",phase:"force"},
+  {id:"baseH",name:"Base hivernale",start:"2026-11-01",end:"2026-12-31",intent:"Volume facile + durabilité.",phase:"base"},
+  {id:"build",name:"Build spécifique",start:"2027-01-01",end:"2027-02-28",intent:"Montée en charge, côtes longues.",phase:"build"},
+  {id:"chianti",name:"Affûtage Chianti",start:"2027-03-01",end:"2027-03-21",intent:"Affûtage 46K.",phase:"affutage"},
+  {id:"paladru",name:"Bloc Paladru",start:"2027-03-22",end:"2027-04-25",intent:"Pic d'endurance — test 84K.",phase:"build"},
+  {id:"maxi",name:"Bloc Maxi-Race",start:"2027-04-26",end:"2027-05-23",intent:"Spécificité longue finale.",phase:"build"},
+  {id:"specUT",name:"Spécifique UT4M",start:"2027-05-24",end:"2027-06-27",intent:"Simulation 4×20 km multi-jours.",phase:"build"},
+  {id:"affUT",name:"Affûtage UT4M",start:"2027-06-28",end:"2027-07-16",intent:"Affûtage final.",phase:"affutage"}
 ];
-
-// Types de séance
-var TYPES = {
-  repos:   {label:"Repos",        type:"REPOS",          color:"var(--mut)",     why:"Le repos fait partie du plan. C'est là que tu progresses."},
-  mobilite:{label:"Mobilité",     type:"MOBILITÉ",       color:"var(--blue)",    why:"Réveil articulaire, hanches, chaîne postérieure. 15-20 min."},
-  fond:    {label:"Sortie fond",  type:"ENDURANCE Z2",   color:"var(--grn)",     why:"Aérobie facile, nez qui respire. Tu construis le moteur de fond."},
-  cotes:   {label:"Côtes / VAM",  type:"CÔTES · VAM",    color:"var(--orange)",  why:"Ton limiteur : l'économie de grimpe. Répétitions en côte, gainé, économe."},
-  longue:  {label:"Sortie longue",type:"SORTIE LONGUE",  color:"var(--orange-d)",why:"Durabilité. Allure tenue, gestion nutrition, jambes qui encaissent."},
-  renfo:   {label:"Renfo",        type:"RENFO TRAIL",    color:"var(--ink)",     why:"ZP-safe. Force athlétique transférée au trail, format WOD."},
-  wod:     {label:"WOD",          type:"WOD",            color:"var(--purp)",    why:"Conditionnement métabolique adapté au bloc. Optionnel selon la charge."}
+var TYPES={
+  repos:{label:"Repos",type:"REPOS",color:"var(--mut)",why:"Le repos fait partie du plan. C'est là que tu progresses."},
+  mobilite:{label:"Mobilité",type:"MOBILITÉ",color:"var(--blue)",why:"Réveil articulaire, hanches, chaîne postérieure. Routine guidée ~15 min."},
+  fond:{label:"Sortie fond",type:"ENDURANCE Z2",color:"var(--grn)",why:"Aérobie facile, nez qui respire. Tu construis le moteur de fond."},
+  cotes:{label:"Côtes / VAM",type:"CÔTES · VAM",color:"var(--orange)",why:"Ton limiteur : l'économie de grimpe. Répétitions gainé, économe."},
+  longue:{label:"Sortie longue",type:"SORTIE LONGUE",color:"var(--orange-d)",why:"Durabilité. Allure tenue, gestion nutrition, jambes qui encaissent."},
+  renfo:{label:"Renfo",type:"RENFO TRAIL",color:"var(--ink)",why:"ZP-safe. Force athlétique transférée au trail, format WOD guidé."},
+  wod:{label:"WOD",type:"WOD",color:"var(--purp)",why:"Conditionnement métabolique adapté au bloc. Optionnel selon la charge."}
 };
-
-// Gabarit hebdo par phase. Index = jour (1=lun ... 7=dim). Week-ends = repos (indispo).
-var WEEK = {
-  recup:    {1:"mobilite",2:"fond",3:"repos",4:"mobilite",5:"fond",6:"repos",7:"repos"},
-  base:     {1:"renfo",2:"fond",3:"mobilite",4:"cotes",5:"fond",6:"repos",7:"longue"},
-  force:    {1:"renfo",2:"cotes",3:"repos",4:"fond",5:"renfo",6:"repos",7:"longue"},
-  build:    {1:"renfo",2:"cotes",3:"fond",4:"wod",5:"renfo",6:"repos",7:"longue"},
-  affutage: {1:"renfo",2:"cotes",3:"repos",4:"fond",5:"mobilite",6:"repos",7:"repos"}
+var WEEK={
+  recup:{1:"mobilite",2:"fond",3:"repos",4:"mobilite",5:"fond",6:"repos",7:"repos"},
+  base:{1:"renfo",2:"fond",3:"mobilite",4:"cotes",5:"fond",6:"repos",7:"longue"},
+  force:{1:"renfo",2:"cotes",3:"repos",4:"fond",5:"renfo",6:"repos",7:"longue"},
+  build:{1:"renfo",2:"cotes",3:"fond",4:"wod",5:"renfo",6:"repos",7:"longue"},
+  affutage:{1:"renfo",2:"cotes",3:"repos",4:"fond",5:"mobilite",6:"repos",7:"repos"}
 };
-
-// specs par type+phase (affichage hero/sheet)
-function specsFor(typeKey, phase){
-  var s=[];
-  if(typeKey==="fond")  s=[["Durée","45–70′"],["Zone","Z2"],["D+","selon parcours"]];
-  if(typeKey==="cotes") s=[["Format","6–10 × côte"],["Intensité","Z3–Z4"],["Focus","posture · VAM"]];
-  if(typeKey==="longue")s=[["Durée", phase==="build"?"2–3 h":"1h30–2h"],["Zone","Z2"],["Nutrition","à tester"]];
-  if(typeKey==="renfo") s=[["Format","EMOM + AMRAP"],["Durée","~30′"],["ZP","safe"]];
-  if(typeKey==="wod")   s=[["Durée","10–20′"],["RPE","7–8"],["ZP","filtré"]];
-  if(typeKey==="mobilite")s=[["Durée","15–20′"],["Focus","hanches · dos"]];
+function specsFor(t,phase){var s=[];
+  if(t==="fond")s=[["Durée","45–70′"],["Zone","Z2"]];
+  if(t==="cotes")s=[["Format","6–10 × côte"],["Intensité","Z3–Z4"]];
+  if(t==="longue")s=[["Durée",phase==="build"?"2–3 h":"1h30–2h"],["Zone","Z2"]];
+  if(t==="renfo")s=[["Format","EMOM + AMRAP"],["Durée","~30′"],["ZP","safe"]];
+  if(t==="wod")s=[["Durée","~12′"],["RPE","7–8"],["ZP","filtré"]];
+  if(t==="mobilite")s=[["Durée","~15′"],["Focus","hanches · dos"]];
   return s;
 }
 
-/* ===================== DATES ===================== */
-function iso(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
-function parse(s){ var p=s.split("-"); return new Date(+p[0],+p[1]-1,+p[2]); }
-function dowMon(d){ var g=d.getDay(); return g===0?7:g; } // 1..7 lun..dim
+/* ================= CONTENU DES SÉANCES (player) ================= */
+var MOBI=[
+  {name:"Respiration 4-6",cue:"Assis ou allongé. Inspire 4 s, souffle 6 s. Relâche les épaules.",hold:40},
+  {name:"Chat-vache",cue:"À quatre pattes. Arrondis puis creuse le dos, lentement, sur le souffle.",reps:"8 lents"},
+  {name:"Rotation thoracique",cue:"Quatre pattes, main derrière la tête, ouvre le coude vers le plafond.",reps:"8 / côté"},
+  {name:"Fente basse — fléchisseurs",cue:"Genou au sol, bascule le bassin vers l'avant. Ouvre l'avant de la hanche.",hold:35,side:true},
+  {name:"90/90 hanches",cue:"Assis, jambes en équerre. Bascule d'un côté à l'autre, contrôlé.",reps:"8 transitions"},
+  {name:"Figure-4 fessiers",cue:"Sur le dos, cheville sur le genou opposé, ramène vers toi sans forcer.",hold:35,side:true},
+  {name:"Cheville genou-mur",cue:"Pied à ~10 cm du mur, genou au mur sans décoller le talon.",reps:"10 / côté"},
+  {name:"Pont fessier",cue:"Sur le dos, pieds au sol. Monte le bassin en serrant les fessiers, redescends lent.",reps:"12 lents"},
+  {name:"Gainage iso doux",cue:"Planche sur genoux ou pieds. Bassin neutre, gainage léger.",hold:30},
+  {name:"Retour au calme 4-6",cue:"Allongé. Souffle long, 6 s. Laisse les jambes lourdes.",hold:60}
+];
+var RENFO_WARM=[
+  {name:"Bascules de hanche",cue:"Good morning à vide ou élastique. Réveille la charnière sans la charger.",reps:"10 lentes"},
+  {name:"Fentes marchées",cue:"Amplitude contrôlée, genou stable. Pas de rebond.",reps:"8 / jambe"},
+  {name:"KB swing technique",cue:"KB léger. Tu cherches le timing hanche.",reps:"15 légers"},
+  {name:"Wall walk / planche",cue:"Gainage épaules. Prêt à grimper.",reps:"3 ou 30 s"}
+];
+function content(t){
+  if(t==="mobilite"){ return MOBI.map(function(s){return {kind:"flow",name:s.name,cue:s.cue,hold:s.hold,reps:s.reps,side:s.side};}); }
+  if(t==="renfo"){
+    var segs=RENFO_WARM.map(function(s){return {kind:"flow",name:s.name,cue:s.cue,reps:s.reps};});
+    segs.push({kind:"emom",minutes:14,
+      odd:{name:"STEP-UP LESTÉ",reps:"12 · 6/jambe",cue:"Box mi-hauteur · montée explosive, descente freinée 2 s."},
+      even:{name:"KB SWING AMÉRICAIN",reps:"15",cue:"Propulsion hanche, bras passifs, gainage."}});
+    segs.push({kind:"amrap",sec:600,
+      moves:[["A","Farmer carry ~20 m","2× lourd"],["B","8 Push press","jambes donnent l'impulsion"],["C","8 DB snatch","4/bras, explosif"],["D","10 TRX row","omoplates serrées"]]});
+    return segs;
+  }
+  if(t==="wod"){
+    return [{kind:"amrap",sec:720,
+      moves:[["","12 KB swing américain","ZP-safe"],["","8 Push press",""],["","10 Box step-up lesté",""],["","8 Tractions",""]]}];
+  }
+  return null;
+}
+function hasPlayer(t){ return t==="mobilite"||t==="renfo"||t==="wod"; }
+
+/* ================= DATES ================= */
+function iso(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function parse(s){var p=s.split("-");return new Date(+p[0],+p[1]-1,+p[2]);}
+function dowMon(d){var g=d.getDay();return g===0?7:g;}
 var MOIS=["janv.","févr.","mars","avr.","mai","juin","juil.","août","sept.","oct.","nov.","déc."];
 var JOURS=["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
+function blockFor(d){var k=iso(d);for(var i=0;i<BLOCKS.length;i++){if(k>=BLOCKS[i].start&&k<=BLOCKS[i].end)return BLOCKS[i];}return k<BLOCKS[0].start?BLOCKS[0]:BLOCKS[BLOCKS.length-1];}
+function sessionFor(d){var b=blockFor(d),tk=WEEK[b.phase][dowMon(d)];return {dateKey:iso(d),date:d,block:b,typeKey:tk,info:TYPES[tk],specs:specsFor(tk,b.phase)};}
 
-function blockFor(d){
-  var k=iso(d);
-  for(var i=0;i<BLOCKS.length;i++){ if(k>=BLOCKS[i].start && k<=BLOCKS[i].end) return BLOCKS[i]; }
-  if(k<BLOCKS[0].start) return BLOCKS[0];
-  return BLOCKS[BLOCKS.length-1];
-}
-function sessionFor(d){
-  var b=blockFor(d), tpl=WEEK[b.phase], tk=tpl[dowMon(d)];
-  return {dateKey:iso(d), date:d, block:b, typeKey:tk, info:TYPES[tk], specs:specsFor(tk,b.phase)};
-}
-
-/* ===================== STORAGE (seam synchro) ===================== */
+/* ================= STORAGE (seam synchro) ================= */
 var LOG_KEY="lvtrail:v2:log";
-function loadLog(){ try{ return JSON.parse(localStorage.getItem(LOG_KEY)||"[]"); }catch(e){ return []; } }
-function saveLog(arr){ localStorage.setItem(LOG_KEY, JSON.stringify(arr)); }
-// --- seams branchés plus tard sur /.netlify/functions/lvsync ---
-function syncPush(entry){ /* TODO: POST entry vers Netlify */ }
-function syncPull(cb){ /* TODO: GET log depuis Netlify -> merge */ cb && cb(); }
+function loadLog(){try{return JSON.parse(localStorage.getItem(LOG_KEY)||"[]");}catch(e){return [];}}
+function saveLog(a){localStorage.setItem(LOG_KEY,JSON.stringify(a));}
+function syncPush(){ /* TODO Netlify */ }
+function entryFor(k){return loadLog().filter(function(e){return e.dateKey===k;})[0]||null;}
 
-function isDone(dateKey){ return loadLog().some(function(e){return e.dateKey===dateKey;}); }
-
-/* ===================== RENDER : AUJOURD'HUI ===================== */
+/* ================= RENDER TODAY ================= */
 var today=new Date();
 function renderToday(){
   var s=sessionFor(today);
-  document.getElementById("todayDate").textContent = JOURS[dowMon(today)-1]+" "+today.getDate()+" "+MOIS[today.getMonth()];
-  document.getElementById("blockBadge").textContent = s.block.name;
-  var hero=document.getElementById("heroCard");
-  hero.style.borderLeftColor = s.info.color;
-  document.getElementById("heroType").textContent = s.info.type;
-  document.getElementById("heroType").style.color = s.info.color;
-  document.getElementById("heroTitle").textContent = s.info.label.toUpperCase();
-  document.getElementById("heroWhy").textContent = s.info.why;
-  document.getElementById("heroSpecs").innerHTML = s.specs.map(function(x){return '<div class="spec"><b>'+x[1]+'</b>'+x[0]+'</div>';}).join("");
-  // actions
-  var done=isDone(s.dateKey);
-  var a="";
-  if(done){ a='<button class="btn btn-acid" disabled style="opacity:.6">SÉANCE VALIDÉE ✓</button>'; }
+  document.getElementById("todayDate").textContent=JOURS[dowMon(today)-1]+" "+today.getDate()+" "+MOIS[today.getMonth()];
+  document.getElementById("blockBadge").textContent=s.block.name;
+  var hero=document.getElementById("heroCard"); hero.style.borderLeftColor=s.info.color;
+  document.getElementById("heroType").textContent=s.info.type; document.getElementById("heroType").style.color=s.info.color;
+  document.getElementById("heroTitle").textContent=s.info.label.toUpperCase();
+  document.getElementById("heroWhy").textContent=s.info.why;
+  document.getElementById("heroSpecs").innerHTML=s.specs.map(function(x){return '<div class="spec"><b>'+x[1]+'</b>'+x[0]+'</div>';}).join("");
+  var done=entryFor(s.dateKey);
+  var a;
+  if(done){ a='<button class="btn btn-acid" onclick="openSheet(\''+s.dateKey+'\')">VALIDÉE ✓ — voir / modifier</button>'; }
+  else if(hasPlayer(s.typeKey)){ a='<button class="btn btn-orange" onclick="openSheet(\''+s.dateKey+'\')">OUVRIR LA SÉANCE</button>'; }
   else if(s.typeKey==="repos"){ a='<button class="btn btn-go" onclick="openSheet(\''+s.dateKey+'\')">VOIR / MARQUER</button>'; }
-  else if(s.typeKey==="renfo"||s.typeKey==="wod"){ a='<button class="btn btn-orange" onclick="openSheet(\''+s.dateKey+'\')">OUVRIR LA SÉANCE</button>'; }
   else { a='<button class="btn btn-go" onclick="openSheet(\''+s.dateKey+'\')">VOIR / VALIDER</button>'; }
   document.getElementById("heroActions").innerHTML=a;
   renderWeek();
-  renderStravaCard();
 }
-
 function renderWeek(){
-  // lundi de la semaine courante
   var mon=new Date(today); mon.setDate(today.getDate()-(dowMon(today)-1));
-  document.getElementById("weekRange").textContent = mon.getDate()+" "+MOIS[mon.getMonth()]+" → "+(new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+6)).getDate();
+  document.getElementById("weekRange").textContent=mon.getDate()+" "+MOIS[mon.getMonth()]+" → "+(new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+6)).getDate();
   var html="";
-  for(var i=0;i<7;i++){
-    var d=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+i);
-    var s=sessionFor(d);
-    var isT = iso(d)===iso(today);
-    var done = isDone(iso(d));
-    html+='<div class="day'+(isT?' today':'')+(done?' done':'')+'" onclick="openSheet(\''+iso(d)+'\')">'
-        +'<div class="dow">'+JOURS[i]+'</div>'
-        +'<div class="dnum">'+d.getDate()+'</div>'
-        +'<div class="pip" style="background:'+s.info.color+'"></div></div>';
-  }
+  for(var i=0;i<7;i++){var d=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+i);var s=sessionFor(d);
+    html+='<div class="day'+(iso(d)===iso(today)?' today':'')+(entryFor(iso(d))?' done':'')+'" onclick="openSheet(\''+iso(d)+'\')">'
+      +'<div class="dow">'+JOURS[i]+'</div><div class="dnum">'+d.getDate()+'</div><div class="pip" style="background:'+s.info.color+'"></div></div>';}
   document.getElementById("weekStrip").innerHTML=html;
 }
 
-/* ===================== SHEET ===================== */
-var curKey=null;
-function openSheet(dateKey){
-  curKey=dateKey;
-  var s=sessionFor(parse(dateKey));
-  document.getElementById("shType").textContent=s.info.type;
-  document.getElementById("shType").style.color=s.info.color;
+/* ================= SHEET ================= */
+var curKey=null, editing=null;
+function openSheet(k){
+  curKey=k; editing=entryFor(k);
+  var s=sessionFor(parse(k));
+  document.getElementById("shType").textContent=s.info.type; document.getElementById("shType").style.color=s.info.color;
   document.getElementById("shTitle").textContent=s.info.label;
   document.getElementById("shDate").textContent=JOURS[dowMon(s.date)-1]+" "+s.date.getDate()+" "+MOIS[s.date.getMonth()];
   document.getElementById("shWhy").textContent=s.info.why;
   document.getElementById("shSpecs").innerHTML=s.specs.map(function(x){return '<div class="spec"><b>'+x[1]+'</b>'+x[0]+'</div>';}).join("");
-  // player link pour renfo/wod
-  var pl="";
-  if(s.typeKey==="renfo"||s.typeKey==="wod"){
-    pl='<a href="'+PLAYER_URL+'" style="text-decoration:none"><button class="btn btn-orange" style="margin-bottom:8px">▶ LANCER LE PLAYER (chrono + score)</button></a>';
-  }
-  document.getElementById("shPlayer").innerHTML=pl;
-  // reset
   document.getElementById("shForm").style.display="none";
-  document.getElementById("shTop").style.display="flex";
-  var done=isDone(dateKey);
-  document.getElementById("shValidateBtn").textContent = done ? "DÉJÀ VALIDÉE ✓" : "VALIDER";
-  document.getElementById("shValidateBtn").disabled = done;
-  document.getElementById("shValidateBtn").style.opacity = done?".6":"1";
+  document.getElementById("shFields").innerHTML="";
+  // summary if done
+  var sum="", playBtn="", btns="";
+  if(editing){
+    var rows="";
+    if(editing.score) rows+='<div class="row"><span>Score</span><b>'+editing.score+'</b></div>';
+    if(editing.duree) rows+='<div class="row"><span>Durée</span><b>'+editing.duree+'</b></div>';
+    if(editing.dplus) rows+='<div class="row"><span>D+</span><b>'+editing.dplus+' m</b></div>';
+    if(editing.rpe) rows+='<div class="row"><span>RPE</span><b>'+editing.rpe+'/10</b></div>';
+    if(editing.jambes) rows+='<div class="row"><span>Jambes</span><b>'+editing.jambes+'/10</b></div>';
+    if(editing.zp) rows+='<div class="row"><span>ZP</span><b>'+editing.zp+'/10</b></div>';
+    if(editing.note) rows+='<div class="row"><span>Note</span><b style="max-width:60%;text-align:right">'+editing.note+'</b></div>';
+    sum='<div class="summary">'+(rows||'<div class="row"><span>Séance marquée comme faite</span><b>✓</b></div>')+'</div>';
+    btns='<button class="btn btn-go" onclick="openForm()">MODIFIER</button><button class="btn btn-red" onclick="deleteSession()">SUPPRIMER</button>';
+  } else {
+    if(hasPlayer(s.typeKey)) playBtn='<button class="btn btn-orange" style="margin-bottom:8px" onclick="startPlayer(\''+k+'\')">▶ DÉMARRER (guidé · chrono)</button>';
+    btns='<button class="btn btn-ghost" onclick="closeSheet()">Fermer</button><button class="btn btn-go" onclick="openForm()">'+(hasPlayer(s.typeKey)?'VALIDER À LA MAIN':'VALIDER')+'</button>';
+  }
+  document.getElementById("shSummary").innerHTML=sum;
+  document.getElementById("shPlayBtn").innerHTML=playBtn;
+  document.getElementById("shButtons").innerHTML=btns;
+  document.getElementById("shButtons").style.display="flex";
   document.getElementById("sheet").classList.add("on");
 }
-function closeSheet(){ document.getElementById("sheet").classList.remove("on"); }
+function closeSheet(){document.getElementById("sheet").classList.remove("on");}
 
-function openForm(){
+function openForm(prefillScore){
   var s=sessionFor(parse(curKey));
-  var run = (s.typeKey==="fond"||s.typeKey==="cotes"||s.typeKey==="longue");
+  var e=editing||{};
+  var run=(s.typeKey==="fond"||s.typeKey==="cotes"||s.typeKey==="longue");
   var f="";
   if(s.typeKey==="repos"||s.typeKey==="mobilite"){
-    f='<div class="ok">Rien à scorer. Confirme juste que c\'est fait.</div>';
+    f='<div class="ok">Rien à scorer. Confirme juste que c\'est fait — un ressenti si tu veux.</div>';
+    f+='<div class="field"><label>Ressenti (optionnel)</label><textarea id="fNote" placeholder="…">'+(e.note||"")+'</textarea></div>';
   } else {
     if(run){
-      f+='<div class="field"><label>Durée</label><input type="text" id="fDuree" placeholder="ex : 1h05"></div>';
-      f+='<div class="field"><label>D+ (m)</label><input type="text" id="fDplus" placeholder="ex : 450"></div>';
+      f+='<div class="field"><label>Durée</label><input type="text" id="fDuree" placeholder="ex : 1h05" value="'+(e.duree||"")+'"></div>';
+      f+='<div class="field"><label>D+ (m)</label><input type="text" id="fDplus" placeholder="ex : 450" value="'+(e.dplus||"")+'"></div>';
     } else {
-      f+='<div class="field"><label>Score / rounds <span style="color:var(--mut);font-weight:400">(optionnel)</span></label><input type="text" id="fScore" placeholder="ex : 6 rounds"></div>';
-      f+='<div class="field"><label>Jambes <b id="fjV">6</b></label><input type="range" min="1" max="10" value="6" id="fJambes" oninput="fjV.textContent=this.value"></div>';
+      var sc=(e.score!==undefined&&e.score!=="")?e.score:(prefillScore||"");
+      f+='<div class="field"><label>Score / rounds <span style="color:var(--mut);font-weight:400">(optionnel)</span></label><input type="text" id="fScore" placeholder="ex : 6 rounds" value="'+sc+'"></div>';
+      f+='<div class="field"><label>Jambes <b id="fjV">'+(e.jambes||6)+'</b></label><input type="range" min="1" max="10" value="'+(e.jambes||6)+'" id="fJambes" oninput="fjV.textContent=this.value"></div>';
     }
-    f+='<div class="field"><label>RPE <b id="frV">6</b></label><input type="range" min="1" max="10" value="6" id="fRpe" oninput="frV.textContent=this.value"></div>';
-    f+='<div class="field"><label>ZP (zone pubienne) <b id="fzV">2</b></label><input type="range" min="0" max="10" value="2" id="fZp" oninput="fzV.textContent=this.value;document.getElementById(\'zpAl\').style.display=(+this.value>=4?\'block\':\'none\')"></div>';
+    f+='<div class="field"><label>RPE <b id="frV">'+(e.rpe||6)+'</b></label><input type="range" min="1" max="10" value="'+(e.rpe||6)+'" id="fRpe" oninput="frV.textContent=this.value"></div>';
+    f+='<div class="field"><label>ZP (zone pubienne) <b id="fzV">'+(e.zp||2)+'</b></label><input type="range" min="0" max="10" value="'+(e.zp||2)+'" id="fZp" oninput="fzV.textContent=this.value;document.getElementById(\'zpAl\').style.display=(+this.value>=4?\'block\':\'none\')"></div>';
+    f+='<div class="field"><label>Note</label><textarea id="fNote" placeholder="Ressenti, charge, douleur…">'+(e.note||"")+'</textarea></div>';
+    f+='<div class="alert" id="zpAl" style="display:'+((e.zp&&+e.zp>=4)?'block':'none')+'">ZP ≥ 4 : on coupe hinge + adduction sur les prochaines séances.</div>';
   }
-  f+='<div class="field"><label>Note</label><textarea id="fNote" placeholder="Ressenti, charge, douleur…"></textarea></div>';
-  f+='<div class="alert" id="zpAl" style="display:none">ZP ≥ 4 : on coupe hinge + adduction sur les prochaines séances.</div>';
   document.getElementById("shFields").innerHTML=f;
   document.getElementById("shForm").style.display="block";
-  document.getElementById("shTop").style.display="none";
+  document.getElementById("shButtons").style.display="none";
+  document.getElementById("shSummary").innerHTML="";
+  document.getElementById("shPlayBtn").innerHTML="";
 }
-
-function val(id){ var e=document.getElementById(id); return e?e.value:""; }
+function val(id){var e=document.getElementById(id);return e?e.value:"";}
 function saveSession(){
   var s=sessionFor(parse(curKey));
-  var entry={
-    id:"s_"+Date.now(), dateKey:curKey, ts:Date.now(),
-    typeKey:s.typeKey, type:s.info.type, title:s.info.label, color:s.info.color,
-    rpe:val("fRpe"), zp:val("fZp"), jambes:val("fJambes"), score:val("fScore"),
-    duree:val("fDuree"), dplus:val("fDplus"), note:(val("fNote")||"").trim()
-  };
-  var log=loadLog(); log.unshift(entry); saveLog(log); syncPush(entry);
+  var entry={id:editing?editing.id:("s_"+Date.now()),dateKey:curKey,ts:Date.now(),
+    typeKey:s.typeKey,type:s.info.type,title:s.info.label,color:s.info.color,
+    rpe:val("fRpe"),zp:val("fZp"),jambes:val("fJambes"),score:val("fScore"),
+    duree:val("fDuree"),dplus:val("fDplus"),note:(val("fNote")||"").trim()};
+  var log=loadLog().filter(function(e){return e.dateKey!==curKey;});
+  log.unshift(entry); log.sort(function(a,b){return a.dateKey<b.dateKey?1:-1;});
+  saveLog(log); syncPush();
+  closeSheet(); renderToday(); renderLog();
+}
+function deleteSession(){
+  if(!confirm("Supprimer cette séance du journal ?")) return;
+  saveLog(loadLog().filter(function(e){return e.dateKey!==curKey;}));
   closeSheet(); renderToday(); renderLog();
 }
 
-/* ===================== HORIZON ===================== */
-function renderHorizon(){
-  var t=new Date(); t.setHours(0,0,0,0);
-  var ut=parse(UT4M_DATE);
-  var days=Math.max(0,Math.round((ut-t)/86400000));
-  document.getElementById("jdays").textContent=days;
-  var curB=blockFor(today);
-  var stops=[
-    {key:"now", n:"Aujourd'hui", d:curB.name, cls:"cur"},
-    {key:"chianti", n:'Chianti Ultra 46K <span class="tag">COURSE</span>', d:"Mars 2027 · affûtage", cls:"race"},
-    {key:"paladru", n:'Trail de Paladru 84K <span class="tag">COURSE</span>', d:"Avril 2027 · le gros test", cls:"race"},
-    {key:"maxi", n:'Maxi-Race <span class="tag">COURSE</span>', d:"Mai 2027 · spécificité longue", cls:"race"},
-    {key:"ut", n:'UT4M 180 <span class="tag">OBJECTIF</span>', d:"Juillet 2027 · ~44 km/j · 11 700 m D+", cls:"race"}
-  ];
-  document.getElementById("road").innerHTML=stops.map(function(s){
-    return '<div class="stop '+s.cls+'"><span class="dot"></span><div class="n">'+s.n+'</div><div class="d">'+s.d+'</div></div>';
-  }).join("");
+/* ================= PLAYER ================= */
+var pSegs=[],pIdx=0,pKey=null,pTimer=null,pState={};
+function startPlayer(k){
+  unlockAudio(); reqWake(); beep(660,.12);
+  pKey=k; pSegs=content(sessionFor(parse(k)).typeKey)||[]; pIdx=0;
+  closeSheet(); document.getElementById("player").classList.add("on");
+  renderSeg();
+}
+function quitPlayer(){ clearInterval(pTimer); document.getElementById("player").classList.remove("on"); }
+function pProg(){ document.getElementById("pProg").style.width=Math.round((pIdx/pSegs.length)*100)+"%"; }
+function nextSeg(){ clearInterval(pTimer); pIdx++; if(pIdx>=pSegs.length){ finishPlayer(); } else { renderSeg(); } }
+
+function renderSeg(){
+  clearInterval(pTimer); pProg();
+  var seg=pSegs[pIdx], body=document.getElementById("pBody"), act=document.getElementById("pAct");
+  document.getElementById("pSeg").textContent="Étape "+(pIdx+1)+" / "+pSegs.length;
+  if(seg.kind==="flow"){
+    pState.side=1;
+    var clock= seg.hold?('<div class="pclock bebas" id="pc">'+seg.hold+'</div>'):'';
+    var sub= seg.hold?'':('<div class="preps">'+(seg.reps||"")+'</div>');
+    body.innerHTML=clock+'<div class="pname bebas">'+seg.name+(seg.side?' · Côté 1':'')+'</div>'+sub+'<div class="pcue">'+seg.cue+'</div>';
+    if(seg.hold){ startHold(seg); act.innerHTML='<button class="btn btn-ghost" onclick="nextSeg()">Passer</button>'; }
+    else { act.innerHTML='<button class="btn btn-acid" onclick="nextSeg()">'+(pIdx===pSegs.length-1?'TERMINER':'SUIVANT')+'</button>'; }
+  }
+  else if(seg.kind==="emom"){ startEmom(seg); }
+  else if(seg.kind==="amrap"){ startAmrap(seg); }
+}
+function startHold(seg){
+  var t=seg.hold; document.getElementById("pc").textContent=t;
+  pTimer=setInterval(function(){
+    t--; var c=document.getElementById("pc"); if(!c){clearInterval(pTimer);return;}
+    c.textContent=t; c.className='pclock bebas'+(t<=3?' hot':(t<=10?' warn':''));
+    if(t<=3&&t>0) beep(700,.07);
+    if(t<=0){ clearInterval(pTimer); beep(950,.16);
+      if(seg.side&&pState.side===1){ pState.side=2; document.querySelector('#pBody .pname').innerHTML=seg.name+' · Côté 2'; startHold(seg); }
+      else { nextSeg(); }
+    }
+  },1000);
+}
+function startEmom(seg){
+  var min=1,sec=60,N=seg.minutes,paused=false;
+  function mv(){return (min%2===1)?seg.odd:seg.even;}
+  function draw(){var m=mv();document.getElementById("pBody").innerHTML=
+    '<div class="pclock bebas" id="pc">'+sec+'</div><div class="pmin">MIN '+min+' / '+N+'</div>'
+    +'<div class="pname bebas">'+m.name+'</div><div class="preps">'+m.reps+'</div><div class="pcue">'+m.cue+'</div>';
+    document.getElementById("pc").className='pclock bebas'+(sec<=3?' hot':(sec<=10?' warn':''));}
+  document.getElementById("pSeg").textContent=seg.label||"EMOM";
+  draw();
+  document.getElementById("pAct").innerHTML='<button class="btn btn-ghost" id="pPause">Pause</button>';
+  document.getElementById("pPause").onclick=function(){paused=!paused;this.textContent=paused?"Reprendre":"Pause";};
+  pTimer=setInterval(function(){
+    if(paused)return; sec--;
+    if(sec<=0){ if(min>=N){clearInterval(pTimer);dbeep();nextSeg();return;} beep(950,.18);min++;sec=60; }
+    else if(sec<=3) beep(700,.07);
+    draw();
+  },1000);
+}
+function startAmrap(seg){
+  var sec=seg.sec,rounds=0;
+  function fmt(s){var m=Math.floor(s/60),x=s%60;return m+":"+(x<10?"0":"")+x;}
+  function draw(){document.getElementById("pBody").innerHTML=
+    '<div class="pclock bebas" id="pc">'+fmt(sec)+'</div>'
+    +'<div class="counter"><button class="rbtn" onclick="amrapR(-1)">–</button><span class="v bebas" id="prnd">'+rounds+'</span><button class="rbtn" onclick="amrapR(1)">+</button></div>'
+    +'<div class="preps">rounds bouclés</div>'
+    +'<div class="plist">'+seg.moves.map(function(m){return '<div class="li"><span class="k">'+(m[0]||'•')+'</span><div><b>'+m[1]+'</b>'+(m[2]?' <span style="color:var(--mut)">· '+m[2]+'</span>':'')+'</div></div>';}).join("")+'</div>';
+    document.getElementById("pc").className='pclock bebas'+(sec<=10?' hot':(sec<=60?' warn':''));}
+  window.amrapR=function(d){rounds=Math.max(0,rounds+d);var e=document.getElementById("prnd");if(e)e.textContent=rounds;if(d>0)beep(1000,.09);pState.rounds=rounds;};
+  document.getElementById("pSeg").textContent=seg.label||"AMRAP";
+  pState.rounds=0; draw();
+  document.getElementById("pAct").innerHTML='<button class="btn btn-go" onclick="nextSeg()">TERMINER</button>';
+  pTimer=setInterval(function(){ sec--; if(sec<=0){clearInterval(pTimer);sec=0;draw();dbeep();nextSeg();return;} if(sec===60)beep(800,.2); if(sec<=5)beep(700,.07); draw(); },1000);
+}
+function finishPlayer(){
+  clearInterval(pTimer);
+  document.getElementById("player").classList.remove("on");
+  dbeep();
+  curKey=pKey; editing=entryFor(pKey);
+  openSheet(pKey);
+  openForm(pState.rounds?(pState.rounds+" rounds"):"");
 }
 
-/* ===================== HISTORIQUE ===================== */
+/* ================= HORIZON ================= */
+function renderHorizon(){
+  var t=new Date();t.setHours(0,0,0,0);var ut=parse(UT4M_DATE);
+  document.getElementById("jdays").textContent=Math.max(0,Math.round((ut-t)/86400000));
+  var curB=blockFor(today);
+  var stops=[
+    {n:"Aujourd'hui",d:curB.name,cls:"cur"},
+    {n:'Chianti Ultra 46K <span class="tag">COURSE</span>',d:"Mars 2027 · affûtage",cls:"race"},
+    {n:'Trail de Paladru 84K <span class="tag">COURSE</span>',d:"Avril 2027 · le gros test",cls:"race"},
+    {n:'Maxi-Race <span class="tag">COURSE</span>',d:"Mai 2027 · spécificité longue",cls:"race"},
+    {n:'UT4M 180 <span class="tag">OBJECTIF</span>',d:"Juillet 2027 · ~44 km/j · 11 700 m D+",cls:"race"}
+  ];
+  document.getElementById("road").innerHTML=stops.map(function(s){return '<div class="stop '+s.cls+'"><span class="dot"></span><div class="n">'+s.n+'</div><div class="d">'+s.d+'</div></div>';}).join("");
+}
+
+/* ================= HISTORIQUE ================= */
 function renderLog(){
   var log=loadLog();
-  document.getElementById("logEmpty").style.display = log.length?"none":"block";
-  document.getElementById("logList").innerHTML = log.map(function(e){
-    var d=parse(e.dateKey);
-    var meta=[];
-    if(e.rpe) meta.push("RPE "+e.rpe);
-    if(e.zp) meta.push("ZP "+e.zp);
-    if(e.dplus) meta.push(e.dplus+"m D+");
-    if(e.duree) meta.push(e.duree);
-    var right = e.score? e.score : (e.rpe? e.rpe+"/10":"✓");
-    return '<div class="logitem"><span class="pip" style="background:'+(e.color||'var(--mut)')+'"></span>'
-      +'<div class="m"><div class="l">'+e.title+'</div><div class="s">'+JOURS[dowMon(d)-1]+' '+d.getDate()+' '+MOIS[d.getMonth()]+' · '+meta.join(' · ')+'</div></div>'
+  document.getElementById("logEmpty").style.display=log.length?"none":"block";
+  document.getElementById("logList").innerHTML=log.map(function(e){
+    var d=parse(e.dateKey),meta=[];
+    if(e.rpe)meta.push("RPE "+e.rpe); if(e.zp)meta.push("ZP "+e.zp); if(e.dplus)meta.push(e.dplus+"m"); if(e.duree)meta.push(e.duree);
+    var right=e.score?e.score:(e.rpe?e.rpe+"/10":"✓");
+    return '<div class="logitem" onclick="openSheet(\''+e.dateKey+'\')"><span class="pip" style="background:'+(e.color||'var(--mut)')+'"></span>'
+      +'<div class="m"><div class="l">'+e.title+'</div><div class="s">'+JOURS[dowMon(d)-1]+' '+d.getDate()+' '+MOIS[d.getMonth()]+(meta.length?' · '+meta.join(' · '):'')+'</div></div>'
       +'<div class="r">'+right+'</div></div>';
   }).join("");
 }
 
-/* ===================== STRAVA (seam) ===================== */
-function renderStravaCard(){
-  // branché plus tard sur /.netlify/functions/lvstrava
-  // état par défaut : à connecter
-}
-function goStrava(){
-  alert("Connexion Strava — bientôt.\n\nUne fois ton appli Strava créée et tes clés posées sur Netlify, je branche un bouton « Connecter » en 1 clic, et ta charge récente (km, D+, dernières sorties) s'affichera ici en live.");
-}
+/* ================= STRAVA + NAV ================= */
+function goStrava(){ alert("Connexion Strava — bientôt.\n\nUne fois ton appli Strava créée et tes clés posées sur Netlify, je branche un bouton « Connecter » en 1 clic, et ta charge récente (km, D+, dernières sorties) s'affichera ici en live."); }
+function nav(v){["today","horizon","log"].forEach(function(x){document.getElementById("v-"+x).classList.toggle("on",x===v);document.getElementById("nav-"+x).classList.toggle("on",x===v);});if(v==="horizon")renderHorizon();if(v==="log")renderLog();window.scrollTo(0,0);}
 
-/* ===================== NAV ===================== */
-function nav(v){
-  ["today","horizon","log"].forEach(function(x){
-    document.getElementById("v-"+x).classList.toggle("on", x===v);
-    document.getElementById("nav-"+x).classList.toggle("on", x===v);
-  });
-  if(v==="horizon") renderHorizon();
-  if(v==="log") renderLog();
-  window.scrollTo(0,0);
-}
-
-/* ===================== INIT ===================== */
-renderToday();
-renderHorizon();
-renderLog();
+/* ================= INIT ================= */
+renderToday(); renderHorizon(); renderLog();
 </script>
 </body>
 </html>
