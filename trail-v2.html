@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#ebede9">
+<title>Trail V2 — Univers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#ebede9; --paper:#ffffff; --ink:#15171a; --ink2:#3a3f44;
+    --mut:#7a8088; --line:#dadfd6;
+    --acid:#e8ff47; --acid-d:#8a9c13;
+    --orange:#ff6b35; --orange-d:#d8470e; --red:#e5484d; --grn:#1f9d55; --blue:#2f86c9; --purp:#7c5cff;
+    --shadow:0 6px 22px rgba(20,30,20,.08);
+    --nav:64px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--ink);font-family:'DM Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased;overscroll-behavior:none}
+  .bebas{font-family:'Bebas Neue',sans-serif;letter-spacing:.5px}
+
+  .app{min-height:100%;padding:max(18px,env(safe-area-inset-top)) 18px calc(var(--nav) + max(18px,env(safe-area-inset-bottom)) + 14px)}
+  .view{display:none;animation:fade .25s ease}
+  .view.on{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  .eyebrow{font-size:11.5px;letter-spacing:2.4px;text-transform:uppercase;color:var(--mut);font-weight:700}
+  .bigtitle{font-size:46px;line-height:.92}
+  .sub{color:var(--ink2);font-size:14.5px;line-height:1.5}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:var(--shadow)}
+
+  .topline{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+  .blockbadge{font-size:12px;font-weight:700;color:var(--ink);background:var(--acid);border-radius:999px;padding:5px 11px}
+
+  /* hero today */
+  .hero{margin-bottom:16px;border-left:6px solid var(--orange)}
+  .hero .type{font-size:12px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--orange-d)}
+  .hero h1{font-size:40px;line-height:.95;margin:6px 0 10px}
+  .hero .why{font-size:14px;color:var(--ink2);line-height:1.5;margin-bottom:14px}
+  .specs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+  .spec{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 11px;font-size:13px;font-weight:600;color:var(--ink2)}
+  .spec b{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--ink);font-weight:400;display:block;margin-bottom:1px}
+
+  .btn{width:100%;border:none;border-radius:14px;padding:16px;font-size:17px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;letter-spacing:.3px;transition:transform .08s}
+  .btn:active{transform:scale(.985)}
+  .btn-go{background:var(--ink);color:#fff}
+  .btn-acid{background:var(--acid);color:#1a1d12}
+  .btn-orange{background:var(--orange);color:#fff}
+  .btn-ghost{background:transparent;color:var(--mut);font-weight:600;border:1px solid var(--line)}
+  .btn-row{display:flex;gap:8px;margin-top:8px}
+  .btn-row .btn{flex:1}
+
+  /* week strip */
+  .weeklbl{margin:6px 0 9px;display:flex;justify-content:space-between;align-items:center}
+  .week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+  .day{background:var(--paper);border:1px solid var(--line);border-radius:13px;padding:9px 3px;text-align:center;cursor:pointer;position:relative}
+  .day.today{border-color:var(--ink);border-width:2px}
+  .day.done::after{content:"✓";position:absolute;top:3px;right:5px;font-size:10px;color:var(--grn);font-weight:700}
+  .day .dow{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px}
+  .day .dnum{font-family:'Bebas Neue',sans-serif;font-size:20px;line-height:1;margin:2px 0 5px}
+  .day .pip{width:8px;height:8px;border-radius:50%;margin:0 auto}
+
+  /* strava card */
+  .strava{display:flex;align-items:center;gap:13px;margin-top:16px}
+  .strava .ic{width:42px;height:42px;border-radius:12px;background:#fc4c02;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Bebas Neue',sans-serif;font-size:20px;flex:0 0 auto}
+  .strava .t{flex:1}
+  .strava .t .l{font-size:13px;font-weight:700}
+  .strava .t .s{font-size:12px;color:var(--mut)}
+  .strava .go{font-size:13px;font-weight:700;color:var(--blue)}
+
+  /* horizon */
+  .jcount{text-align:center;margin:8px 0 22px}
+  .jcount .lab{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--mut);font-weight:700}
+  .jcount .v{font-family:'Bebas Neue',sans-serif;font-size:78px;line-height:.85;color:var(--ink)}
+  .jcount .v small{font-size:26px;color:var(--orange)}
+  .jcount .when{font-size:13px;color:var(--ink2);font-weight:600}
+
+  .road{position:relative;margin:0 0 8px 0;padding-left:30px}
+  .road::before{content:"";position:absolute;left:11px;top:8px;bottom:8px;width:2px;background:var(--line)}
+  .stop{position:relative;padding:11px 0}
+  .stop .dot{position:absolute;left:-24px;top:15px;width:14px;height:14px;border-radius:50%;background:var(--paper);border:3px solid var(--line)}
+  .stop.cur .dot{border-color:var(--orange);background:var(--orange)}
+  .stop.race .dot{border-color:var(--ink);background:var(--acid)}
+  .stop .n{font-weight:700;font-size:15px}
+  .stop .d{font-size:12.5px;color:var(--mut)}
+  .stop.cur .n{color:var(--orange-d)}
+  .stop.race .n .tag{font-size:10px;background:var(--ink);color:#fff;border-radius:5px;padding:1px 6px;margin-left:7px;vertical-align:middle;letter-spacing:1px}
+
+  .capnote{margin-top:14px;font-size:12.5px;color:var(--ink2);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:11px 13px;line-height:1.45}
+
+  /* historique */
+  .logitem{display:flex;align-items:center;gap:13px;padding:13px 0;border-bottom:1px solid var(--line)}
+  .logitem:last-child{border-bottom:none}
+  .logitem .pip{width:10px;height:10px;border-radius:50%;flex:0 0 auto}
+  .logitem .m{flex:1}
+  .logitem .m .l{font-weight:700;font-size:15px}
+  .logitem .m .s{font-size:12.5px;color:var(--mut)}
+  .logitem .r{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--ink2)}
+  .empty{text-align:center;color:var(--mut);padding:40px 20px;line-height:1.6}
+
+  /* sheet (session detail + validate) */
+  .sheet{position:fixed;inset:0;background:rgba(20,25,20,.4);display:none;align-items:flex-end;z-index:50}
+  .sheet.on{display:flex;animation:fade .2s}
+  .sheet .panel{background:var(--bg);width:100%;max-height:92vh;overflow:auto;border-radius:24px 24px 0 0;padding:22px 18px calc(env(safe-area-inset-bottom) + 22px);animation:up .25s ease}
+  @keyframes up{from{transform:translateY(40px)}to{transform:none}}
+  .grab{width:42px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 16px}
+
+  .field{margin-bottom:16px}
+  .field label{display:flex;justify-content:space-between;font-size:13.5px;font-weight:700;margin-bottom:8px}
+  .field label b{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--orange);font-weight:400}
+  input[type=range]{width:100%;-webkit-appearance:none;height:7px;border-radius:5px;background:var(--line);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:25px;height:25px;border-radius:50%;background:var(--ink);cursor:pointer}
+  input[type=text]{width:100%;border:1px solid var(--line);border-radius:11px;padding:12px;font-size:15px;background:var(--paper);color:var(--ink);font-family:inherit}
+  input[type=text]:focus{outline:none;border-color:var(--ink)}
+  textarea{width:100%;border:1px solid var(--line);border-radius:11px;padding:12px;font-family:inherit;font-size:14px;resize:vertical;min-height:60px;background:var(--paper);color:var(--ink)}
+  textarea:focus{outline:none;border-color:var(--ink)}
+  .ok{background:#eef7f0;border:1px solid #cfe9d6;border-radius:12px;padding:11px 13px;font-size:13px;color:#1d6b3c;line-height:1.45}
+  .alert{background:#fff4f3;border:1px solid #f6cfca;border-radius:12px;padding:11px 13px;font-size:13px;color:#9a3027;line-height:1.45;margin-top:8px}
+
+  /* bottom nav */
+  .nav{position:fixed;left:0;right:0;bottom:0;height:calc(var(--nav) + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-top:1px solid var(--line);display:flex;z-index:40}
+  .nav button{flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:var(--mut);font-family:'DM Sans',sans-serif}
+  .nav button.on{color:var(--ink)}
+  .nav .ni{font-size:19px;line-height:1}
+  .nav .nl{font-size:10.5px;font-weight:700;letter-spacing:.4px}
+  .nav button.on .nl{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ AUJOURD'HUI ============ -->
+  <section class="view on" id="v-today">
+    <div class="topline">
+      <div>
+        <div class="eyebrow" id="todayDate">—</div>
+        <div class="bigtitle bebas">AUJOURD'HUI</div>
+      </div>
+      <div class="blockbadge" id="blockBadge">—</div>
+    </div>
+
+    <div class="card hero" id="heroCard">
+      <div class="type" id="heroType">—</div>
+      <h1 class="bebas" id="heroTitle">—</h1>
+      <div class="why" id="heroWhy">—</div>
+      <div class="specs" id="heroSpecs"></div>
+      <div id="heroActions"></div>
+    </div>
+
+    <div class="weeklbl"><span class="eyebrow">Ta semaine</span><span class="eyebrow" id="weekRange">—</span></div>
+    <div class="week" id="weekStrip"></div>
+
+    <div class="card strava" onclick="goStrava()">
+      <div class="ic">≈</div>
+      <div class="t"><div class="l">Charge récente</div><div class="s" id="stravaState">Strava à connecter</div></div>
+      <div class="go" id="stravaGo">Connecter →</div>
+    </div>
+  </section>
+
+  <!-- ============ HORIZON ============ -->
+  <section class="view" id="v-horizon">
+    <div class="topline"><div><div class="eyebrow">Objectif final</div><div class="bigtitle bebas">L'HORIZON</div></div></div>
+    <div class="jcount">
+      <div class="lab">UT4M 180 Challenge</div>
+      <div class="v bebas">J<small>–</small><span id="jdays">—</span></div>
+      <div class="when" id="jwhen">≈ juillet 2027 · date à ajuster</div>
+    </div>
+    <div class="road" id="road"></div>
+    <div class="capnote">Plafond volume : <b>4 000–5 000 m D+/mois</b>. Le plan ne dépasse jamais ça — la grimpe se construit par l'économie (VAM) et la durabilité, pas par le volume brut.</div>
+  </section>
+
+  <!-- ============ HISTORIQUE ============ -->
+  <section class="view" id="v-log">
+    <div class="topline">
+      <div><div class="eyebrow">Suivi</div><div class="bigtitle bebas">HISTORIQUE</div></div>
+      <div class="blockbadge" style="background:var(--bg);border:1px solid var(--line)" id="syncState">Local</div>
+    </div>
+    <div class="card" id="logCard"><div class="empty" id="logEmpty">Aucune séance validée pour l'instant.<br>Valide ta première depuis l'accueil.</div><div id="logList"></div></div>
+  </section>
+
+</div>
+
+<!-- ============ SHEET ============ -->
+<div class="sheet" id="sheet" onclick="if(event.target===this)closeSheet()">
+  <div class="panel">
+    <div class="grab"></div>
+    <div class="eyebrow" id="shType">—</div>
+    <h2 class="bebas" style="font-size:34px;line-height:1;margin:5px 0 4px" id="shTitle">—</h2>
+    <div class="sub" id="shDate" style="margin-bottom:14px;color:var(--mut);font-weight:600"></div>
+    <div class="sub" id="shWhy" style="margin-bottom:16px"></div>
+    <div class="specs" id="shSpecs" style="margin-bottom:16px"></div>
+    <div id="shPlayer"></div>
+    <div id="shForm" style="display:none;margin-top:8px">
+      <div id="shFields"></div>
+      <button class="btn btn-acid" onclick="saveSession()">ENREGISTRER LA SÉANCE</button>
+    </div>
+    <div class="btn-row" id="shTop">
+      <button class="btn btn-ghost" onclick="closeSheet()">Fermer</button>
+      <button class="btn btn-go" id="shValidateBtn" onclick="openForm()">VALIDER</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ NAV ============ -->
+<nav class="nav">
+  <button class="on" id="nav-today" onclick="nav('today')"><span class="ni">◎</span><span class="nl">Aujourd'hui</span></button>
+  <button id="nav-horizon" onclick="nav('horizon')"><span class="ni">⛰</span><span class="nl">Horizon</span></button>
+  <button id="nav-log" onclick="nav('log')"><span class="ni">▤</span><span class="nl">Historique</span></button>
+</nav>
+
+<script>
+/* ===================== PLAN ENGINE (règles, déterministe) ===================== */
+// Player Moteur Grimpe déjà déployé (sera remplacé par génération par bloc)
+var PLAYER_URL = "proto.html";
+
+// Macrocycle juin 2026 -> UT4M juillet 2027. Dates de courses = mois (jours exacts à caler).
+var UT4M_DATE = "2027-07-16"; // placeholder ajustable
+var BLOCKS = [
+  {id:"trans", name:"Transition", start:"2026-06-14", end:"2026-07-13", intent:"Récup active post-100K. Tissu, sommeil, zéro charge.", phase:"recup"},
+  {id:"base1", name:"Reprise base", start:"2026-07-14", end:"2026-08-31", intent:"Reconstruire l'aérobie + fondation force.", phase:"base"},
+  {id:"force", name:"Force & côtes", start:"2026-09-01", end:"2026-10-31", intent:"Économie de grimpe (VAM) + force structurelle.", phase:"force"},
+  {id:"baseH", name:"Base hivernale", start:"2026-11-01", end:"2026-12-31", intent:"Volume aérobie facile + durabilité excentrique.", phase:"base"},
+  {id:"build", name:"Build spécifique", start:"2027-01-01", end:"2027-02-28", intent:"Montée en charge, côtes longues, spécificité trail.", phase:"build"},
+  {id:"chianti", name:"Affûtage Chianti", start:"2027-03-01", end:"2027-03-21", intent:"Affûtage 46K. Fraîcheur + rappels d'intensité.", phase:"affutage"},
+  {id:"paladru", name:"Bloc Paladru", start:"2027-03-22", end:"2027-04-25", intent:"Pic d'endurance — le gros test 84K.", phase:"build"},
+  {id:"maxi", name:"Bloc Maxi-Race", start:"2027-04-26", end:"2027-05-23", intent:"Spécificité longue finale.", phase:"build"},
+  {id:"specUT", name:"Spécifique UT4M", start:"2027-05-24", end:"2027-06-27", intent:"Bloc clé : simulation 4×20 km multi-jours.", phase:"build"},
+  {id:"affUT", name:"Affûtage UT4M", start:"2027-06-28", end:"2027-07-16", intent:"Affûtage final. Fraîcheur maximale.", phase:"affutage"}
+];
+
+// Types de séance
+var TYPES = {
+  repos:   {label:"Repos",        type:"REPOS",          color:"var(--mut)",     why:"Le repos fait partie du plan. C'est là que tu progresses."},
+  mobilite:{label:"Mobilité",     type:"MOBILITÉ",       color:"var(--blue)",    why:"Réveil articulaire, hanches, chaîne postérieure. 15-20 min."},
+  fond:    {label:"Sortie fond",  type:"ENDURANCE Z2",   color:"var(--grn)",     why:"Aérobie facile, nez qui respire. Tu construis le moteur de fond."},
+  cotes:   {label:"Côtes / VAM",  type:"CÔTES · VAM",    color:"var(--orange)",  why:"Ton limiteur : l'économie de grimpe. Répétitions en côte, gainé, économe."},
+  longue:  {label:"Sortie longue",type:"SORTIE LONGUE",  color:"var(--orange-d)",why:"Durabilité. Allure tenue, gestion nutrition, jambes qui encaissent."},
+  renfo:   {label:"Renfo",        type:"RENFO TRAIL",    color:"var(--ink)",     why:"ZP-safe. Force athlétique transférée au trail, format WOD."},
+  wod:     {label:"WOD",          type:"WOD",            color:"var(--purp)",    why:"Conditionnement métabolique adapté au bloc. Optionnel selon la charge."}
+};
+
+// Gabarit hebdo par phase. Index = jour (1=lun ... 7=dim). Week-ends = repos (indispo).
+var WEEK = {
+  recup:    {1:"mobilite",2:"fond",3:"repos",4:"mobilite",5:"fond",6:"repos",7:"repos"},
+  base:     {1:"renfo",2:"fond",3:"mobilite",4:"cotes",5:"fond",6:"repos",7:"longue"},
+  force:    {1:"renfo",2:"cotes",3:"repos",4:"fond",5:"renfo",6:"repos",7:"longue"},
+  build:    {1:"renfo",2:"cotes",3:"fond",4:"wod",5:"renfo",6:"repos",7:"longue"},
+  affutage: {1:"renfo",2:"cotes",3:"repos",4:"fond",5:"mobilite",6:"repos",7:"repos"}
+};
+
+// specs par type+phase (affichage hero/sheet)
+function specsFor(typeKey, phase){
+  var s=[];
+  if(typeKey==="fond")  s=[["Durée","45–70′"],["Zone","Z2"],["D+","selon parcours"]];
+  if(typeKey==="cotes") s=[["Format","6–10 × côte"],["Intensité","Z3–Z4"],["Focus","posture · VAM"]];
+  if(typeKey==="longue")s=[["Durée", phase==="build"?"2–3 h":"1h30–2h"],["Zone","Z2"],["Nutrition","à tester"]];
+  if(typeKey==="renfo") s=[["Format","EMOM + AMRAP"],["Durée","~30′"],["ZP","safe"]];
+  if(typeKey==="wod")   s=[["Durée","10–20′"],["RPE","7–8"],["ZP","filtré"]];
+  if(typeKey==="mobilite")s=[["Durée","15–20′"],["Focus","hanches · dos"]];
+  return s;
+}
+
+/* ===================== DATES ===================== */
+function iso(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function parse(s){ var p=s.split("-"); return new Date(+p[0],+p[1]-1,+p[2]); }
+function dowMon(d){ var g=d.getDay(); return g===0?7:g; } // 1..7 lun..dim
+var MOIS=["janv.","févr.","mars","avr.","mai","juin","juil.","août","sept.","oct.","nov.","déc."];
+var JOURS=["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
+
+function blockFor(d){
+  var k=iso(d);
+  for(var i=0;i<BLOCKS.length;i++){ if(k>=BLOCKS[i].start && k<=BLOCKS[i].end) return BLOCKS[i]; }
+  if(k<BLOCKS[0].start) return BLOCKS[0];
+  return BLOCKS[BLOCKS.length-1];
+}
+function sessionFor(d){
+  var b=blockFor(d), tpl=WEEK[b.phase], tk=tpl[dowMon(d)];
+  return {dateKey:iso(d), date:d, block:b, typeKey:tk, info:TYPES[tk], specs:specsFor(tk,b.phase)};
+}
+
+/* ===================== STORAGE (seam synchro) ===================== */
+var LOG_KEY="lvtrail:v2:log";
+function loadLog(){ try{ return JSON.parse(localStorage.getItem(LOG_KEY)||"[]"); }catch(e){ return []; } }
+function saveLog(arr){ localStorage.setItem(LOG_KEY, JSON.stringify(arr)); }
+// --- seams branchés plus tard sur /.netlify/functions/lvsync ---
+function syncPush(entry){ /* TODO: POST entry vers Netlify */ }
+function syncPull(cb){ /* TODO: GET log depuis Netlify -> merge */ cb && cb(); }
+
+function isDone(dateKey){ return loadLog().some(function(e){return e.dateKey===dateKey;}); }
+
+/* ===================== RENDER : AUJOURD'HUI ===================== */
+var today=new Date();
+function renderToday(){
+  var s=sessionFor(today);
+  document.getElementById("todayDate").textContent = JOURS[dowMon(today)-1]+" "+today.getDate()+" "+MOIS[today.getMonth()];
+  document.getElementById("blockBadge").textContent = s.block.name;
+  var hero=document.getElementById("heroCard");
+  hero.style.borderLeftColor = s.info.color;
+  document.getElementById("heroType").textContent = s.info.type;
+  document.getElementById("heroType").style.color = s.info.color;
+  document.getElementById("heroTitle").textContent = s.info.label.toUpperCase();
+  document.getElementById("heroWhy").textContent = s.info.why;
+  document.getElementById("heroSpecs").innerHTML = s.specs.map(function(x){return '<div class="spec"><b>'+x[1]+'</b>'+x[0]+'</div>';}).join("");
+  // actions
+  var done=isDone(s.dateKey);
+  var a="";
+  if(done){ a='<button class="btn btn-acid" disabled style="opacity:.6">SÉANCE VALIDÉE ✓</button>'; }
+  else if(s.typeKey==="repos"){ a='<button class="btn btn-go" onclick="openSheet(\''+s.dateKey+'\')">VOIR / MARQUER</button>'; }
+  else if(s.typeKey==="renfo"||s.typeKey==="wod"){ a='<button class="btn btn-orange" onclick="openSheet(\''+s.dateKey+'\')">OUVRIR LA SÉANCE</button>'; }
+  else { a='<button class="btn btn-go" onclick="openSheet(\''+s.dateKey+'\')">VOIR / VALIDER</button>'; }
+  document.getElementById("heroActions").innerHTML=a;
+  renderWeek();
+  renderStravaCard();
+}
+
+function renderWeek(){
+  // lundi de la semaine courante
+  var mon=new Date(today); mon.setDate(today.getDate()-(dowMon(today)-1));
+  document.getElementById("weekRange").textContent = mon.getDate()+" "+MOIS[mon.getMonth()]+" → "+(new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+6)).getDate();
+  var html="";
+  for(var i=0;i<7;i++){
+    var d=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+i);
+    var s=sessionFor(d);
+    var isT = iso(d)===iso(today);
+    var done = isDone(iso(d));
+    html+='<div class="day'+(isT?' today':'')+(done?' done':'')+'" onclick="openSheet(\''+iso(d)+'\')">'
+        +'<div class="dow">'+JOURS[i]+'</div>'
+        +'<div class="dnum">'+d.getDate()+'</div>'
+        +'<div class="pip" style="background:'+s.info.color+'"></div></div>';
+  }
+  document.getElementById("weekStrip").innerHTML=html;
+}
+
+/* ===================== SHEET ===================== */
+var curKey=null;
+function openSheet(dateKey){
+  curKey=dateKey;
+  var s=sessionFor(parse(dateKey));
+  document.getElementById("shType").textContent=s.info.type;
+  document.getElementById("shType").style.color=s.info.color;
+  document.getElementById("shTitle").textContent=s.info.label;
+  document.getElementById("shDate").textContent=JOURS[dowMon(s.date)-1]+" "+s.date.getDate()+" "+MOIS[s.date.getMonth()];
+  document.getElementById("shWhy").textContent=s.info.why;
+  document.getElementById("shSpecs").innerHTML=s.specs.map(function(x){return '<div class="spec"><b>'+x[1]+'</b>'+x[0]+'</div>';}).join("");
+  // player link pour renfo/wod
+  var pl="";
+  if(s.typeKey==="renfo"||s.typeKey==="wod"){
+    pl='<a href="'+PLAYER_URL+'" style="text-decoration:none"><button class="btn btn-orange" style="margin-bottom:8px">▶ LANCER LE PLAYER (chrono + score)</button></a>';
+  }
+  document.getElementById("shPlayer").innerHTML=pl;
+  // reset
+  document.getElementById("shForm").style.display="none";
+  document.getElementById("shTop").style.display="flex";
+  var done=isDone(dateKey);
+  document.getElementById("shValidateBtn").textContent = done ? "DÉJÀ VALIDÉE ✓" : "VALIDER";
+  document.getElementById("shValidateBtn").disabled = done;
+  document.getElementById("shValidateBtn").style.opacity = done?".6":"1";
+  document.getElementById("sheet").classList.add("on");
+}
+function closeSheet(){ document.getElementById("sheet").classList.remove("on"); }
+
+function openForm(){
+  var s=sessionFor(parse(curKey));
+  var run = (s.typeKey==="fond"||s.typeKey==="cotes"||s.typeKey==="longue");
+  var f="";
+  if(s.typeKey==="repos"||s.typeKey==="mobilite"){
+    f='<div class="ok">Rien à scorer. Confirme juste que c\'est fait.</div>';
+  } else {
+    if(run){
+      f+='<div class="field"><label>Durée</label><input type="text" id="fDuree" placeholder="ex : 1h05"></div>';
+      f+='<div class="field"><label>D+ (m)</label><input type="text" id="fDplus" placeholder="ex : 450"></div>';
+    } else {
+      f+='<div class="field"><label>Score / rounds <span style="color:var(--mut);font-weight:400">(optionnel)</span></label><input type="text" id="fScore" placeholder="ex : 6 rounds"></div>';
+      f+='<div class="field"><label>Jambes <b id="fjV">6</b></label><input type="range" min="1" max="10" value="6" id="fJambes" oninput="fjV.textContent=this.value"></div>';
+    }
+    f+='<div class="field"><label>RPE <b id="frV">6</b></label><input type="range" min="1" max="10" value="6" id="fRpe" oninput="frV.textContent=this.value"></div>';
+    f+='<div class="field"><label>ZP (zone pubienne) <b id="fzV">2</b></label><input type="range" min="0" max="10" value="2" id="fZp" oninput="fzV.textContent=this.value;document.getElementById(\'zpAl\').style.display=(+this.value>=4?\'block\':\'none\')"></div>';
+  }
+  f+='<div class="field"><label>Note</label><textarea id="fNote" placeholder="Ressenti, charge, douleur…"></textarea></div>';
+  f+='<div class="alert" id="zpAl" style="display:none">ZP ≥ 4 : on coupe hinge + adduction sur les prochaines séances.</div>';
+  document.getElementById("shFields").innerHTML=f;
+  document.getElementById("shForm").style.display="block";
+  document.getElementById("shTop").style.display="none";
+}
+
+function val(id){ var e=document.getElementById(id); return e?e.value:""; }
+function saveSession(){
+  var s=sessionFor(parse(curKey));
+  var entry={
+    id:"s_"+Date.now(), dateKey:curKey, ts:Date.now(),
+    typeKey:s.typeKey, type:s.info.type, title:s.info.label, color:s.info.color,
+    rpe:val("fRpe"), zp:val("fZp"), jambes:val("fJambes"), score:val("fScore"),
+    duree:val("fDuree"), dplus:val("fDplus"), note:(val("fNote")||"").trim()
+  };
+  var log=loadLog(); log.unshift(entry); saveLog(log); syncPush(entry);
+  closeSheet(); renderToday(); renderLog();
+}
+
+/* ===================== HORIZON ===================== */
+function renderHorizon(){
+  var t=new Date(); t.setHours(0,0,0,0);
+  var ut=parse(UT4M_DATE);
+  var days=Math.max(0,Math.round((ut-t)/86400000));
+  document.getElementById("jdays").textContent=days;
+  var curB=blockFor(today);
+  var stops=[
+    {key:"now", n:"Aujourd'hui", d:curB.name, cls:"cur"},
+    {key:"chianti", n:'Chianti Ultra 46K <span class="tag">COURSE</span>', d:"Mars 2027 · affûtage", cls:"race"},
+    {key:"paladru", n:'Trail de Paladru 84K <span class="tag">COURSE</span>', d:"Avril 2027 · le gros test", cls:"race"},
+    {key:"maxi", n:'Maxi-Race <span class="tag">COURSE</span>', d:"Mai 2027 · spécificité longue", cls:"race"},
+    {key:"ut", n:'UT4M 180 <span class="tag">OBJECTIF</span>', d:"Juillet 2027 · ~44 km/j · 11 700 m D+", cls:"race"}
+  ];
+  document.getElementById("road").innerHTML=stops.map(function(s){
+    return '<div class="stop '+s.cls+'"><span class="dot"></span><div class="n">'+s.n+'</div><div class="d">'+s.d+'</div></div>';
+  }).join("");
+}
+
+/* ===================== HISTORIQUE ===================== */
+function renderLog(){
+  var log=loadLog();
+  document.getElementById("logEmpty").style.display = log.length?"none":"block";
+  document.getElementById("logList").innerHTML = log.map(function(e){
+    var d=parse(e.dateKey);
+    var meta=[];
+    if(e.rpe) meta.push("RPE "+e.rpe);
+    if(e.zp) meta.push("ZP "+e.zp);
+    if(e.dplus) meta.push(e.dplus+"m D+");
+    if(e.duree) meta.push(e.duree);
+    var right = e.score? e.score : (e.rpe? e.rpe+"/10":"✓");
+    return '<div class="logitem"><span class="pip" style="background:'+(e.color||'var(--mut)')+'"></span>'
+      +'<div class="m"><div class="l">'+e.title+'</div><div class="s">'+JOURS[dowMon(d)-1]+' '+d.getDate()+' '+MOIS[d.getMonth()]+' · '+meta.join(' · ')+'</div></div>'
+      +'<div class="r">'+right+'</div></div>';
+  }).join("");
+}
+
+/* ===================== STRAVA (seam) ===================== */
+function renderStravaCard(){
+  // branché plus tard sur /.netlify/functions/lvstrava
+  // état par défaut : à connecter
+}
+function goStrava(){
+  alert("Connexion Strava — bientôt.\n\nUne fois ton appli Strava créée et tes clés posées sur Netlify, je branche un bouton « Connecter » en 1 clic, et ta charge récente (km, D+, dernières sorties) s'affichera ici en live.");
+}
+
+/* ===================== NAV ===================== */
+function nav(v){
+  ["today","horizon","log"].forEach(function(x){
+    document.getElementById("v-"+x).classList.toggle("on", x===v);
+    document.getElementById("nav-"+x).classList.toggle("on", x===v);
+  });
+  if(v==="horizon") renderHorizon();
+  if(v==="log") renderLog();
+  window.scrollTo(0,0);
+}
+
+/* ===================== INIT ===================== */
+renderToday();
+renderHorizon();
+renderLog();
+</script>
+</body>
+</html>
