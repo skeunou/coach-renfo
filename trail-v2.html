@@ -283,6 +283,31 @@ function specsFor(t,phase){var s=[];
   return s;
 }
 
+/* ================= WOD SUPPLÉMENTAIRE BANQUE ================= */
+var WODS_SUPP=[
+  {name:"Swing & Push",sec:600,moves:[["","12 KB swing américain","ZP-safe"],["","8 Push press","jambes donnent impulsion"],["","10 Farmer carry ~15m","2× lourd"]]},
+  {name:"Portés & Squat",sec:600,moves:[["","Suitcase carry 20m","1 côté puis l'autre"],["","8 Goblet squat","KB lourd"],["","10 TRX row","omoplates"]]},
+  {name:"Snatch ladder",sec:600,moves:[["","8 DB snatch (alt)","explosif gainé"],["","10 Push press","même DB"],["","12 Swing KB","prop hanche"]]},
+  {name:"Anti-rotation",sec:600,moves:[["","Pallof press walk 15m","Medium élastique"],["","12 Tirage MB","tirage explosif"],["","10 Step-up lesté","5/jambe"]]},
+  {name:"Tirage & Step",sec:600,moves:[["","10 Pull-ups ou TRX row","serre omoplates"],["","12 Step-up lesté","6/jambe"],["","15 KB swing russe","respire"]]},
+  {name:"Complexe DBs",sec:600,moves:[["","5 Clean & jerk (alt)","puissance"],["","8 Thruster (alt)","jambes"],["","10 Renegade row","stabilité"]]},
+  {name:"Kettlebell grind",sec:600,moves:[["","10 KB clean & press (alt)","lourd"],["","12 Goblet squat","en attente"],["","15 Swing KB","fini léger"]]},
+  {name:"Portés lourds",sec:600,moves:[["","Walk 20m bras croisés","DBs lourds"],["","8 Jerk power clean","explosif"],["","10 Box step-up","4 jambe"]]},
+  {name:"Row & Jump",sec:600,moves:[["","12 TRX row unilatéral","alt"],["","8 Broad jump ou fente sautée","contrôle chute"],["","10 Push press","finish"]]},
+  {name:"Snatch & Thruster",sec:600,moves:[["","8 DB snatch alt","gainé"],["","8 Thruster alt","jambes"],["","12 Swing KB","respiré"]]},
+  {name:"Carry complex",sec:600,moves:[["","Farmer 15m + Suitcase 15m","chaque côté"],["","8 Push press","DB"],["","10 Tirage explosif","TRX"]]},
+  {name:"Clean ladder",sec:600,moves:[["","5 Power clean","barre ~30kg"],["","8 Push press","barre"],["","10 Front squat","barre"]]},
+  {name:"Rotational power",sec:600,moves:[["","Pallof press explosive","Medium élastique"],["","10 Rotation thoracique","DB une main"],["","12 Step-down","contrôle"]]},
+  {name:"Anti-extension",sec:600,moves:[["","Ab wheel 8","ou TRX fallout"],["","10 Tirage explosif","MB"],["","12 Swing KB","léger"]]},
+  {name:"Unilateral force",sec:600,moves:[["","8 Single-leg RDL alt","KB ou DB"],["","10 Renegade row","alt"],["","12 Push press","DBs"]]}
+];
+var lastWodIdx=-1;
+function randWod(){
+  var idx;
+  do { idx=Math.floor(Math.random()*WODS_SUPP.length); } while(idx===lastWodIdx);
+  lastWodIdx=idx; return WODS_SUPP[idx];
+}
+
 /* ================= CONTENU DES SÉANCES (player) ================= */
 var MOBI=[
   {name:"Respiration 4-6",cue:"Assis ou allongé. Inspire 4 s, souffle 6 s. Relâche les épaules.",hold:40},
@@ -394,6 +419,7 @@ function openSheet(k){
     btns='<button class="btn btn-go" onclick="openForm()">MODIFIER</button><button class="btn btn-red" onclick="deleteSession()">SUPPRIMER</button>';
   } else {
     if(hasPlayer(s.typeKey)) playBtn='<button class="btn btn-orange" style="margin-bottom:8px" onclick="startPlayer(\''+k+'\')">▶ DÉMARRER (guidé · chrono)</button>';
+    playBtn+='<button class="btn btn-go" style="background:var(--purp);margin-top:6px" onclick="startSuppWod(\''+k+'\')">⚡ WOD SUPPLÉMENTAIRE</button>';
     btns='<button class="btn btn-ghost" onclick="closeSheet()">Fermer</button><button class="btn btn-go" onclick="openForm()">'+(hasPlayer(s.typeKey)?'VALIDER À LA MAIN':'VALIDER')+'</button>';
   }
   document.getElementById("shSummary").innerHTML=sum;
@@ -451,10 +477,18 @@ function deleteSession(){
 }
 
 /* ================= PLAYER ================= */
-var pSegs=[],pIdx=0,pKey=null,pTimer=null,pState={};
+var pSegs=[],pIdx=0,pKey=null,pTimer=null,pState={},pIsSupp=false;
 function startPlayer(k){
   unlockAudio(); reqWake(); beep(660,.12);
-  pKey=k; pSegs=content(sessionFor(parse(k)).typeKey)||[]; pIdx=0;
+  pKey=k; pIsSupp=false; pSegs=content(sessionFor(parse(k)).typeKey)||[]; pIdx=0;
+  closeSheet(); document.getElementById("player").classList.add("on");
+  renderSeg();
+}
+function startSuppWod(k){
+  unlockAudio(); reqWake(); beep(660,.12);
+  pKey=k; pIsSupp=true;
+  var wod=randWod();
+  pSegs=[{kind:"amrap",sec:600,label:"WOD SUPP",name:wod.name,moves:wod.moves}]; pIdx=0;
   closeSheet(); document.getElementById("player").classList.add("on");
   renderSeg();
 }
@@ -465,7 +499,7 @@ function nextSeg(){ clearInterval(pTimer); pIdx++; if(pIdx>=pSegs.length){ finis
 function renderSeg(){
   clearInterval(pTimer); pProg();
   var seg=pSegs[pIdx], body=document.getElementById("pBody"), act=document.getElementById("pAct");
-  document.getElementById("pSeg").textContent="Étape "+(pIdx+1)+" / "+pSegs.length;
+  document.getElementById("pSeg").textContent=(seg.label||"Étape ")+(pIdx+1)+" / "+pSegs.length;
   if(seg.kind==="flow"){
     pState.side=1;
     var clock= seg.hold?('<div class="pclock bebas" id="pc">'+seg.hold+'</div>'):'';
@@ -512,6 +546,7 @@ function startAmrap(seg){
   function fmt(s){var m=Math.floor(s/60),x=s%60;return m+":"+(x<10?"0":"")+x;}
   function draw(){document.getElementById("pBody").innerHTML=
     '<div class="pclock bebas" id="pc">'+fmt(sec)+'</div>'
+    +(seg.name?'<div class="pname bebas">'+seg.name+'</div>':'')
     +'<div class="counter"><button class="rbtn" onclick="amrapR(-1)">–</button><span class="v bebas" id="prnd">'+rounds+'</span><button class="rbtn" onclick="amrapR(1)">+</button></div>'
     +'<div class="preps">rounds bouclés</div>'
     +'<div class="plist">'+seg.moves.map(function(m){return '<div class="li"><span class="k">'+(m[0]||'•')+'</span><div><b>'+m[1]+'</b>'+(m[2]?' <span style="color:var(--mut)">· '+m[2]+'</span>':'')+'</div></div>';}).join("")+'</div>';
@@ -526,9 +561,35 @@ function finishPlayer(){
   clearInterval(pTimer);
   document.getElementById("player").classList.remove("on");
   dbeep();
-  curKey=pKey; editing=entryFor(pKey);
-  openSheet(pKey);
-  openForm(pState.rounds?(pState.rounds+" rounds"):"");
+  if(pIsSupp){
+    // WOD supp = entrée indépendante, validation optionnelle
+    var wod=WODS_SUPP[lastWodIdx];
+    var entry={id:"w_"+Date.now(),dateKey:pKey,ts:Date.now(),
+      typeKey:"wod-supp",type:"WOD SUPP",title:wod.name,color:"var(--purp)",
+      rpe:"",zp:"",jambes:"",score:pState.rounds?pState.rounds+" rounds":"",note:""};
+    curKey=pKey; editing=entry;
+    openSheet(pKey);
+    // affiche le WOD supp avec option validation
+    document.getElementById("shTitle").textContent=wod.name;
+    document.getElementById("shWhy").textContent="WOD supplémentaire — format libre. Valide ou ignore.";
+    document.getElementById("shSpecs").innerHTML='<div class="spec"><b>'+pState.rounds+' rounds</b>SCORE</div>';
+    document.getElementById("shForm").style.display="none";
+    document.getElementById("shButtons").innerHTML='<button class="btn btn-go" onclick="saveSuppWod()">VALIDER CE WOD</button><button class="btn btn-ghost" onclick="closeSheet()">Ignorer</button>';
+  } else {
+    curKey=pKey; editing=entryFor(pKey);
+    openSheet(pKey);
+    openForm(pState.rounds?(pState.rounds+" rounds"):"");
+  }
+}
+function saveSuppWod(){
+  var log=loadLog();
+  var entry={id:"w_"+Date.now(),dateKey:curKey,ts:Date.now(),
+    typeKey:"wod-supp",type:"WOD SUPP",title:editing.title,color:"var(--purp)",
+    rpe:"",zp:"",jambes:"",score:editing.score,note:""};
+  log.unshift(entry);
+  log.sort(function(a,b){return a.dateKey<b.dateKey?1:-1;});
+  saveLog(log); syncPush();
+  closeSheet(); renderToday(); renderLog();
 }
 
 /* ================= HORIZON ================= */
