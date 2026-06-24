@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#ebede9">
+<title>Moteur Grimpe — Proto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#ebede9; --paper:#ffffff; --ink:#15171a; --ink2:#3a3f44;
+    --mut:#7a8088; --line:#dadfd6;
+    --acid:#e8ff47; --acid-d:#b8d018;
+    --orange:#ff6b35; --red:#e5484d; --grn:#1f9d55;
+    --slate:#2a2f36;
+    --shadow:0 6px 22px rgba(20,30,20,.08);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:'DM Sans',system-ui,sans-serif;
+    overscroll-behavior:none; -webkit-font-smoothing:antialiased;
+  }
+  .bebas{font-family:'Bebas Neue',sans-serif;letter-spacing:.5px;font-weight:400}
+  .screen{
+    position:fixed; inset:0; display:none;
+    flex-direction:column; padding:max(20px,env(safe-area-inset-top)) 20px max(20px,env(safe-area-inset-bottom));
+    animation:fade .25s ease;
+  }
+  .screen.on{display:flex}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  /* ascension signature */
+  .ascent{height:34px;flex:0 0 auto;margin-bottom:10px;position:relative}
+  .ascent svg{width:100%;height:100%;display:block;overflow:visible}
+  .ascent .lbl{position:absolute;top:-2px;right:0;font-size:11px;color:var(--mut);letter-spacing:1px;text-transform:uppercase}
+
+  .eyebrow{font-size:12px;letter-spacing:2.5px;text-transform:uppercase;color:var(--mut);font-weight:700}
+  .h1{font-size:64px;line-height:.92;color:var(--ink)}
+  .h2{font-size:40px;line-height:1;color:var(--ink)}
+  .sub{color:var(--ink2);font-size:15px;line-height:1.5}
+
+  .grow{flex:1 1 auto;display:flex;flex-direction:column;justify-content:center;gap:18px;min-height:0}
+  .center{align-items:center;text-align:center}
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:7px 13px;font-size:13px;font-weight:600;color:var(--ink2)}
+  .chip.k{background:var(--acid);border-color:var(--acid);color:#1a1d12;font-weight:700}
+  .chip.zp{background:#eef7f0;border-color:#cfe9d6;color:var(--grn);font-weight:700}
+
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:var(--shadow)}
+
+  .btn{
+    width:100%;border:none;border-radius:16px;padding:19px;font-size:19px;font-weight:700;
+    font-family:'DM Sans',sans-serif;cursor:pointer;letter-spacing:.3px;transition:transform .08s ease,filter .15s;
+  }
+  .btn:active{transform:scale(.985)}
+  .btn-go{background:var(--ink);color:#fff}
+  .btn-acid{background:var(--acid);color:#1a1d12}
+  .btn-ghost{background:transparent;color:var(--mut);font-weight:600;padding:14px;font-size:15px}
+  .btn-orange{background:var(--orange);color:#fff}
+  .actions{flex:0 0 auto;display:flex;flex-direction:column;gap:8px;padding-top:14px}
+
+  /* clock */
+  .clock{font-family:'Bebas Neue',sans-serif;font-size:118px;line-height:.82;letter-spacing:2px;color:var(--ink)}
+  .clock.warn{color:var(--orange)}
+  .clock.hot{color:var(--red)}
+
+  .moveName{font-size:46px;line-height:.95}
+  .moveReps{font-size:20px;color:var(--ink2);font-weight:700}
+  .cue{font-size:14px;color:var(--mut);line-height:1.45;max-width:320px}
+
+  .minilist{display:flex;flex-direction:column;gap:10px}
+  .row{display:flex;align-items:baseline;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+  .row:last-child{border-bottom:none}
+  .row .n{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--acid-d);min-width:52px}
+  .row .m{font-weight:700;font-size:16px}
+  .row .d{font-size:13px;color:var(--mut)}
+
+  .counter{display:flex;align-items:center;justify-content:center;gap:24px}
+  .counter .v{font-family:'Bebas Neue',sans-serif;font-size:96px;line-height:.8;min-width:90px;text-align:center}
+  .rbtn{width:64px;height:64px;border-radius:50%;border:2px solid var(--line);background:var(--paper);font-size:34px;color:var(--ink);line-height:1;cursor:pointer;font-family:'Bebas Neue',sans-serif}
+  .rbtn:active{background:var(--bg)}
+
+  .field{margin-bottom:18px}
+  .field label{display:flex;justify-content:space-between;font-size:14px;font-weight:700;margin-bottom:9px}
+  .field label b{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--orange);font-weight:400}
+  input[type=range]{width:100%;-webkit-appearance:none;height:7px;border-radius:5px;background:var(--line);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:var(--ink);cursor:pointer}
+  textarea{width:100%;border:1px solid var(--line);border-radius:14px;padding:13px;font-family:inherit;font-size:15px;resize:vertical;min-height:70px;background:var(--paper);color:var(--ink)}
+  textarea:focus{outline:none;border-color:var(--ink)}
+
+  .alert{background:#fff4f3;border:1px solid #f6cfca;border-radius:14px;padding:13px 15px;font-size:13.5px;color:#9a3027;line-height:1.45}
+  .ok{background:#eef7f0;border:1px solid #cfe9d6;border-radius:14px;padding:13px 15px;font-size:13.5px;color:#1d6b3c;line-height:1.45}
+
+  pre{white-space:pre-wrap;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:15px;font-size:13px;line-height:1.6;color:var(--ink2);font-family:'DM Sans',monospace}
+
+  .pager{display:flex;justify-content:center;gap:7px;flex:0 0 auto;padding:14px 0}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--line)}
+  .dot.a{background:var(--ink);width:22px;border-radius:5px}
+
+  .topbar{display:flex;justify-content:space-between;align-items:center;flex:0 0 auto;margin-bottom:4px}
+  .topbar .x{font-size:14px;color:var(--mut);background:none;border:none;cursor:pointer;font-weight:600}
+</style>
+</head>
+<body>
+
+<!-- ========= COVER ========= -->
+<section class="screen on" id="cover">
+  <div class="ascent">
+    <svg viewBox="0 0 320 34" preserveAspectRatio="none">
+      <polyline points="0,30 60,24 120,26 180,12 240,16 320,2" fill="none" stroke="#d8dcd6" stroke-width="2"/>
+    </svg>
+    <span class="lbl">Renfo trail</span>
+  </div>
+  <div class="grow">
+    <div class="eyebrow">Séance proto · LV Tools</div>
+    <h1 class="h1 bebas">MOTEUR<br>GRIMPE</h1>
+    <p class="sub">Renfo trail athlétique. Format WOD : chrono qui tourne, un score à la fin. Tout est filtré pour ton pubis — zéro impact bilatéral, zéro hinge lourd, zéro adduction.</p>
+    <div class="chips">
+      <span class="chip k">EMOM 14′</span>
+      <span class="chip k">AMRAP 10′</span>
+      <span class="chip">~30 min</span>
+      <span class="chip zp">ZP ✓ safe</span>
+    </div>
+    <div class="card" style="padding:16px">
+      <div class="minilist">
+        <div class="row"><span class="n">01</span><div><div class="m">Bloc Montée — EMOM 14′</div><div class="d">Step-ups lestés + KB swings. Le moteur de grimpe.</div></div></div>
+        <div class="row"><span class="n">02</span><div><div class="m">Bloc Durabilité — AMRAP 10′</div><div class="d">Portés + push press + snatch + tirage. Score = rounds.</div></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="actions">
+    <button class="btn btn-go" onclick="startSession()">DÉMARRER</button>
+  </div>
+</section>
+
+<!-- ========= WARMUP ========= -->
+<section class="screen" id="warmup">
+  <div class="topbar"><span class="eyebrow">Échauffement · 3 min</span><button class="x" onclick="goCover()">Quitter</button></div>
+  <div class="grow center">
+    <div class="moveName bebas" id="wuName">—</div>
+    <div class="moveReps" id="wuReps">—</div>
+    <div class="cue" id="wuCue">—</div>
+  </div>
+  <div class="pager" id="wuDots"></div>
+  <div class="actions">
+    <button class="btn btn-acid" id="wuNext" onclick="wuNextStep()">SUIVANT</button>
+  </div>
+</section>
+
+<!-- ========= BLOC 1 INTRO ========= -->
+<section class="screen" id="b1intro">
+  <div class="topbar"><span class="eyebrow">Bloc 1</span><button class="x" onclick="goCover()">Quitter</button></div>
+  <div class="grow">
+    <div class="eyebrow">EMOM · 14 minutes</div>
+    <h2 class="h2 bebas">LE MOTEUR<br>DE GRIMPE</h2>
+    <p class="sub">Chaque minute, un mouvement. Tu fais les reps, tu récupères jusqu'au top suivant. Minutes impaires : montées. Minutes paires : propulsion hanche.</p>
+    <div class="card">
+      <div class="minilist">
+        <div class="row"><span class="n">IMP</span><div><div class="m">Step-up lesté · 12 (6/jambe)</div><div class="d">Box mi-hauteur · DB 2×10-12 kg · montée explosive, descente freinée 2 s</div></div></div>
+        <div class="row"><span class="n">PAIR</span><div><div class="m">KB swing américain · 15</div><div class="d">KB 16-20 kg · propulsion hanche, bras passifs, gainage</div></div></div>
+      </div>
+    </div>
+    <div class="ok">Transfert VAM + durabilité excentrique. Réception toujours gainée, jamais de relâchement bas du dos.</div>
+  </div>
+  <div class="actions">
+    <button class="btn btn-go" onclick="startB1()">LANCER L'EMOM</button>
+  </div>
+</section>
+
+<!-- ========= BLOC 1 PLAYER ========= -->
+<section class="screen" id="b1">
+  <div class="ascent">
+    <svg viewBox="0 0 320 34" preserveAspectRatio="none">
+      <polyline points="0,30 60,24 120,26 180,12 240,16 320,2" fill="none" stroke="#d8dcd6" stroke-width="2"/>
+      <circle id="b1marker" r="5" fill="#15171a"/>
+    </svg>
+  </div>
+  <div class="topbar"><span class="eyebrow" id="b1min">MIN 1 / 14</span><button class="x" onclick="stopB1andSkip()">Passer →</button></div>
+  <div class="grow center">
+    <div class="clock bebas" id="b1clock">60</div>
+    <div class="moveName bebas" id="b1move">STEP-UP LESTÉ</div>
+    <div class="moveReps" id="b1reps">12 reps · 6 par jambe</div>
+    <div class="cue" id="b1cue">Box mi-hauteur · montée explosive, descente freinée 2 s.</div>
+  </div>
+  <div class="actions">
+    <button class="btn btn-ghost" id="b1pause" onclick="toggleB1()">Pause</button>
+  </div>
+</section>
+
+<!-- ========= BLOC 2 INTRO ========= -->
+<section class="screen" id="b2intro">
+  <div class="topbar"><span class="eyebrow">Bloc 2</span><button class="x" onclick="goCover()">Quitter</button></div>
+  <div class="grow">
+    <div class="eyebrow">AMRAP · 10 minutes</div>
+    <h2 class="h2 bebas">DURABILITÉ<br>SOUS FATIGUE</h2>
+    <p class="sub">Max de rounds en 10 min. Tu tapes "+1 round" à chaque tour bouclé. Garde un rythme tenable — c'est l'endurance de force qui compte, pas le sprint.</p>
+    <div class="card">
+      <div class="minilist">
+        <div class="row"><span class="n">A</span><div><div class="m">Farmer carry · ~20 m A/R</div><div class="d">2× lourd (KB/DB) · épaules basses, buste droit</div></div></div>
+        <div class="row"><span class="n">B</span><div><div class="m">Push press · 8</div><div class="d">Barre ~30-40 kg · l'impulsion vient des jambes</div></div></div>
+        <div class="row"><span class="n">C</span><div><div class="m">DB snatch · 8 (4/bras)</div><div class="d">DB 12-15 kg · explosif, réception gainée</div></div></div>
+        <div class="row"><span class="n">D</span><div><div class="m">TRX row · 10</div><div class="d">Tirage horizontal · serre les omoplates</div></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="actions">
+    <button class="btn btn-orange" onclick="startB2()">LANCER L'AMRAP</button>
+  </div>
+</section>
+
+<!-- ========= BLOC 2 PLAYER ========= -->
+<section class="screen" id="b2">
+  <div class="ascent">
+    <svg viewBox="0 0 320 34" preserveAspectRatio="none">
+      <polyline points="0,30 60,24 120,26 180,12 240,16 320,2" fill="none" stroke="#d8dcd6" stroke-width="2"/>
+      <circle id="b2marker" r="5" fill="#15171a"/>
+    </svg>
+  </div>
+  <div class="topbar"><span class="eyebrow">AMRAP · rounds</span><button class="x" onclick="endB2()">Stop →</button></div>
+  <div class="grow center">
+    <div class="clock bebas" id="b2clock">10:00</div>
+    <div class="counter">
+      <button class="rbtn" onclick="round(-1)">–</button>
+      <span class="v bebas" id="b2rounds">0</span>
+      <button class="rbtn" onclick="round(1)">+</button>
+    </div>
+    <div class="moveReps">rounds bouclés</div>
+    <div class="card" style="padding:13px 16px;width:100%;max-width:340px">
+      <div class="minilist" style="font-size:13px">
+        <div class="row" style="padding:7px 0"><span class="n" style="font-size:20px;min-width:24px">A</span><div class="m" style="font-size:14px">Carry 20 m · <span class="d" style="display:inline">2× lourd</span></div></div>
+        <div class="row" style="padding:7px 0"><span class="n" style="font-size:20px;min-width:24px">B</span><div class="m" style="font-size:14px">8 Push press</div></div>
+        <div class="row" style="padding:7px 0"><span class="n" style="font-size:20px;min-width:24px">C</span><div class="m" style="font-size:14px">8 DB snatch</div></div>
+        <div class="row" style="padding:7px 0"><span class="n" style="font-size:20px;min-width:24px">D</span><div class="m" style="font-size:14px">10 TRX row</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="actions">
+    <button class="btn btn-go" id="b2done" onclick="endB2()">TERMINER LE BLOC</button>
+  </div>
+</section>
+
+<!-- ========= BILAN ========= -->
+<section class="screen" id="bilan">
+  <div class="topbar"><span class="eyebrow">Bilan</span><span></span></div>
+  <div class="grow" style="justify-content:flex-start;overflow:auto;gap:0">
+    <h2 class="h2 bebas" style="margin:6px 0 18px">SÉANCE BOUCLÉE</h2>
+    <div class="card" style="margin-bottom:18px;text-align:center">
+      <div class="eyebrow">Score AMRAP</div>
+      <div class="bebas" style="font-size:72px;line-height:1" id="scoreRounds">0</div>
+      <div class="moveReps">rounds <span id="scorePartial"></span></div>
+    </div>
+    <div class="field">
+      <label>RPE général <b id="rpeV">7</b></label>
+      <input type="range" min="1" max="10" value="7" id="rpe" oninput="rpeV.textContent=this.value">
+    </div>
+    <div class="field">
+      <label>Jambes <b id="jambesV">6</b></label>
+      <input type="range" min="1" max="10" value="6" id="jambes" oninput="jambesV.textContent=this.value">
+    </div>
+    <div class="field">
+      <label>Zone pubienne (ZP) <b id="zpV">2</b></label>
+      <input type="range" min="0" max="10" value="2" id="zp" oninput="zpV.textContent=this.value">
+    </div>
+    <div class="field">
+      <label>Ressenti / note</label>
+      <textarea id="note" placeholder="Ce qui t'a parlé, ce qui t'a saoulé, une douleur, une charge…"></textarea>
+    </div>
+    <div class="alert" id="zpAlert" style="display:none">ZP ≥ 4/10 : on coupera le hinge et l'adduction à la prochaine. Note-le bien.</div>
+  </div>
+  <div class="actions">
+    <button class="btn btn-acid" onclick="finish()">VOIR L'EXPORT</button>
+  </div>
+</section>
+
+<!-- ========= DONE / EXPORT ========= -->
+<section class="screen" id="done">
+  <div class="topbar"><span class="eyebrow">Export</span><span></span></div>
+  <div class="grow" style="justify-content:flex-start;overflow:auto">
+    <h2 class="h2 bebas" style="margin:6px 0 14px">À COLLER<br>DANS LE CHAT</h2>
+    <p class="sub" style="margin-bottom:14px">Copie ce bloc et colle-le moi pour que je log la séance et ajuste la suite.</p>
+    <pre id="exportTxt">—</pre>
+  </div>
+  <div class="actions">
+    <button class="btn btn-go" id="copyBtn" onclick="copyExport()">COPIER</button>
+    <button class="btn btn-ghost" onclick="goCover()">Refaire / quitter</button>
+  </div>
+</section>
+
+<script>
+/* ---------- audio ---------- */
+var actx=null;
+function unlockAudio(){ if(!actx){try{actx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}} }
+function beep(freq,dur){
+  if(!actx) return;
+  try{
+    var o=actx.createOscillator(), g=actx.createGain();
+    o.type='sine'; o.frequency.value=freq; o.connect(g); g.connect(actx.destination);
+    g.gain.setValueAtTime(.0001,actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.5,actx.currentTime+.02);
+    g.gain.exponentialRampToValueAtTime(.0001,actx.currentTime+dur);
+    o.start(); o.stop(actx.currentTime+dur);
+  }catch(e){}
+}
+function doubleBeep(){ beep(880,.16); setTimeout(function(){beep(1100,.2);},170); }
+
+/* ---------- wake lock ---------- */
+var wl=null;
+async function reqWake(){ try{ if('wakeLock' in navigator){ wl=await navigator.wakeLock.request('screen'); } }catch(e){} }
+document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='visible') reqWake(); });
+
+/* ---------- router ---------- */
+function show(id){
+  var s=document.querySelectorAll('.screen');
+  for(var i=0;i<s.length;i++) s[i].classList.remove('on');
+  document.getElementById(id).classList.add('on');
+  window.scrollTo(0,0);
+}
+function goCover(){ stopAllTimers(); show('cover'); }
+
+/* progress marker along ascent line (0..1) */
+var ASCENT=[[0,30],[60,24],[120,26],[180,12],[240,16],[320,2]];
+function ascentPoint(t){ // t 0..1 -> x,y on polyline (by x param 0..320)
+  var x=t*320, p=ASCENT;
+  for(var i=1;i<p.length;i++){ if(x<=p[i][0]){ var a=p[i-1],b=p[i],r=(x-a[0])/(b[0]-a[0]); return [x, a[1]+(b[1]-a[1])*r]; } }
+  return [320,2];
+}
+function setMarker(id,t){ var pt=ascentPoint(t),el=document.getElementById(id); if(el){el.setAttribute('cx',pt[0]);el.setAttribute('cy',pt[1]);} }
+
+/* ---------- session start ---------- */
+function startSession(){ unlockAudio(); reqWake(); beep(660,.12); wuIdx=0; renderWU(); show('warmup'); }
+
+/* ---------- warmup ---------- */
+var WU=[
+  {n:"Bascules de hanche",r:"10 lentes",c:"Good morning à vide ou élastique. Réveille la charnière sans la charger."},
+  {n:"Fentes marchées",r:"8 par jambe",c:"Amplitude contrôlée, genou stable. Pas de rebond."},
+  {n:"KB swing technique",r:"15 légers",c:"KB léger. Tu cherches le timing hanche, pas la charge."},
+  {n:"Wall walk / planche",r:"3 montées ou 30 s",c:"Gainage épaules. Prêt à grimper."}
+];
+var wuIdx=0;
+function renderWU(){
+  var w=WU[wuIdx];
+  document.getElementById('wuName').textContent=w.n;
+  document.getElementById('wuReps').textContent=w.r;
+  document.getElementById('wuCue').textContent=w.c;
+  var d='';for(var i=0;i<WU.length;i++)d+='<span class="dot'+(i===wuIdx?' a':'')+'"></span>';
+  document.getElementById('wuDots').innerHTML=d;
+  document.getElementById('wuNext').textContent = wuIdx===WU.length-1 ? "C'EST PARTI" : "SUIVANT";
+}
+function wuNextStep(){ beep(700,.08); if(wuIdx<WU.length-1){wuIdx++;renderWU();} else { show('b1intro'); } }
+
+/* ---------- BLOC 1 : EMOM 14 ---------- */
+var b1t=null,b1min=1,b1sec=60,b1paused=false;
+var B1TOTAL=14;
+function b1Move(){ return (b1min%2===1)
+  ? {name:"STEP-UP LESTÉ",reps:"12 reps · 6 par jambe",cue:"Box mi-hauteur · montée explosive, descente freinée 2 s."}
+  : {name:"KB SWING AMÉRICAIN",reps:"15 reps",cue:"Propulsion hanche, bras passifs, gainage serré."}; }
+function renderB1(){
+  document.getElementById('b1clock').textContent=b1sec;
+  var c=document.getElementById('b1clock'); c.className='clock bebas'+(b1sec<=3?' hot':(b1sec<=10?' warn':''));
+  var m=b1Move();
+  document.getElementById('b1move').textContent=m.name;
+  document.getElementById('b1reps').textContent=m.reps;
+  document.getElementById('b1cue').textContent=m.cue;
+  document.getElementById('b1min').textContent='MIN '+b1min+' / '+B1TOTAL;
+  setMarker('b1marker',(b1min-1+(60-b1sec)/60)/B1TOTAL*0.55); // bloc1 = first ~55% of climb
+}
+function startB1(){ unlockAudio(); reqWake(); b1min=1;b1sec=60;b1paused=false; document.getElementById('b1pause').textContent='Pause'; renderB1(); show('b1');
+  clearInterval(b1t);
+  b1t=setInterval(function(){
+    if(b1paused) return;
+    b1sec--;
+    if(b1sec<=0){
+      if(b1min>=B1TOTAL){ clearInterval(b1t); doubleBeep(); show('b2intro'); return; }
+      beep(950,.18); b1min++; b1sec=60;
+    } else if(b1sec<=3){ beep(700,.07); }
+    renderB1();
+  },1000);
+}
+function toggleB1(){ b1paused=!b1paused; document.getElementById('b1pause').textContent=b1paused?'Reprendre':'Pause'; }
+function stopB1andSkip(){ clearInterval(b1t); show('b2intro'); }
+
+/* ---------- BLOC 2 : AMRAP 10 ---------- */
+var b2t=null,b2sec=600,b2rounds=0;
+var B2TOTAL=600;
+function fmt(s){ var m=Math.floor(s/60),x=s%60; return m+':'+(x<10?'0':'')+x; }
+function renderB2(){
+  document.getElementById('b2clock').textContent=fmt(b2sec);
+  var c=document.getElementById('b2clock'); c.className='clock bebas'+(b2sec<=10?' hot':(b2sec<=60?' warn':''));
+  document.getElementById('b2rounds').textContent=b2rounds;
+  setMarker('b2marker',0.55+(1-b2sec/B2TOTAL)*0.45);
+}
+function startB2(){ unlockAudio(); reqWake(); b2sec=600;b2rounds=0; renderB2(); show('b2');
+  clearInterval(b2t);
+  b2t=setInterval(function(){
+    b2sec--;
+    if(b2sec<=0){ clearInterval(b2t); b2sec=0; renderB2(); doubleBeep(); endB2(); return; }
+    if(b2sec===60) beep(800,.2);
+    if(b2sec<=5) beep(700,.07);
+    renderB2();
+  },1000);
+}
+function round(d){ b2rounds=Math.max(0,b2rounds+d); document.getElementById('b2rounds').textContent=b2rounds; if(d>0)beep(1000,.09); }
+function endB2(){ clearInterval(b2t); goBilan(); }
+
+/* ---------- BILAN ---------- */
+function goBilan(){
+  document.getElementById('scoreRounds').textContent=b2rounds;
+  show('bilan');
+  setMarker('b1marker',1); setMarker('b2marker',1);
+}
+document.getElementById('zp').addEventListener('input',function(){
+  document.getElementById('zpAlert').style.display = (parseInt(this.value)>=4)?'block':'none';
+});
+function finish(){
+  var d=new Date();
+  var date=d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear();
+  var rpe=document.getElementById('rpe').value;
+  var jambes=document.getElementById('jambes').value;
+  var zp=document.getElementById('zp').value;
+  var note=document.getElementById('note').value.trim();
+  var txt=
+"SÉANCE PROTO — Moteur Grimpe — "+date+"\n"+
+"Format : EMOM 14′ (step-up lesté / KB swing) + AMRAP 10′\n"+
+"Score AMRAP : "+b2rounds+" rounds\n"+
+"RPE "+rpe+"/10 · Jambes "+jambes+"/10 · ZP "+zp+"/10"+
+(note?("\nNote : "+note):"");
+  document.getElementById('exportTxt').textContent=txt;
+  document.getElementById('scorePartial').textContent='';
+  show('done');
+}
+function copyExport(){
+  var t=document.getElementById('exportTxt').textContent;
+  if(navigator.clipboard){ navigator.clipboard.writeText(t).then(function(){flashCopy();},function(){fallbackCopy(t);}); }
+  else fallbackCopy(t);
+}
+function fallbackCopy(t){
+  var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();
+  try{document.execCommand('copy');flashCopy();}catch(e){}document.body.removeChild(ta);
+}
+function flashCopy(){ var b=document.getElementById('copyBtn'); b.textContent='COPIÉ ✓'; setTimeout(function(){b.textContent='COPIER';},1400); }
+
+/* ---------- cleanup ---------- */
+function stopAllTimers(){ clearInterval(b1t); clearInterval(b2t); }
+</script>
+</body>
+</html>
