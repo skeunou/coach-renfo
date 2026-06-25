@@ -184,6 +184,7 @@
     </div>
     <div class="card hero" id="heroCard">
       <div class="type" id="heroType">—</div>
+      <div class="sessionid bebas" id="heroId" style="font-size:14px;color:var(--acc);letter-spacing:1px">—</div>
       <h1 class="bebas" id="heroTitle">—</h1>
       <div class="why" id="heroWhy">—</div>
       <div class="specs" id="heroSpecs"></div>
@@ -237,6 +238,7 @@
     <div class="eyebrow" id="shType">—</div>
     <h2 class="bebas" style="font-size:34px;line-height:1;margin:5px 0 4px" id="shTitle">—</h2>
     <div class="sub" id="shDate" style="margin-bottom:14px;color:var(--mut);font-weight:600"></div>
+    <div class="bebas" id="shId" style="font-size:12px;color:var(--acc);letter-spacing:1px;margin-bottom:8px">—</div>
     <div id="shDetail">
       <div class="sub" id="shWhy" style="margin-bottom:16px"></div>
       <div class="specs" id="shSpecs" style="margin-bottom:16px"></div>
@@ -305,7 +307,19 @@ var TYPES={
   renfo:{label:"Renfo",type:"RENFO TRAIL",color:"var(--ink)",why:"ZP-safe. Force athlétique transférée au trail, format WOD guidé."},
   wod:{label:"WOD",type:"WOD",color:"var(--purp)",why:"Conditionnement métabolique adapté au bloc. Optionnel selon la charge."}
 };
-/* ================= EMPLOI DU SPORTIF (BASE STABLE) ================= */
+var EPOCH_START=parse("2026-06-25"), EPOCH_SWITCH=parse("2027-01-01");
+function sessionId(d){
+  if(d<EPOCH_SWITCH){
+    // Avant 01/01/27 : compteur linéaire S1, S2, S3...
+    var days=Math.floor((d-EPOCH_START)/(24*3600*1000)), idx=days+1;
+    return "S"+idx;
+  } else {
+    // À partir de 01/01/27 : S{week}.{session}
+    var wi=weekInfo(d), wd=dowMon(d);
+    var sessionNum = wd; // lun=1, mar=2, mer=3, jeu=4, ven=5, sam=6, dim=7
+    return "S"+wi.wb+"."+sessionNum;
+  }
+}
 // Lun (repos pro) : sortie longue 1-2h solo + 1h EF club
 // Mar (soir) : côte club (pilier)
 // Mer : endurance ou récup flexible
@@ -330,8 +344,8 @@ var MOBI_FOCUS=["hanches & bas du corps","dos & thoracique","global récup"];
 function getByDow(d){var wd=dowMon(d);return wd===1?"lun":(wd===2?"mar":(wd===3?"mer":(wd===4?"jeu":(wd===5?"ven":"weekend"))));}
 
 function gen(d){
-  var wi=weekInfo(d), dow=getByDow(d), ph=wi.phase, b=wi.block;
-  var o={typeKey:"repos",label:"Repos",sub:"",why:"",detail:[],color:"var(--mut)",plan:{}};
+  var wi=weekInfo(d), dow=getByDow(d), ph=wi.phase, b=wi.block, sid=sessionId(d);
+  var o={typeKey:"repos",label:"Repos",sub:"",why:"",detail:[],color:"var(--mut)",plan:{},sid:sid};
   
   if(ph==="recup"){
     // Récup post-course : lundi EF facile club, mar repos, mer EF léger, jeu repos, ven marche
@@ -530,6 +544,7 @@ function renderToday(){
   document.getElementById("blockBadge").textContent=s.block.name;
   var hero=document.getElementById("heroCard"); hero.style.borderLeftColor=s.info.color;
   document.getElementById("heroType").textContent=s.info.type; document.getElementById("heroType").style.color=s.info.color;
+  document.getElementById("heroId").textContent=s.plan.sid;
   document.getElementById("heroTitle").textContent=s.plan.label.toUpperCase();
   document.getElementById("heroWhy").textContent=s.plan.why;
   document.getElementById("heroSpecs").innerHTML=s.specs.map(function(x){return '<div class="spec"><b>'+x[1]+'</b>'+x[0]+'</div>';}).join("");
@@ -580,6 +595,7 @@ function openSheet(k){
   document.getElementById("shType").textContent=s.info.type; document.getElementById("shType").style.color=s.info.color;
   document.getElementById("shTitle").textContent=s.plan.label;
   document.getElementById("shDate").textContent=JOURS[dowMon(s.date)-1]+" "+s.date.getDate()+" "+MOIS[s.date.getMonth()];
+  document.getElementById("shId").textContent=s.plan.sid;
   document.getElementById("shWhy").innerHTML=(s.plan.detail&&s.plan.detail.length)?s.plan.detail.join("<br>"):s.plan.why;
   document.getElementById("shSpecs").innerHTML=s.specs.map(function(x){return '<div class="spec"><b>'+x[1]+'</b>'+x[0]+'</div>';}).join("");
   document.getElementById("shForm").style.display="none";
