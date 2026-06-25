@@ -308,16 +308,38 @@ var TYPES={
   wod:{label:"WOD",type:"WOD",color:"var(--purp)",why:"Conditionnement métabolique adapté au bloc. Optionnel selon la charge."}
 };
 var EPOCH_START=parse("2026-06-25"), EPOCH_SWITCH=parse("2027-01-01");
+// classify() : type de séance SANS construire le contenu (léger, pas de récursion).
+// DOIT rester synchro avec la logique de gen().
+function classify(d){
+  var wi=weekInfo(d), dow=getByDow(d), ph=wi.phase;
+  if(ph==="recup"){
+    if(dow==="lun")return "longue"; if(dow==="mar")return "mobilite";
+    if(dow==="mer")return "fond"; if(dow==="ven")return "fond"; return "repos";
+  }
+  if(ph==="base"||ph==="force"||ph==="build"){
+    var renfoDays=(ph==="base")?["ven"]:["mer","ven"];
+    if(renfoDays.indexOf(dow)!==-1)return "renfo";
+    if(dow==="lun")return "longue"; if(dow==="mar")return "cotes";
+    if(dow==="mer"||dow==="jeu"||dow==="ven")return "fond"; return "repos";
+  }
+  if(ph==="affutage"){
+    if(dow==="lun")return "longue"; if(dow==="mar")return "cotes";
+    if(dow==="mer"||dow==="jeu"||dow==="ven")return "fond"; return "repos";
+  }
+  return "repos";
+}
+function isRun(t){return t==="fond"||t==="cotes"||t==="longue";}
 function sessionId(d){
+  if(!isRun(classify(d))) return ""; // seulement les runs sont numérotés
   if(d<EPOCH_SWITCH){
-    // Avant 01/01/27 : compteur linéaire S1, S2, S3...
-    var days=Math.floor((d-EPOCH_START)/(24*3600*1000)), idx=days+1;
-    return "S"+idx;
+    if(d<EPOCH_START) return "";
+    var n=0, cur=new Date(EPOCH_START.getFullYear(),EPOCH_START.getMonth(),EPOCH_START.getDate());
+    while(cur<=d){ if(isRun(classify(cur)))n++; cur.setDate(cur.getDate()+1); }
+    return "S"+n;
   } else {
-    // À partir de 01/01/27 : S{week}.{session}
-    var wi=weekInfo(d), wd=dowMon(d);
-    var sessionNum = wd; // lun=1, mar=2, mer=3, jeu=4, ven=5, sam=6, dim=7
-    return "S"+wi.wb+"."+sessionNum;
+    var wb=weekInfo(d).wb, mon=mondayOf(d), n=0, c2=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate());
+    while(c2<=d){ if(isRun(classify(c2)))n++; c2.setDate(c2.getDate()+1); }
+    return "S"+wb+"."+n;
   }
 }
 // Lun (repos pro) : sortie longue 1-2h solo + 1h EF club
@@ -349,11 +371,11 @@ function gen(d){
   
   if(ph==="recup"){
     // Récup post-course : lundi EF facile club, mar repos, mer EF léger, jeu repos, ven marche
-    if(dow==="lun"){ o.typeKey="longue"; o.label="EF Club facile"; o.sub="~1h · Z2 · club"; o.why="Récupération active en groupe."; o.detail=["1h EF avec le club (lundi midi fixe).","Allure vraiment facile, nez qui respire.","Social et mobilisation sans charge."]; o.color="var(--grn)"; }
+    if(dow==="lun"){ o.typeKey="longue"; o.label="EF Club facile"; o.short="EF Club 1h"; o.sub="~1h · Z2 · club"; o.why="Récupération active en groupe."; o.detail=["1h EF avec le club (lundi midi fixe).","Allure vraiment facile, nez qui respire.","Social et mobilisation sans charge."]; o.color="var(--grn)"; o.plan={durMin:60}; }
     else if(dow==="mar"){ o.typeKey="mobilite"; o.mobiIdx=(wi.wb-1)%3; var mf=MOBI_FOCUS[o.mobiIdx]; o.label="Mobilité guidée"; o.sub="~15′ · "+mf; o.why="Récup active : mobilité guidée."; o.detail=["Routine guidée ~15′ · focus "+mf+".","ZP-safe (pas d'adduction agressive).","Parfait en récup post-course."]; o.color="var(--blue)"; o.plan={mobiIdx:o.mobiIdx}; }
-    else if(dow==="mer"){ o.typeKey="fond"; o.label="EF léger doux"; o.sub="30–40′ · Z2"; o.why="Mobilisation douce."; o.detail=["30–40′ EF très facile, solo ou avec pote.","Réveil des jambes sans fatigue."]; o.color="var(--grn)"; }
+    else if(dow==="mer"){ o.typeKey="fond"; o.label="EF léger doux"; o.short="EF 35' souple"; o.sub="30–40′ · Z2"; o.why="Mobilisation douce."; o.detail=["30–40′ EF très facile, solo ou avec pote.","Réveil des jambes sans fatigue."]; o.color="var(--grn)"; o.plan={durMin:35}; }
     else if(dow==="jeu"){ o.typeKey="repos"; o.label="Repos"; o.sub="récup"; o.why="Jour allégé."; }
-    else if(dow==="ven"){ o.typeKey="fond"; o.label="Marche facile"; o.sub="30′ · Z1"; o.why="Mobilisation extrêmement douce."; o.detail=["30′ marche ou EF ultra-léger.","Pas de charge."]; o.color="var(--grn)"; }
+    else if(dow==="ven"){ o.typeKey="fond"; o.label="Marche facile"; o.short="EF souple 30'"; o.sub="30′ · Z1"; o.why="Mobilisation extrêmement douce."; o.detail=["30′ marche ou EF ultra-léger.","Pas de charge."]; o.color="var(--grn)"; o.plan={durMin:30}; }
     else { o.typeKey="repos"; }
   }
   else if(ph==="base"||ph==="force"||ph==="build"){
@@ -363,7 +385,7 @@ function gen(d){
       // Longue : ancre de la semaine
       var durBase=isBuild?110:75, durAct=round5(durBase*wi.m);
       var var_formats=["vallonné · nutrition","+ descente technique","esprit UT4M"], vfmt=var_formats[(wi.wb-1)%3];
-      o.typeKey="longue"; o.label="Sortie longue"; o.sub=durStr(durAct)+" · "+vfmt;
+      o.typeKey="longue"; o.label="Sortie longue"; o.short="Longue "+durStr(durAct)+" Z2"; o.sub=durStr(durAct)+" · "+vfmt;
       o.why="Durabilité : l'ancre de la semaine.";
       o.detail=["Durée : "+durStr(durAct)+" en Z2 (FC <"+FCZ2HI+").","Focus : "+vfmt.toLowerCase()+".","~30-45min solo vallonné + 1h EF club fixe (lundi midi).","Allure plat indicative "+Z2PACE+"/km — en côte, FC-piloted."];
       o.color="var(--grn)"; o.plan={durMin:durAct};
@@ -371,30 +393,30 @@ function gen(d){
     else if(dow==="mar"){
       // Côte : pilier du bloc
       var formats=[
-        {n:"Côtes Z4",desc:"6×2′ montée Z4 · récup descente",reps:6},
-        {n:"VMA ascensionnelle",desc:"8×45″ raide @ Z5 · récup marchée",reps:8},
-        {n:"Côtes longues",desc:"4×4′ Z3–4 montée régulière · récup descente",reps:4}
+        {n:"Côtes Z4",desc:"6×2′ montée Z4 · récup descente",reps:6,tag:"2′ Z4"},
+        {n:"VMA ascensionnelle",desc:"8×45″ raide @ Z5 · récup marchée",reps:8,tag:"45″ Z5"},
+        {n:"Côtes longues",desc:"4×4′ Z3–4 montée régulière · récup descente",reps:4,tag:"4′ Z3"}
       ], fmt=formats[(wi.wb-1)%3], reps=Math.round(fmt.reps*wi.m);
-      o.typeKey="cotes"; o.label="Côte club · "+fmt.n; o.sub=reps+"×"+fmt.desc.split("×")[1].split("·")[0].trim();
+      o.typeKey="cotes"; o.label="Côte club · "+fmt.n; o.short="Côtes "+reps+"×"+fmt.tag; o.sub=reps+"×"+fmt.desc.split("×")[1].split("·")[0].trim();
       o.why="VAM & économie de grimpe — pilier de l'année.";
       o.detail=["Échauff : 15′ EF progressif.","Corps : "+reps+"× "+fmt.desc.toLowerCase()+".","Retour : 10′ EF facile.","Gainée, foulée économe. Mardi soir = toujours club."];
       o.color="var(--orange)"; o.plan={reps:reps,format:fmt.n};
     }
     else if(dow==="mer"){
       var dur=round5(45*wi.m), var_focus=["EF continu fluide","+ 6 lignes droites Z3 (30″)","progressif : dernier tiers Z3"];
-      o.typeKey="fond"; o.label="Endurance"; o.sub=dur+"′ · Z2 · flexible";
+      o.typeKey="fond"; o.label="Endurance"; o.short="EF "+dur+"' Z2"; o.sub=dur+"′ · Z2 · flexible";
       o.why="Volume aérobie, flexible selon la fatigue.";
       o.detail=["Durée : "+dur+"′ en Z2 ("+Z2PACE+"/km).","Variante : "+var_focus[(wi.wb-1)%3].toLowerCase()+".","Peut être déplacée si la journée a un client lourd."];
       o.color="var(--grn)"; o.plan={durMin:dur};
     }
     else if(dow==="jeu"){
-      o.typeKey="fond"; o.label="EF relance"; o.sub="~1h · Z2";
+      o.typeKey="fond"; o.label="EF relance"; o.short="EF relance 1h"; o.sub="~1h · Z2";
       o.why="Relance sur jambes fatiguées (mar côte + mer).";
       o.detail=["~1h EF conversation, nez qui respire.","Jeudi 12-14h = créneau fixe avec toi.","Pas de charge, récup active."];
       o.color="var(--grn)"; o.plan={durMin:60};
     }
     else if(dow==="ven"){
-      o.typeKey="fond"; o.label="EF avec pote"; o.sub="~50′ · Z2";
+      o.typeKey="fond"; o.label="EF avec pote"; o.short="EF pote 50'"; o.sub="~50′ · Z2";
       o.why="Récup active sociale.";
       o.detail=["~50′ EF facile avec footing pote.","Allure légère, social."];
       o.color="var(--grn)"; o.plan={durMin:50};
@@ -417,16 +439,25 @@ function gen(d){
   }
   else if(ph==="affutage"){
     // Affûtage : très allègement progressif
-    if(dow==="lun"){ o.typeKey="longue"; o.label="Sortie souple"; o.sub="~1h EF · affûtage";
+    if(dow==="lun"){ o.typeKey="longue"; o.label="Sortie souple"; o.short="EF souple 1h"; o.sub="~1h EF · affûtage";
       o.why="Affûtage : allègement."; o.detail=["~1h EF très facile avec le club.","Très léger, prés à l'effort."]; o.color="var(--grn)"; o.plan={durMin:60}; }
-    else if(dow==="mar"){ o.typeKey="cotes"; o.label="Accent léger"; o.sub="4×2′ Z3 · affûtage";
-      o.why="Affûtage : tonalité, pas fatigue."; o.detail=["4×2′ en montée modérée Z3 (pas max).","Juste une tonalité neuro, récup complète."]; o.color="var(--orange)"; o.plan={reps:4}; }
-    else if(dow==="mer"||dow==="jeu"||dow==="ven"){ o.typeKey="fond"; o.label="EF léger"; o.sub="30–45′ · Z2";
+    else if(dow==="mar"){ o.typeKey="cotes"; o.label="Accent léger"; o.short="Côtes 4×2′ Z3"; o.sub="4×2′ Z3 · affûtage";
+      o.why="Affûtage : tonalité, pas fatigue."; o.detail=["4×2′ en montée modérée Z3 (pas max).","Juste une tonalité neuro, récup complète."]; o.color="var(--orange)"; o.plan={reps:4,format:"Accent léger"}; }
+    else if(dow==="mer"||dow==="jeu"||dow==="ven"){ o.typeKey="fond"; o.label="EF léger"; o.short="EF léger 40'"; o.sub="30–45′ · Z2";
       o.why="Affûtage : mobilisation très facile."; o.detail=["30–45′ ultra-facile.","Nez qui respire, pas de fatigue."]; o.color="var(--grn)"; o.plan={durMin:40}; }
     else { o.typeKey="repos"; o.label="Repos"; o.sub="repos"; o.plan={}; }
   }
   
-  o.specs=[["Bloc",b.name],["Semaine","S"+wi.wb]];
+  // Specs utiles selon le type (plus de doublon Bloc/Semaine — déjà dans le badge)
+  var t=o.typeKey;
+  if(t==="fond"||t==="longue"){ o.specs=[["Durée",o.plan.durMin?durStr(o.plan.durMin):(o.sub.split(" · ")[0])],["Zone","Z2"],["FC",t==="longue"?("<"+FCZ2HI):FCZ2]]; }
+  else if(t==="cotes"){ o.specs=[["Format",o.plan.format||"Côtes"],["Séries",(o.plan.reps||"?")+"×"],["FC",">"+FCZ4]]; }
+  else if(t==="renfo"){ o.specs=[["Format","EMOM+AMRAP"],["Durée","~30′"],["ZP","safe"]]; }
+  else if(t==="mobilite"){ o.specs=[["Durée","~15′"],["Focus",MOBI_FOCUS[(o.plan&&o.plan.mobiIdx)||0]]]; }
+  else { o.specs=[]; }
+  // Titre façon Strava : "S1 — EF 30' Z2" (runs) · sinon le label simple
+  o.displayTitle = (o.sid && o.short) ? (o.sid+" — "+o.short) : o.label;
+  o.stravaName  = (o.sid && o.short) ? (o.sid+" - "+o.short) : "";
   if(wi.deload) o.detail.push("⚠️ SEMAINE ALLÈGEMENT — tu dois te sentir soulagé, pas déçu.");
   return o;
 }
@@ -543,9 +574,9 @@ function renderToday(){
   document.getElementById("todayDate").textContent=JOURS[dowMon(today)-1]+" "+today.getDate()+" "+MOIS[today.getMonth()];
   document.getElementById("blockBadge").textContent=s.block.name;
   var hero=document.getElementById("heroCard"); hero.style.borderLeftColor=s.info.color;
-  document.getElementById("heroType").textContent=s.info.type; document.getElementById("heroType").style.color=s.info.color;
-  document.getElementById("heroId").textContent=s.plan.sid;
-  document.getElementById("heroTitle").textContent=s.plan.label.toUpperCase();
+  document.getElementById("heroType").style.display="none";
+  document.getElementById("heroId").style.display="none";
+  document.getElementById("heroTitle").textContent=s.plan.displayTitle;
   document.getElementById("heroWhy").textContent=s.plan.why;
   document.getElementById("heroSpecs").innerHTML=s.specs.map(function(x){return '<div class="spec"><b>'+x[1]+'</b>'+x[0]+'</div>';}).join("");
   var done=entryFor(s.dateKey);
@@ -580,7 +611,7 @@ function renderWeekView(){
     for(var i=0;i<7;i++){var d=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+i);var s=sessionFor(d);var done=entryFor(iso(d));var dd=s.plan;
       out+='<div class="wkrow'+(iso(d)===iso(today)?' wktoday':'')+'" onclick="openSheet(\''+iso(d)+'\')">'
         +'<div class="wkdn bebas">'+JOURS[i]+' '+d.getDate()+'</div>'
-        +'<div class="wkdesc"><span class="pip" style="background:'+s.info.color+'"></span><div class="wtxt"><div class="wm">'+dd.label+'</div>'+(dd.sub?'<div class="wsub">'+dd.sub+'</div>':'')+'</div></div>'
+        +'<div class="wkdesc"><span class="pip" style="background:'+s.info.color+'"></span><div class="wtxt"><div class="wm">'+(dd.sid?'<span style="color:var(--blue)">'+dd.sid+'</span> · ':'')+dd.label+'</div>'+(dd.sub?'<div class="wsub">'+dd.sub+'</div>':'')+'</div></div>'
         +'<div class="wkchk">'+(done?'✓':'')+'</div></div>';}
     out+='</div>';
   }
@@ -593,9 +624,9 @@ function openSheet(k){
   curKey=k; editing=entryFor(k);
   var s=sessionFor(parse(k));
   document.getElementById("shType").textContent=s.info.type; document.getElementById("shType").style.color=s.info.color;
-  document.getElementById("shTitle").textContent=s.plan.label;
+  document.getElementById("shTitle").textContent=s.plan.displayTitle;
   document.getElementById("shDate").textContent=JOURS[dowMon(s.date)-1]+" "+s.date.getDate()+" "+MOIS[s.date.getMonth()];
-  document.getElementById("shId").textContent=s.plan.sid;
+  document.getElementById("shId").style.display="none";
   document.getElementById("shWhy").innerHTML=(s.plan.detail&&s.plan.detail.length)?s.plan.detail.join("<br>"):s.plan.why;
   document.getElementById("shSpecs").innerHTML=s.specs.map(function(x){return '<div class="spec"><b>'+x[1]+'</b>'+x[0]+'</div>';}).join("");
   document.getElementById("shForm").style.display="none";
