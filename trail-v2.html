@@ -312,14 +312,73 @@ var WEEK={
   build:{1:"renfo",2:"cotes",3:"fond",4:"wod",5:"renfo",6:"repos",7:"longue"},
   affutage:{1:"renfo",2:"cotes",3:"repos",4:"fond",5:"mobilite",6:"repos",7:"repos"}
 };
-function specsFor(t,phase){var s=[];
-  if(t==="fond")s=[["Durée","45–70′"],["Zone","Z2"],["Allure",Z2PACE],["FC",FCZ2]];
-  if(t==="cotes")s=[["Format","6–10 × côte"],["Zone","Z4–5"],["FC",">"+FCZ4]];
-  if(t==="longue")s=[["Durée",phase==="build"?"2–3 h":"1h30–2h"],["Zone","Z2"],["Allure",Z2PACE],["FC","<"+FCZ2HI]];
-  if(t==="renfo")s=[["Format","EMOM + AMRAP"],["Durée","~30′"],["ZP","safe"]];
-  if(t==="wod")s=[["Durée","~12′"],["RPE","7–8"],["ZP","filtré"]];
-  if(t==="mobilite")s=[["Durée","~15′"],["Focus","hanches · dos"]];
-  return s;
+/* ================= MOTEUR PROGRESSIF ================= */
+function round5(x){return Math.round(x/5)*5;}
+function mondayOf(d){var x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-(dowMon(x)-1));return x;}
+function durStr(min){return min>=60?(Math.floor(min/60)+"h"+(min%60?String(min%60).padStart(2,"0"):"")):(min+"′");}
+function weekInfo(d){
+  var b=blockFor(d), loading=(b.phase==="base"||b.phase==="force"||b.phase==="build");
+  var ms=mondayOf(parse(b.start)), me=mondayOf(parse(b.end)), md=mondayOf(d);
+  var wb=Math.floor((md-ms)/(7*86400000))+1;
+  var tot=Math.floor((me-ms)/(7*86400000))+1;
+  var p=(wb-1)%4, deload=loading&&p===3, m;
+  if(b.phase==="recup") m=0.70;
+  else if(b.phase==="affutage") m=Math.max(0.45,0.78-0.12*(wb-1));
+  else m=deload?0.80:[0.92,1.0,1.10][p];
+  return {block:b,phase:b.phase,wb:wb,tot:tot,deload:deload,m:m,loading:loading};
+}
+var MOBI_FOCUS=["hanches & bas du corps","dos & thoracique","global récup"];
+function gen(d){
+  var wi=weekInfo(d), ph=wi.phase, tk=WEEK[ph][dowMon(d)], info=TYPES[tk];
+  var o={typeKey:tk,color:info.color,type:info.type,label:info.label,why:info.why,sub:"",detail:[],specs:[],mobiIdx:0,renfoVar:"ADAPT"};
+  if(tk==="repos"){
+    o.sub="récup — ça fait partie du plan";
+    o.detail=["Vraie coupure : sommeil, hydratation, jambes en l'air si besoin."];
+    o.specs=[["Bloc",wi.block.name]];
+  } else if(tk==="mobilite"){
+    o.mobiIdx=((wi.wb-1)+(dowMon(d)>=4?1:0))%3; var f=MOBI_FOCUS[o.mobiIdx];
+    o.sub="~15′ · "+f; o.why="Réveil articulaire guidé — aujourd'hui : "+f+".";
+    o.detail=["Routine guidée ~15′ · focus "+f+".","ZP-safe (pas d'adduction agressive)."];
+    o.specs=[["Durée","~15′"],["Focus",f]];
+  } else if(tk==="fond"){
+    var fb={recup:40,base:50,force:55,build:55,affutage:40}[ph]||50, dur=round5(fb*wi.m);
+    var V=["Z2 continu, fluide","Z2 + 6 lignes droites (30″) en fin","progressif : dernier tiers en Z3"], v=V[(wi.wb-1)%3];
+    o.sub=dur+"′ · Z2 · "+Z2PACE+"/km · FC "+FCZ2;
+    o.why="Aérobie facile — le moteur de fond.";
+    o.detail=["Cible : "+dur+"′ en Z2 ("+Z2PACE+"/km · FC "+FCZ2+").","Variante : "+v+".",(wi.deload?"Semaine d'allègement — reste vraiment facile.":"")].filter(Boolean);
+    o.specs=[["Durée",dur+"′"],["Zone","Z2"],["FC",FCZ2]];
+  } else if(tk==="cotes"){
+    var F=[
+      {n:"Côtes Z4",mk:function(r){return r+" × 2′ en montée Z4, récup descente en trot";},base:6},
+      {n:"VMA ascensionnelle",mk:function(r){return r+" × 45″ raide @ Z5, récup descente marchée";},base:8},
+      {n:"Côtes longues",mk:function(r){return r+" × 4′ Z3–4 montée régulière, récup descente";},base:4}
+    ], f=F[(wi.wb-1)%3], reps=Math.max(f.base,Math.round(f.base*wi.m));
+    o.sub=f.n+" · "+f.mk(reps); o.why="Ton limiteur : l'économie de grimpe (VAM).";
+    o.detail=["Échauffement : 15′ Z2 progressif.","Corps : "+f.mk(reps)+".","Retour : 10′ Z2 facile.","Gainée, foulée économe — c'est la VAM qu'on travaille."];
+    o.specs=[["Format",f.n],["Séries",reps+"×"],["FC",">"+FCZ4]];
+  } else if(tk==="longue"){
+    var lb={base:80,force:95,build:140,affutage:70,recup:60}[ph]||90, dur=round5(lb*wi.m);
+    var Fo=[
+      {s:"vallonné · nutrition",f:"Z2 vallonné · teste 1 prise nutrition / 30′"},
+      {s:"+ descente technique",f:"Z2 · 20′ de descente technique en fin (durabilité excentrique)"},
+      {s:"esprit UT4M",f:"Z2 · soutenu dans les bosses, gestion d'allure (esprit UT4M)"}
+    ], fo=Fo[(wi.wb-1)%3];
+    o.sub=durStr(dur)+" · Z2 · "+fo.s; o.why="Durabilité : jambes qui encaissent, nutrition, gestion.";
+    o.detail=["Durée : "+durStr(dur)+" en Z2 (FC < "+FCZ2HI+").","Focus : "+fo.f+".","Allure plat indicative "+Z2PACE+"/km — en côte, pilote à la FC."];
+    o.specs=[["Durée",durStr(dur)],["Zone","Z2"],["FC","<"+FCZ2HI]];
+  } else if(tk==="renfo"){
+    o.renfoVar=(ph==="base"||ph==="recup")?"ADAPT":"FORCE";
+    o.label=o.renfoVar==="FORCE"?"Renfo force":"Renfo";
+    o.sub="EMOM + AMRAP · ~30′ · charge sem "+wi.wb+(wi.deload?" (allégée)":"")+" · ZP-safe";
+    o.why=o.renfoVar==="FORCE"?"Force structurelle, charges lourdes, ZP-safe.":"Adaptation : volume modéré, technique, ZP-safe.";
+    o.detail=["Format guidé : échauff + EMOM + AMRAP (~30′).","Charge semaine "+wi.wb+"/"+wi.tot+(wi.deload?" — allégée (deload)":" — monte d'un cran si la dernière était facile")+".","Mouvements-clés stables sur le bloc, accessoires variables."];
+    o.specs=[["Format","EMOM+AMRAP"],["Charge","S"+wi.wb],["ZP","safe"]];
+  } else if(tk==="wod"){
+    o.sub="~12′ · RPE 7–8 · optionnel"; o.why="Conditionnement court, optionnel selon la charge.";
+    o.detail=["Format court (~12′), RPE 7–8.","Optionnel : saute-le si la semaine est déjà chargée."];
+    o.specs=[["Durée","~12′"],["RPE","7–8"],["ZP","filtré"]];
+  }
+  return o;
 }
 
 /* ================= WOD SUPPLÉMENTAIRE BANQUE ================= */
@@ -348,39 +407,64 @@ function randWod(){
 }
 
 /* ================= CONTENU DES SÉANCES (player) ================= */
-var MOBI=[
+var MOBI_A=[
   {name:"Respiration 4-6",cue:"Assis ou allongé. Inspire 4 s, souffle 6 s. Relâche les épaules.",hold:40},
-  {name:"Chat-vache",cue:"À quatre pattes. Arrondis puis creuse le dos, lentement, sur le souffle.",reps:"8 lents"},
-  {name:"Rotation thoracique",cue:"Quatre pattes, main derrière la tête, ouvre le coude vers le plafond.",reps:"8 / côté"},
   {name:"Fente basse — fléchisseurs",cue:"Genou au sol, bascule le bassin vers l'avant. Ouvre l'avant de la hanche.",hold:35,side:true},
   {name:"90/90 hanches",cue:"Assis, jambes en équerre. Bascule d'un côté à l'autre, contrôlé.",reps:"8 transitions"},
   {name:"Figure-4 fessiers",cue:"Sur le dos, cheville sur le genou opposé, ramène vers toi sans forcer.",hold:35,side:true},
   {name:"Cheville genou-mur",cue:"Pied à ~10 cm du mur, genou au mur sans décoller le talon.",reps:"10 / côté"},
   {name:"Pont fessier",cue:"Sur le dos, pieds au sol. Monte le bassin en serrant les fessiers, redescends lent.",reps:"12 lents"},
   {name:"Gainage iso doux",cue:"Planche sur genoux ou pieds. Bassin neutre, gainage léger.",hold:30},
-  {name:"Retour au calme 4-6",cue:"Allongé. Souffle long, 6 s. Laisse les jambes lourdes.",hold:60}
+  {name:"Retour au calme 4-6",cue:"Allongé. Souffle long, 6 s. Laisse les jambes lourdes.",hold:50}
 ];
+var MOBI_B=[
+  {name:"Respiration 4-6",cue:"Allongé. Inspire 4 s, souffle 6 s.",hold:40},
+  {name:"Chat-vache",cue:"À quatre pattes. Arrondis puis creuse le dos, lentement, sur le souffle.",reps:"8 lents"},
+  {name:"Rotation thoracique",cue:"Quatre pattes, main derrière la tête, ouvre le coude vers le plafond.",reps:"8 / côté"},
+  {name:"Sphinx",cue:"Sur le ventre, appuyé sur les avant-bras. Ouvre le haut du dos, sans forcer le bas.",hold:30},
+  {name:"Posture de l'enfant bras tendus",cue:"Assis sur les talons, bras loin devant. Relâche les épaules.",hold:40},
+  {name:"Dead bug",cue:"Sur le dos, bras et jambe opposés tendus lentement, bas du dos collé au sol.",reps:"8 / côté"},
+  {name:"Gainage iso doux",cue:"Planche genoux ou pieds, bassin neutre.",hold:30},
+  {name:"Retour 4-6",cue:"Souffle long, 6 s.",hold:50}
+];
+var MOBI_C=[
+  {name:"Respiration 4-6",cue:"Allongé, jambes lourdes.",hold:40},
+  {name:"Balanciers de jambe",cue:"Debout, un appui. Balance la jambe avant/arrière, contrôlé.",reps:"10 / côté"},
+  {name:"Berceau de hanche",cue:"Debout, ramène genou + cheville vers la poitrine, doux.",hold:25,side:true},
+  {name:"Étirement ischios doux",cue:"Talon au sol jambe tendue, penche le buste sans arrondir, sans forcer.",hold:30,side:true},
+  {name:"Mollets au mur",cue:"Mains au mur, jambe arrière tendue, talon au sol.",hold:30,side:true},
+  {name:"Pont fessier",cue:"Monte le bassin en serrant les fessiers, lent.",reps:"12 lents"},
+  {name:"Gainage iso doux",cue:"Planche genoux, bassin neutre.",hold:25},
+  {name:"Retour 4-6",cue:"Souffle long, relâche tout.",hold:50}
+];
+var MOBIS=[MOBI_A,MOBI_B,MOBI_C];
 var RENFO_WARM=[
   {name:"Bascules de hanche",cue:"Good morning à vide ou élastique. Réveille la charnière sans la charger.",reps:"10 lentes"},
   {name:"Fentes marchées",cue:"Amplitude contrôlée, genou stable. Pas de rebond.",reps:"8 / jambe"},
   {name:"KB swing technique",cue:"KB léger. Tu cherches le timing hanche.",reps:"15 légers"},
   {name:"Wall walk / planche",cue:"Gainage épaules. Prêt à grimper.",reps:"3 ou 30 s"}
 ];
-function content(t){
-  if(t==="mobilite"){ return MOBI.map(function(s){return {kind:"flow",name:s.name,cue:s.cue,hold:s.hold,reps:s.reps,side:s.side};}); }
+var RENFO_ADAPT={
+  emom:{kind:"emom",minutes:14,label:"Moteur de grimpe",moves:[
+    {name:"STEP-UP LESTÉ",reps:"12 · 6/jambe",cue:"Box mi-hauteur · montée explosive, descente freinée 2 s."},
+    {name:"KB SWING AMÉRICAIN",reps:"15",cue:"Propulsion hanche, bras passifs, gainage."}]},
+  amrap:{kind:"amrap",sec:600,moves:[["A","Farmer carry ~20 m","2× lourd"],["B","8 Push press","jambes donnent l'impulsion"],["C","8 DB snatch","4/bras, explosif"],["D","10 TRX row","omoplates serrées"]]}
+};
+var RENFO_FORCE={
+  emom:{kind:"emom",minutes:16,label:"Force structurelle",moves:[
+    {name:"STEP-UP LESTÉ LOURD",reps:"8 · 4/jambe",cue:"Charge lourde, descente freinée 3 s."},
+    {name:"DÉVELOPPÉ / PUSH PRESS",reps:"6 lourd",cue:"Explosif, gainage serré."}]},
+  amrap:{kind:"amrap",sec:480,moves:[["A","Farmer carry lourd ~20 m","le plus lourd tenable"],["B","6 Tractions (lestées si possible)","amplitude complète"],["C","8 Rowing haltère","4/bras, lourd"]]}
+};
+function content(k){
+  var g=gen(parse(k)), t=g.typeKey;
+  if(t==="mobilite"){ return MOBIS[g.mobiIdx].map(function(s){return {kind:"flow",name:s.name,cue:s.cue,hold:s.hold,reps:s.reps,side:s.side};}); }
   if(t==="renfo"){
+    var src=g.renfoVar==="FORCE"?RENFO_FORCE:RENFO_ADAPT;
     var segs=RENFO_WARM.map(function(s){return {kind:"flow",name:s.name,cue:s.cue,reps:s.reps};});
-    segs.push({kind:"emom",minutes:14,label:"Moteur de grimpe",moves:[
-      {name:"STEP-UP LESTÉ",reps:"12 · 6/jambe",cue:"Box mi-hauteur · montée explosive, descente freinée 2 s."},
-      {name:"KB SWING AMÉRICAIN",reps:"15",cue:"Propulsion hanche, bras passifs, gainage."}]});
-    segs.push({kind:"amrap",sec:600,
-      moves:[["A","Farmer carry ~20 m","2× lourd"],["B","8 Push press","jambes donnent l'impulsion"],["C","8 DB snatch","4/bras, explosif"],["D","10 TRX row","omoplates serrées"]]});
-    return segs;
+    segs.push(src.emom); segs.push(src.amrap); return segs;
   }
-  if(t==="wod"){
-    return [{kind:"amrap",sec:720,
-      moves:[["","12 KB swing américain","ZP-safe"],["","8 Push press",""],["","10 Box step-up lesté",""],["","8 Tractions",""]]}];
-  }
+  if(t==="wod"){ return [{kind:"amrap",sec:720,moves:[["","12 KB swing américain","ZP-safe"],["","8 Push press",""],["","10 Box step-up lesté",""],["","8 Tractions",""]]}]; }
   return null;
 }
 function hasPlayer(t){ return t==="mobilite"||t==="renfo"||t==="wod"; }
@@ -392,7 +476,7 @@ function dowMon(d){var g=d.getDay();return g===0?7:g;}
 var MOIS=["janv.","févr.","mars","avr.","mai","juin","juil.","août","sept.","oct.","nov.","déc."];
 var JOURS=["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
 function blockFor(d){var k=iso(d);for(var i=0;i<BLOCKS.length;i++){if(k>=BLOCKS[i].start&&k<=BLOCKS[i].end)return BLOCKS[i];}return k<BLOCKS[0].start?BLOCKS[0]:BLOCKS[BLOCKS.length-1];}
-function sessionFor(d){var b=blockFor(d),tk=WEEK[b.phase][dowMon(d)];return {dateKey:iso(d),date:d,block:b,typeKey:tk,info:TYPES[tk],specs:specsFor(tk,b.phase)};}
+function sessionFor(d){var b=blockFor(d),g=gen(d);return {dateKey:iso(d),date:d,block:b,typeKey:g.typeKey,info:TYPES[g.typeKey],plan:g,specs:g.specs};}
 
 /* ================= STORAGE (seam synchro) ================= */
 var LOG_KEY="lvtrail:v2:log";
@@ -409,8 +493,8 @@ function renderToday(){
   document.getElementById("blockBadge").textContent=s.block.name;
   var hero=document.getElementById("heroCard"); hero.style.borderLeftColor=s.info.color;
   document.getElementById("heroType").textContent=s.info.type; document.getElementById("heroType").style.color=s.info.color;
-  document.getElementById("heroTitle").textContent=s.info.label.toUpperCase();
-  document.getElementById("heroWhy").textContent=s.info.why;
+  document.getElementById("heroTitle").textContent=s.plan.label.toUpperCase();
+  document.getElementById("heroWhy").textContent=s.plan.why;
   document.getElementById("heroSpecs").innerHTML=s.specs.map(function(x){return '<div class="spec"><b>'+x[1]+'</b>'+x[0]+'</div>';}).join("");
   var done=entryFor(s.dateKey);
   var a;
@@ -431,16 +515,6 @@ function renderWeek(){
       +'<div class="dow">'+JOURS[i]+'</div><div class="dnum">'+d.getDate()+'</div><div class="pip" style="background:'+s.info.color+'"></div></div>';}
   document.getElementById("weekStrip").innerHTML=html;
 }
-function dayDesc(t,phase){
-  if(t==='repos')return{m:'Repos',s:'récup — ça fait partie du plan'};
-  if(t==='mobilite')return{m:'Mobilité',s:'~15′ · hanches, dos, chaîne post.'};
-  if(t==='fond')return{m:'Sortie fond',s:'45–70′ · Z2 · '+Z2PACE+'/km · FC '+FCZ2};
-  if(t==='cotes')return{m:'Côtes / VAM',s:'6–10 × côte · Z4–5 · FC > '+FCZ4};
-  if(t==='longue')return{m:'Sortie longue',s:(phase==='build'?'2–3 h':'1h30–2h')+' · Z2 · '+Z2PACE+'/km · FC < '+FCZ2HI};
-  if(t==='renfo')return{m:'Renfo',s:'EMOM + AMRAP · ~30′ · ZP-safe'};
-  if(t==='wod')return{m:'WOD',s:'~12′ · RPE 7–8 · optionnel'};
-  return{m:TYPES[t]?TYPES[t].label:t,s:''};
-}
 function renderWeekView(){
   var out="";
   for(var w=0;w<2;w++){
@@ -451,10 +525,10 @@ function renderWeekView(){
     var range=mon.getDate()+(mon.getMonth()!==sun.getMonth()?' '+MOIS[mon.getMonth()]:'')+'–'+sun.getDate()+' '+MOIS[sun.getMonth()];
     out+='<div class="wkhead"><div class="wktitle bebas">'+(w===0?'Cette semaine':'Semaine prochaine')+'</div><div class="wkmeta">'+range+' · '+blk.name+'</div></div>';
     out+='<div class="card" style="padding:0;margin-bottom:18px;overflow:hidden">';
-    for(var i=0;i<7;i++){var d=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+i);var s=sessionFor(d);var done=entryFor(iso(d));var dd=dayDesc(s.typeKey,blk.phase);
+    for(var i=0;i<7;i++){var d=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+i);var s=sessionFor(d);var done=entryFor(iso(d));var dd=s.plan;
       out+='<div class="wkrow'+(iso(d)===iso(today)?' wktoday':'')+'" onclick="openSheet(\''+iso(d)+'\')">'
         +'<div class="wkdn bebas">'+JOURS[i]+' '+d.getDate()+'</div>'
-        +'<div class="wkdesc"><span class="pip" style="background:'+s.info.color+'"></span><div class="wtxt"><div class="wm">'+dd.m+'</div>'+(dd.s?'<div class="wsub">'+dd.s+'</div>':'')+'</div></div>'
+        +'<div class="wkdesc"><span class="pip" style="background:'+s.info.color+'"></span><div class="wtxt"><div class="wm">'+dd.label+'</div>'+(dd.sub?'<div class="wsub">'+dd.sub+'</div>':'')+'</div></div>'
         +'<div class="wkchk">'+(done?'✓':'')+'</div></div>';}
     out+='</div>';
   }
@@ -467,9 +541,9 @@ function openSheet(k){
   curKey=k; editing=entryFor(k);
   var s=sessionFor(parse(k));
   document.getElementById("shType").textContent=s.info.type; document.getElementById("shType").style.color=s.info.color;
-  document.getElementById("shTitle").textContent=s.info.label;
+  document.getElementById("shTitle").textContent=s.plan.label;
   document.getElementById("shDate").textContent=JOURS[dowMon(s.date)-1]+" "+s.date.getDate()+" "+MOIS[s.date.getMonth()];
-  document.getElementById("shWhy").textContent=s.info.why;
+  document.getElementById("shWhy").innerHTML=(s.plan.detail&&s.plan.detail.length)?s.plan.detail.join("<br>"):s.plan.why;
   document.getElementById("shSpecs").innerHTML=s.specs.map(function(x){return '<div class="spec"><b>'+x[1]+'</b>'+x[0]+'</div>';}).join("");
   document.getElementById("shForm").style.display="none";
   document.getElementById("shFields").innerHTML="";
@@ -549,7 +623,7 @@ function deleteSession(){
 var pSegs=[],pIdx=0,pKey=null,pTimer=null,pState={},pIsSupp=false,ftSec=0;
 function startPlayer(k){
   unlockAudio(); reqWake(); beep(660,.12);
-  pKey=k; pIsSupp=false; pState={}; pSegs=content(sessionFor(parse(k)).typeKey)||[]; pIdx=0;
+  pKey=k; pIsSupp=false; pState={}; pSegs=content(k)||[]; pIdx=0;
   closeSheet(); document.getElementById("player").classList.add("on");
   renderSeg();
 }
