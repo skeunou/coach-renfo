@@ -112,8 +112,11 @@
   .wkrow.wktoday{background:var(--bg)}
   .wkdn{font-size:20px;min-width:62px;color:var(--ink2)}
   .wkrow.wktoday .wkdn{color:var(--ink)}
-  .wkdesc{flex:1;font-size:14px;font-weight:600;display:flex;align-items:center;gap:9px}
-  .wkdesc .pip{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+  .wkdesc{flex:1;display:flex;align-items:flex-start;gap:9px;min-width:0}
+  .wkdesc .pip{width:9px;height:9px;border-radius:50%;flex:0 0 auto;margin-top:5px}
+  .wtxt{min-width:0}
+  .wtxt .wm{font-size:14px;font-weight:700;line-height:1.2}
+  .wtxt .wsub{font-size:11.5px;color:var(--mut);line-height:1.3;margin-top:1px}
   .wkchk{width:16px;text-align:center;color:var(--grn);font-weight:700;flex:0 0 auto}
 
   /* sheet */
@@ -202,7 +205,7 @@
   <section class="view" id="v-week">
     <div class="topline"><div><div class="eyebrow">Vue d'ensemble</div><div class="bigtitle bebas">LA SEMAINE</div></div></div>
     <div id="weekViewBody"></div>
-    <div class="capnote" style="margin-top:2px">Les allures précises (@min/km) s'ajouteront si tu me donnes tes zones — pour l'instant : durée + zone d'effort.</div>
+    <div class="capnote" style="margin-top:2px">Repères : VMA 16,5 km/h · FCmax 179 bpm. Allures = références plat ; sur trail (D+), pilote à la FC / sensation. Dis-moi pour ajuster.</div>
   </section>
 
   <!-- HORIZON -->
@@ -275,6 +278,12 @@ document.addEventListener('visibilitychange',function(){ if(document.visibilityS
 
 /* ================= PLAN ENGINE ================= */
 var UT4M_DATE="2027-07-16"; // placeholder ajustable
+var VMA=16.5, FCMAX=179; // valeurs de travail (ajustables)
+function paceStr(frac){ var s=Math.round(3600/(VMA*frac)); return Math.floor(s/60)+":"+String(s%60).padStart(2,"0"); }
+var Z2PACE=paceStr(0.70)+"–"+paceStr(0.65);   // endurance fond
+var FCZ2=Math.round(FCMAX*0.70)+"–"+Math.round(FCMAX*0.80);
+var FCZ2HI=Math.round(FCMAX*0.80);
+var FCZ4=Math.round(FCMAX*0.87);
 var BLOCKS=[
   {id:"trans",name:"Transition",start:"2026-06-14",end:"2026-07-13",intent:"Récup active post-100K.",phase:"recup"},
   {id:"base1",name:"Reprise base",start:"2026-07-14",end:"2026-08-31",intent:"Aérobie + fondation force.",phase:"base"},
@@ -304,9 +313,9 @@ var WEEK={
   affutage:{1:"renfo",2:"cotes",3:"repos",4:"fond",5:"mobilite",6:"repos",7:"repos"}
 };
 function specsFor(t,phase){var s=[];
-  if(t==="fond")s=[["Durée","45–70′"],["Zone","Z2"]];
-  if(t==="cotes")s=[["Format","6–10 × côte"],["Intensité","Z3–Z4"]];
-  if(t==="longue")s=[["Durée",phase==="build"?"2–3 h":"1h30–2h"],["Zone","Z2"]];
+  if(t==="fond")s=[["Durée","45–70′"],["Zone","Z2"],["Allure",Z2PACE],["FC",FCZ2]];
+  if(t==="cotes")s=[["Format","6–10 × côte"],["Zone","Z4–5"],["FC",">"+FCZ4]];
+  if(t==="longue")s=[["Durée",phase==="build"?"2–3 h":"1h30–2h"],["Zone","Z2"],["Allure",Z2PACE],["FC","<"+FCZ2HI]];
   if(t==="renfo")s=[["Format","EMOM + AMRAP"],["Durée","~30′"],["ZP","safe"]];
   if(t==="wod")s=[["Durée","~12′"],["RPE","7–8"],["ZP","filtré"]];
   if(t==="mobilite")s=[["Durée","~15′"],["Focus","hanches · dos"]];
@@ -423,14 +432,14 @@ function renderWeek(){
   document.getElementById("weekStrip").innerHTML=html;
 }
 function dayDesc(t,phase){
-  if(t==='repos')return'Repos';
-  if(t==='mobilite')return'Mobilité · ~15′';
-  if(t==='fond')return'Sortie fond · 45–70′ Z2';
-  if(t==='cotes')return'Côtes / VAM · 6–10 × côte';
-  if(t==='longue')return'Sortie longue · '+(phase==='build'?'2–3 h':'1h30–2h')+' Z2';
-  if(t==='renfo')return'Renfo · EMOM + AMRAP ~30′';
-  if(t==='wod')return'WOD · ~12′ (optionnel)';
-  return TYPES[t]?TYPES[t].label:'';
+  if(t==='repos')return{m:'Repos',s:'récup — ça fait partie du plan'};
+  if(t==='mobilite')return{m:'Mobilité',s:'~15′ · hanches, dos, chaîne post.'};
+  if(t==='fond')return{m:'Sortie fond',s:'45–70′ · Z2 · '+Z2PACE+'/km · FC '+FCZ2};
+  if(t==='cotes')return{m:'Côtes / VAM',s:'6–10 × côte · Z4–5 · FC > '+FCZ4};
+  if(t==='longue')return{m:'Sortie longue',s:(phase==='build'?'2–3 h':'1h30–2h')+' · Z2 · '+Z2PACE+'/km · FC < '+FCZ2HI};
+  if(t==='renfo')return{m:'Renfo',s:'EMOM + AMRAP · ~30′ · ZP-safe'};
+  if(t==='wod')return{m:'WOD',s:'~12′ · RPE 7–8 · optionnel'};
+  return{m:TYPES[t]?TYPES[t].label:t,s:''};
 }
 function renderWeekView(){
   var out="";
@@ -442,10 +451,10 @@ function renderWeekView(){
     var range=mon.getDate()+(mon.getMonth()!==sun.getMonth()?' '+MOIS[mon.getMonth()]:'')+'–'+sun.getDate()+' '+MOIS[sun.getMonth()];
     out+='<div class="wkhead"><div class="wktitle bebas">'+(w===0?'Cette semaine':'Semaine prochaine')+'</div><div class="wkmeta">'+range+' · '+blk.name+'</div></div>';
     out+='<div class="card" style="padding:0;margin-bottom:18px;overflow:hidden">';
-    for(var i=0;i<7;i++){var d=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+i);var s=sessionFor(d);var done=entryFor(iso(d));
+    for(var i=0;i<7;i++){var d=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+i);var s=sessionFor(d);var done=entryFor(iso(d));var dd=dayDesc(s.typeKey,blk.phase);
       out+='<div class="wkrow'+(iso(d)===iso(today)?' wktoday':'')+'" onclick="openSheet(\''+iso(d)+'\')">'
         +'<div class="wkdn bebas">'+JOURS[i]+' '+d.getDate()+'</div>'
-        +'<div class="wkdesc"><span class="pip" style="background:'+s.info.color+'"></span>'+dayDesc(s.typeKey,blk.phase)+'</div>'
+        +'<div class="wkdesc"><span class="pip" style="background:'+s.info.color+'"></span><div class="wtxt"><div class="wm">'+dd.m+'</div>'+(dd.s?'<div class="wsub">'+dd.s+'</div>':'')+'</div></div>'
         +'<div class="wkchk">'+(done?'✓':'')+'</div></div>';}
     out+='</div>';
   }
