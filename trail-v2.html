@@ -53,10 +53,7 @@
   .btn-row{display:flex;gap:8px;margin-top:8px}
   .btn-row .btn{flex:1}
 
-  .weeklbl{margin:6px 0 9px;display:flex;justify-content:space-between;align-items:center;gap:8px}
-  .weeknav{display:flex;align-items:center;gap:8px}
-  .weeknav button{background:none;border:none;font-size:22px;line-height:1;color:var(--ink2);cursor:pointer;padding:0 4px;font-family:'Bebas Neue',sans-serif}
-  .weeknav #weekRange{text-align:right;color:var(--ink2)}
+  .weeklbl{margin:6px 0 9px;display:flex;justify-content:space-between;align-items:center}
   .week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
   .day{background:var(--paper);border:1px solid var(--line);border-radius:13px;padding:9px 3px;text-align:center;cursor:pointer;position:relative}
   .day.today{border-color:var(--ink);border-width:2px}
@@ -105,6 +102,19 @@
   .logitem .m .s{font-size:12.5px;color:var(--mut)}
   .logitem .r{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--ink2)}
   .empty{text-align:center;color:var(--mut);padding:40px 20px;line-height:1.6}
+
+  /* week view */
+  .wkhead{display:flex;justify-content:space-between;align-items:baseline;margin:4px 2px 8px;gap:10px}
+  .wktitle{font-size:24px;line-height:1}
+  .wkmeta{font-size:12px;color:var(--mut);font-weight:600;text-align:right}
+  .wkrow{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid var(--line);cursor:pointer}
+  .wkrow:last-child{border-bottom:none}
+  .wkrow.wktoday{background:var(--bg)}
+  .wkdn{font-size:20px;min-width:62px;color:var(--ink2)}
+  .wkrow.wktoday .wkdn{color:var(--ink)}
+  .wkdesc{flex:1;font-size:14px;font-weight:600;display:flex;align-items:center;gap:9px}
+  .wkdesc .pip{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+  .wkchk{width:16px;text-align:center;color:var(--grn);font-weight:700;flex:0 0 auto}
 
   /* sheet */
   .sheet{position:fixed;inset:0;background:rgba(20,25,20,.4);display:none;align-items:flex-end;z-index:50}
@@ -176,10 +186,7 @@
       <div class="specs" id="heroSpecs"></div>
       <div id="heroActions"></div>
     </div>
-    <div class="weeklbl">
-      <span class="eyebrow" id="weekTitle" onclick="weekReset()" style="cursor:pointer">Ta semaine</span>
-      <div class="weeknav"><button onclick="weekShift(-1)">‹</button><span class="eyebrow" id="weekRange">—</span><button onclick="weekShift(1)">›</button></div>
-    </div>
+    <div class="weeklbl"><span class="eyebrow">Ta semaine</span><span class="eyebrow" id="weekRange">—</span></div>
     <div class="week" id="weekStrip"></div>
     <div class="card stravacard">
       <div class="strava" onclick="goStrava()">
@@ -189,6 +196,13 @@
       </div>
       <div id="stravaActs"></div>
     </div>
+  </section>
+
+  <!-- SEMAINE -->
+  <section class="view" id="v-week">
+    <div class="topline"><div><div class="eyebrow">Vue d'ensemble</div><div class="bigtitle bebas">LA SEMAINE</div></div></div>
+    <div id="weekViewBody"></div>
+    <div class="capnote" style="margin-top:2px">Les allures précises (@min/km) s'ajouteront si tu me donnes tes zones — pour l'instant : durée + zone d'effort.</div>
   </section>
 
   <!-- HORIZON -->
@@ -245,6 +259,7 @@
 <!-- NAV -->
 <nav class="nav">
   <button class="on" id="nav-today" onclick="nav('today')"><span class="ni">◎</span><span class="nl">Aujourd'hui</span></button>
+  <button id="nav-week" onclick="nav('week')"><span class="ni">▦</span><span class="nl">Semaine</span></button>
   <button id="nav-horizon" onclick="nav('horizon')"><span class="ni">⛰</span><span class="nl">Horizon</span></button>
   <button id="nav-log" onclick="nav('log')"><span class="ni">▤</span><span class="nl">Historique</span></button>
 </nav>
@@ -397,29 +412,44 @@ function renderToday(){
   document.getElementById("heroActions").innerHTML=a;
   renderWeek();
 }
-var weekOffset=0;
-function weekLabel(o){ if(o===0)return"Cette semaine"; if(o===1)return"Sem. prochaine"; if(o===-1)return"Sem. dernière"; return o>0?("Dans "+o+" sem."):("Il y a "+(-o)+" sem."); }
-function weekShift(d){ weekOffset=Math.max(-8,Math.min(26,weekOffset+d)); renderWeek(); }
-function weekReset(){ if(weekOffset!==0){ weekOffset=0; renderWeek(); } }
 function renderWeek(){
-  var mon=new Date(today); mon.setHours(0,0,0,0);
-  mon.setDate(today.getDate()-(dowMon(today)-1)+weekOffset*7);
+  var mon=new Date(today); mon.setHours(0,0,0,0); mon.setDate(today.getDate()-(dowMon(today)-1));
   var sun=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+6);
-  var thu=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+3);
-  var blk=blockFor(thu);
-  document.getElementById("weekTitle").textContent=weekLabel(weekOffset);
-  var range=mon.getDate()+(mon.getMonth()!==sun.getMonth()?' '+MOIS[mon.getMonth()]:'')+'–'+sun.getDate()+' '+MOIS[sun.getMonth()];
-  document.getElementById("weekRange").textContent=range+' · '+blk.name;
+  document.getElementById("weekRange").textContent=mon.getDate()+" "+MOIS[mon.getMonth()]+" → "+sun.getDate()+" "+MOIS[sun.getMonth()];
   var html="";
   for(var i=0;i<7;i++){var d=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+i);var s=sessionFor(d);
     html+='<div class="day'+(iso(d)===iso(today)?' today':'')+(entryFor(iso(d))?' done':'')+'" onclick="openSheet(\''+iso(d)+'\')">'
       +'<div class="dow">'+JOURS[i]+'</div><div class="dnum">'+d.getDate()+'</div><div class="pip" style="background:'+s.info.color+'"></div></div>';}
   document.getElementById("weekStrip").innerHTML=html;
 }
-function attachWeekSwipe(){
-  var s=document.getElementById("weekStrip"); if(!s)return; var x=null;
-  s.addEventListener('touchstart',function(e){x=e.touches[0].clientX;},{passive:true});
-  s.addEventListener('touchend',function(e){ if(x===null)return; var dx=e.changedTouches[0].clientX-x; if(Math.abs(dx)>40) weekShift(dx<0?1:-1); x=null; },{passive:true});
+function dayDesc(t,phase){
+  if(t==='repos')return'Repos';
+  if(t==='mobilite')return'Mobilité · ~15′';
+  if(t==='fond')return'Sortie fond · 45–70′ Z2';
+  if(t==='cotes')return'Côtes / VAM · 6–10 × côte';
+  if(t==='longue')return'Sortie longue · '+(phase==='build'?'2–3 h':'1h30–2h')+' Z2';
+  if(t==='renfo')return'Renfo · EMOM + AMRAP ~30′';
+  if(t==='wod')return'WOD · ~12′ (optionnel)';
+  return TYPES[t]?TYPES[t].label:'';
+}
+function renderWeekView(){
+  var out="";
+  for(var w=0;w<2;w++){
+    var mon=new Date(today); mon.setHours(0,0,0,0); mon.setDate(today.getDate()-(dowMon(today)-1)+w*7);
+    var sun=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+6);
+    var thu=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+3);
+    var blk=blockFor(thu);
+    var range=mon.getDate()+(mon.getMonth()!==sun.getMonth()?' '+MOIS[mon.getMonth()]:'')+'–'+sun.getDate()+' '+MOIS[sun.getMonth()];
+    out+='<div class="wkhead"><div class="wktitle bebas">'+(w===0?'Cette semaine':'Semaine prochaine')+'</div><div class="wkmeta">'+range+' · '+blk.name+'</div></div>';
+    out+='<div class="card" style="padding:0;margin-bottom:18px;overflow:hidden">';
+    for(var i=0;i<7;i++){var d=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+i);var s=sessionFor(d);var done=entryFor(iso(d));
+      out+='<div class="wkrow'+(iso(d)===iso(today)?' wktoday':'')+'" onclick="openSheet(\''+iso(d)+'\')">'
+        +'<div class="wkdn bebas">'+JOURS[i]+' '+d.getDate()+'</div>'
+        +'<div class="wkdesc"><span class="pip" style="background:'+s.info.color+'"></span>'+dayDesc(s.typeKey,blk.phase)+'</div>'
+        +'<div class="wkchk">'+(done?'✓':'')+'</div></div>';}
+    out+='</div>';
+  }
+  document.getElementById("weekViewBody").innerHTML=out;
 }
 
 /* ================= SHEET ================= */
@@ -715,10 +745,10 @@ function renderStravaCard(){
   if(stravaToken){ stravaMsg('<span style="color:var(--grn);font-weight:700">✓ Connecté</span>'); document.getElementById("stravaGo").textContent='↻'; }
   else { stravaMsg("Strava à connecter"); document.getElementById("stravaGo").textContent='Connecter →'; var el=document.getElementById("stravaActs"); if(el)el.innerHTML=""; }
 }
-function nav(v){["today","horizon","log"].forEach(function(x){document.getElementById("v-"+x).classList.toggle("on",x===v);document.getElementById("nav-"+x).classList.toggle("on",x===v);});if(v==="horizon")renderHorizon();if(v==="log")renderLog();window.scrollTo(0,0);}
+function nav(v){["today","week","horizon","log"].forEach(function(x){document.getElementById("v-"+x).classList.toggle("on",x===v);document.getElementById("nav-"+x).classList.toggle("on",x===v);});if(v==="week")renderWeekView();if(v==="horizon")renderHorizon();if(v==="log")renderLog();window.scrollTo(0,0);}
 
 /* ================= INIT ================= */
-renderToday(); renderHorizon(); renderLog(); renderStravaCard(); attachWeekSwipe();
+renderToday(); renderHorizon(); renderLog(); renderStravaCard();
 if(stravaToken) loadStravaData();
 </script>
 </body>
