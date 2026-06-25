@@ -53,7 +53,10 @@
   .btn-row{display:flex;gap:8px;margin-top:8px}
   .btn-row .btn{flex:1}
 
-  .weeklbl{margin:6px 0 9px;display:flex;justify-content:space-between;align-items:center}
+  .weeklbl{margin:6px 0 9px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .weeknav{display:flex;align-items:center;gap:8px}
+  .weeknav button{background:none;border:none;font-size:22px;line-height:1;color:var(--ink2);cursor:pointer;padding:0 4px;font-family:'Bebas Neue',sans-serif}
+  .weeknav #weekRange{text-align:right;color:var(--ink2)}
   .week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
   .day{background:var(--paper);border:1px solid var(--line);border-radius:13px;padding:9px 3px;text-align:center;cursor:pointer;position:relative}
   .day.today{border-color:var(--ink);border-width:2px}
@@ -173,7 +176,10 @@
       <div class="specs" id="heroSpecs"></div>
       <div id="heroActions"></div>
     </div>
-    <div class="weeklbl"><span class="eyebrow">Ta semaine</span><span class="eyebrow" id="weekRange">—</span></div>
+    <div class="weeklbl">
+      <span class="eyebrow" id="weekTitle" onclick="weekReset()" style="cursor:pointer">Ta semaine</span>
+      <div class="weeknav"><button onclick="weekShift(-1)">‹</button><span class="eyebrow" id="weekRange">—</span><button onclick="weekShift(1)">›</button></div>
+    </div>
     <div class="week" id="weekStrip"></div>
     <div class="card stravacard">
       <div class="strava" onclick="goStrava()">
@@ -391,14 +397,29 @@ function renderToday(){
   document.getElementById("heroActions").innerHTML=a;
   renderWeek();
 }
+var weekOffset=0;
+function weekLabel(o){ if(o===0)return"Cette semaine"; if(o===1)return"Sem. prochaine"; if(o===-1)return"Sem. dernière"; return o>0?("Dans "+o+" sem."):("Il y a "+(-o)+" sem."); }
+function weekShift(d){ weekOffset=Math.max(-8,Math.min(26,weekOffset+d)); renderWeek(); }
+function weekReset(){ if(weekOffset!==0){ weekOffset=0; renderWeek(); } }
 function renderWeek(){
-  var mon=new Date(today); mon.setDate(today.getDate()-(dowMon(today)-1));
-  document.getElementById("weekRange").textContent=mon.getDate()+" "+MOIS[mon.getMonth()]+" → "+(new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+6)).getDate();
+  var mon=new Date(today); mon.setHours(0,0,0,0);
+  mon.setDate(today.getDate()-(dowMon(today)-1)+weekOffset*7);
+  var sun=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+6);
+  var thu=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+3);
+  var blk=blockFor(thu);
+  document.getElementById("weekTitle").textContent=weekLabel(weekOffset);
+  var range=mon.getDate()+(mon.getMonth()!==sun.getMonth()?' '+MOIS[mon.getMonth()]:'')+'–'+sun.getDate()+' '+MOIS[sun.getMonth()];
+  document.getElementById("weekRange").textContent=range+' · '+blk.name;
   var html="";
   for(var i=0;i<7;i++){var d=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+i);var s=sessionFor(d);
     html+='<div class="day'+(iso(d)===iso(today)?' today':'')+(entryFor(iso(d))?' done':'')+'" onclick="openSheet(\''+iso(d)+'\')">'
       +'<div class="dow">'+JOURS[i]+'</div><div class="dnum">'+d.getDate()+'</div><div class="pip" style="background:'+s.info.color+'"></div></div>';}
   document.getElementById("weekStrip").innerHTML=html;
+}
+function attachWeekSwipe(){
+  var s=document.getElementById("weekStrip"); if(!s)return; var x=null;
+  s.addEventListener('touchstart',function(e){x=e.touches[0].clientX;},{passive:true});
+  s.addEventListener('touchend',function(e){ if(x===null)return; var dx=e.changedTouches[0].clientX-x; if(Math.abs(dx)>40) weekShift(dx<0?1:-1); x=null; },{passive:true});
 }
 
 /* ================= SHEET ================= */
@@ -697,7 +718,7 @@ function renderStravaCard(){
 function nav(v){["today","horizon","log"].forEach(function(x){document.getElementById("v-"+x).classList.toggle("on",x===v);document.getElementById("nav-"+x).classList.toggle("on",x===v);});if(v==="horizon")renderHorizon();if(v==="log")renderLog();window.scrollTo(0,0);}
 
 /* ================= INIT ================= */
-renderToday(); renderHorizon(); renderLog(); renderStravaCard();
+renderToday(); renderHorizon(); renderLog(); renderStravaCard(); attachWeekSwipe();
 if(stravaToken) loadStravaData();
 </script>
 </body>
