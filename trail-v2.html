@@ -632,14 +632,14 @@ if(urlToken){ saveStravaToken(urlToken); stravaToken=urlToken; window.history.re
 
 function loadStravaData(){
   if(!stravaToken){renderStravaCard();return;}
-  var url="/.netlify/functions/lvstrava?action=data&token="+encodeURIComponent(stravaToken);
+  var url="https://coach-nutrition.netlify.app/.netlify/functions/lvstrava?action=data&token="+encodeURIComponent(stravaToken);
   fetch(url).then(r=>r.json()).then(d=>{
     if(d.error){ console.log("Strava:",d.error); stravaToken=null; saveStravaToken(""); renderStravaCard(); return; }
     document.getElementById("stravaState").innerHTML='<b style="font-weight:700">'+d.kmRecent+'</b> km · <b style="font-weight:700">'+d.dRecent+'</b>m D+ (10 dern.)';
     document.getElementById("stravaGo").textContent='↻ Rafraîchir';
   }).catch(e=>{ console.log("Strava fetch:",e); renderStravaCard(); });
 }
-function goStrava(){ if(!stravaToken) window.location.href="/.netlify/functions/lvstrava?action=connect"; else loadStravaData(); }
+function goStrava(){ if(!stravaToken) window.location.href="https://coach-nutrition.netlify.app/.netlify/functions/lvstrava?action=connect"; else loadStravaData(); }
 function renderStravaCard(){
   if(stravaToken){
     document.getElementById("stravaState").innerHTML='<span style="color:var(--grn);font-weight:700">✓ Connecté</span>';
