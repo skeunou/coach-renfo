@@ -622,11 +622,38 @@ function renderLog(){
 }
 
 /* ================= STRAVA + NAV ================= */
-function goStrava(){ alert("Connexion Strava — bientôt.\n\nUne fois ton appli Strava créée et tes clés posées sur Netlify, je branche un bouton « Connecter » en 1 clic, et ta charge récente (km, D+, dernières sorties) s'affichera ici en live."); }
+var STRAVA_KEY="lvtrail:strava:token";
+function loadStravaToken(){ try{ return localStorage.getItem(STRAVA_KEY)||null; }catch(e){return null;} }
+function saveStravaToken(t){ try{ localStorage.setItem(STRAVA_KEY,t); }catch(e){} }
+function getUrlParam(n){var u=new URLSearchParams(window.location.search);return u.get(n);}
+var stravaToken=loadStravaToken();
+var urlToken=getUrlParam("strava_token");
+if(urlToken){ saveStravaToken(urlToken); stravaToken=urlToken; window.history.replaceState({},document.title,window.location.pathname); }
+
+function loadStravaData(){
+  if(!stravaToken){renderStravaCard();return;}
+  var url="/.netlify/functions/lvstrava?action=data&token="+encodeURIComponent(stravaToken);
+  fetch(url).then(r=>r.json()).then(d=>{
+    if(d.error){ console.log("Strava:",d.error); stravaToken=null; saveStravaToken(""); renderStravaCard(); return; }
+    document.getElementById("stravaState").innerHTML='<b style="font-weight:700">'+d.kmRecent+'</b> km · <b style="font-weight:700">'+d.dRecent+'</b>m D+ (10 dern.)';
+    document.getElementById("stravaGo").textContent='↻ Rafraîchir';
+  }).catch(e=>{ console.log("Strava fetch:",e); renderStravaCard(); });
+}
+function goStrava(){ if(!stravaToken) window.location.href="/.netlify/functions/lvstrava?action=connect"; else loadStravaData(); }
+function renderStravaCard(){
+  if(stravaToken){
+    document.getElementById("stravaState").innerHTML='<span style="color:var(--grn);font-weight:700">✓ Connecté</span>';
+    document.getElementById("stravaGo").textContent='↻ Données';
+    setTimeout(loadStravaData,200);
+  } else {
+    document.getElementById("stravaState").textContent='Strava à connecter';
+    document.getElementById("stravaGo").textContent='Connecter →';
+  }
+}
 function nav(v){["today","horizon","log"].forEach(function(x){document.getElementById("v-"+x).classList.toggle("on",x===v);document.getElementById("nav-"+x).classList.toggle("on",x===v);});if(v==="horizon")renderHorizon();if(v==="log")renderLog();window.scrollTo(0,0);}
 
 /* ================= INIT ================= */
-renderToday(); renderHorizon(); renderLog();
+renderToday(); renderHorizon(); renderLog(); renderStravaCard();
 </script>
 </body>
 </html>
