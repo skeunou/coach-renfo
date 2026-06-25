@@ -172,7 +172,7 @@
     <div class="card strava" onclick="goStrava()">
       <div class="ic">≈</div>
       <div class="t"><div class="l">Charge récente</div><div class="s" id="stravaState">Strava à connecter</div></div>
-      <div class="go">Connecter →</div>
+      <div class="go" id="stravaGo">Connecter →</div>
     </div>
   </section>
 
@@ -622,38 +622,63 @@ function renderLog(){
 }
 
 /* ================= STRAVA + NAV ================= */
-var STRAVA_KEY="lvtrail:strava:token";
-function loadStravaToken(){ try{ return localStorage.getItem(STRAVA_KEY)||null; }catch(e){return null;} }
-function saveStravaToken(t){ try{ localStorage.setItem(STRAVA_KEY,t); }catch(e){} }
-function getUrlParam(n){var u=new URLSearchParams(window.location.search);return u.get(n);}
-var stravaToken=loadStravaToken();
-var urlToken=getUrlParam("strava_token");
-if(urlToken){ saveStravaToken(urlToken); stravaToken=urlToken; window.history.replaceState({},document.title,window.location.pathname); }
+var SK_TOK="lvtrail:strava:token", SK_REF="lvtrail:strava:refresh", SK_EXP="lvtrail:strava:exp";
+function lsGet(k){try{return localStorage.getItem(k)||"";}catch(e){return "";}}
+function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
+function getUrlParam(n){return new URLSearchParams(window.location.search).get(n);}
+var NF="https://coach-nutrition.netlify.app/.netlify/functions/lvstrava";
 
-function loadStravaData(){
-  if(!stravaToken){renderStravaCard();return;}
-  var url="https://coach-nutrition.netlify.app/.netlify/functions/lvstrava?action=data&token="+encodeURIComponent(stravaToken);
-  fetch(url).then(r=>r.json()).then(d=>{
-    if(d.error){ console.log("Strava:",d.error); stravaToken=null; saveStravaToken(""); renderStravaCard(); return; }
-    document.getElementById("stravaState").innerHTML='<b style="font-weight:700">'+d.kmRecent+'</b> km · <b style="font-weight:700">'+d.dRecent+'</b>m D+ (10 dern.)';
-    document.getElementById("stravaGo").textContent='↻ Rafraîchir';
-  }).catch(e=>{ console.log("Strava fetch:",e); renderStravaCard(); });
+var stravaToken=lsGet(SK_TOK), stravaRefresh=lsGet(SK_REF), stravaExp=parseInt(lsGet(SK_EXP)||"0");
+// capture depuis l'URL après callback
+(function(){
+  var t=getUrlParam("strava_token"), rf=getUrlParam("strava_refresh"), ex=getUrlParam("strava_exp"), err=getUrlParam("strava_error");
+  if(t){ stravaToken=t; stravaRefresh=rf||""; stravaExp=parseInt(ex||"0"); lsSet(SK_TOK,t); lsSet(SK_REF,stravaRefresh); lsSet(SK_EXP,String(stravaExp)); }
+  if(t||err) window.history.replaceState({},document.title,window.location.pathname);
+  if(err){ setTimeout(function(){ stravaMsg("⚠️ "+err+" — reconnecte en cochant les cases","var(--red)"); },300); }
+})();
+
+function stravaMsg(txt,color){ var s=document.getElementById("stravaState"); if(s){s.innerHTML=txt; s.style.color=color||"var(--mut)";} }
+function disconnectStrava(){ stravaToken="";stravaRefresh="";stravaExp=0; lsDel(SK_TOK);lsDel(SK_REF);lsDel(SK_EXP); renderStravaCard(); }
+
+function refreshStrava(cb){
+  if(!stravaRefresh){ cb(false); return; }
+  fetch(NF+"?action=refresh&refresh="+encodeURIComponent(stravaRefresh))
+    .then(r=>r.json()).then(d=>{
+      if(d.access_token){ stravaToken=d.access_token; stravaExp=d.expires_at||0; if(d.refresh_token)stravaRefresh=d.refresh_token;
+        lsSet(SK_TOK,stravaToken);lsSet(SK_EXP,String(stravaExp));lsSet(SK_REF,stravaRefresh); cb(true); }
+      else cb(false);
+    }).catch(function(){cb(false);});
 }
-function goStrava(){ if(!stravaToken) window.location.href="https://coach-nutrition.netlify.app/.netlify/functions/lvstrava?action=connect"; else loadStravaData(); }
+function fetchStravaData(retried){
+  stravaMsg("Chargement…","var(--mut)");
+  fetch(NF+"?action=data&token="+encodeURIComponent(stravaToken))
+    .then(r=>r.json()).then(d=>{
+      if(d.error){
+        if(!retried){ refreshStrava(function(ok){ if(ok) fetchStravaData(true); else stravaMsg("⚠️ Reconnecte (coche les cases d'accès)","var(--red)"); }); }
+        else stravaMsg("⚠️ Reconnecte (coche les cases d'accès)","var(--red)");
+        return;
+      }
+      stravaMsg('<b style="font-weight:700">'+d.kmRecent+'</b> km · <b style="font-weight:700">'+d.dRecent+'</b> m D+ <span style="color:var(--mut)">(10 dern.)</span>',"var(--ink2)");
+      document.getElementById("stravaGo").textContent='↻';
+    })
+    .catch(function(){ stravaMsg("⚠️ Réseau — réessaie","var(--orange)"); });
+}
+function loadStravaData(){
+  if(!stravaToken){ renderStravaCard(); return; }
+  if(stravaExp && (Date.now()/1000 > stravaExp-60)){ refreshStrava(function(ok){ if(ok) fetchStravaData(true); else stravaMsg("⚠️ Reconnecte","var(--red)"); }); }
+  else fetchStravaData(false);
+}
+function goStrava(){ if(!stravaToken) window.location.href=NF+"?action=connect"; else loadStravaData(); }
 function renderStravaCard(){
-  if(stravaToken){
-    document.getElementById("stravaState").innerHTML='<span style="color:var(--grn);font-weight:700">✓ Connecté</span>';
-    document.getElementById("stravaGo").textContent='↻ Données';
-    setTimeout(loadStravaData,200);
-  } else {
-    document.getElementById("stravaState").textContent='Strava à connecter';
-    document.getElementById("stravaGo").textContent='Connecter →';
-  }
+  if(stravaToken){ stravaMsg('<span style="color:var(--grn);font-weight:700">✓ Connecté</span>'); document.getElementById("stravaGo").textContent='↻'; }
+  else { stravaMsg("Strava à connecter"); document.getElementById("stravaGo").textContent='Connecter →'; }
 }
 function nav(v){["today","horizon","log"].forEach(function(x){document.getElementById("v-"+x).classList.toggle("on",x===v);document.getElementById("nav-"+x).classList.toggle("on",x===v);});if(v==="horizon")renderHorizon();if(v==="log")renderLog();window.scrollTo(0,0);}
 
 /* ================= INIT ================= */
 renderToday(); renderHorizon(); renderLog(); renderStravaCard();
+if(stravaToken) loadStravaData();
 </script>
 </body>
 </html>
