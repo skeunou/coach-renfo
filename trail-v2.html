@@ -370,9 +370,9 @@ function content(t){
   if(t==="mobilite"){ return MOBI.map(function(s){return {kind:"flow",name:s.name,cue:s.cue,hold:s.hold,reps:s.reps,side:s.side};}); }
   if(t==="renfo"){
     var segs=RENFO_WARM.map(function(s){return {kind:"flow",name:s.name,cue:s.cue,reps:s.reps};});
-    segs.push({kind:"emom",minutes:14,
-      odd:{name:"STEP-UP LESTÉ",reps:"12 · 6/jambe",cue:"Box mi-hauteur · montée explosive, descente freinée 2 s."},
-      even:{name:"KB SWING AMÉRICAIN",reps:"15",cue:"Propulsion hanche, bras passifs, gainage."}});
+    segs.push({kind:"emom",minutes:14,label:"Moteur de grimpe",moves:[
+      {name:"STEP-UP LESTÉ",reps:"12 · 6/jambe",cue:"Box mi-hauteur · montée explosive, descente freinée 2 s."},
+      {name:"KB SWING AMÉRICAIN",reps:"15",cue:"Propulsion hanche, bras passifs, gainage."}]});
     segs.push({kind:"amrap",sec:600,
       moves:[["A","Farmer carry ~20 m","2× lourd"],["B","8 Push press","jambes donnent l'impulsion"],["C","8 DB snatch","4/bras, explosif"],["D","10 TRX row","omoplates serrées"]]});
     return segs;
@@ -546,18 +546,21 @@ function deleteSession(){
 }
 
 /* ================= PLAYER ================= */
-var pSegs=[],pIdx=0,pKey=null,pTimer=null,pState={},pIsSupp=false;
+var pSegs=[],pIdx=0,pKey=null,pTimer=null,pState={},pIsSupp=false,ftSec=0;
 function startPlayer(k){
   unlockAudio(); reqWake(); beep(660,.12);
-  pKey=k; pIsSupp=false; pSegs=content(sessionFor(parse(k)).typeKey)||[]; pIdx=0;
+  pKey=k; pIsSupp=false; pState={}; pSegs=content(sessionFor(parse(k)).typeKey)||[]; pIdx=0;
   closeSheet(); document.getElementById("player").classList.add("on");
   renderSeg();
 }
 function startSuppWod(k){
   unlockAudio(); reqWake(); beep(660,.12);
-  pKey=k; pIsSupp=true;
-  var wod=randWod();
-  pSegs=[{kind:"amrap",sec:600,label:"WOD SUPP",name:wod.name,moves:wod.moves}]; pIdx=0;
+  pKey=k; pIsSupp=true; pState={};
+  var wod=randWod(), r=Math.random(), seg;
+  if(r<0.5){ seg={kind:"amrap",sec:600,label:"WOD SUPP",name:wod.name,moves:wod.moves}; }
+  else if(r<0.8){ var mv=wod.moves.map(function(m){return {name:m[1],reps:"",cue:m[2]||""};}); var rd=Math.max(3,Math.floor(12/mv.length)); seg={kind:"emom",minutes:rd*mv.length,label:"WOD SUPP",name:wod.name,moves:mv}; }
+  else { seg={kind:"fortime",cap:720,rounds:4,label:"WOD SUPP",name:wod.name,moves:wod.moves}; }
+  pSegs=[seg]; pIdx=0;
   closeSheet(); document.getElementById("player").classList.add("on");
   renderSeg();
 }
@@ -565,10 +568,17 @@ function quitPlayer(){ clearInterval(pTimer); document.getElementById("player").
 function pProg(){ document.getElementById("pProg").style.width=Math.round((pIdx/pSegs.length)*100)+"%"; }
 function nextSeg(){ clearInterval(pTimer); pIdx++; if(pIdx>=pSegs.length){ finishPlayer(); } else { renderSeg(); } }
 
+function fmtClock(s){var m=Math.floor(s/60),x=s%60;return m+":"+(x<10?"0":"")+x;}
+function fmtName(k){return k==="amrap"?"AMRAP":k==="emom"?"EMOM":"FOR TIME";}
+function durLabel(seg){ if(seg.kind==="amrap")return Math.round(seg.sec/60)+" min"; if(seg.kind==="emom")return seg.minutes+" min"; return seg.rounds+" rounds · cap "+Math.round(seg.cap/60)+"′"; }
+function movesList(seg){
+  if(seg.kind==="emom") return seg.moves.map(function(m,i){return '<div class="li"><span class="k">'+(i+1)+'</span><div><b>'+m.name+'</b>'+(m.cue?' <span style="color:var(--mut)">· '+m.cue+'</span>':'')+'</div></div>';}).join("");
+  return seg.moves.map(function(m){return '<div class="li"><span class="k">'+(m[0]||'•')+'</span><div><b>'+m[1]+'</b>'+(m[2]?' <span style="color:var(--mut)">· '+m[2]+'</span>':'')+'</div></div>';}).join("");
+}
 function renderSeg(){
   clearInterval(pTimer); pProg();
   var seg=pSegs[pIdx], body=document.getElementById("pBody"), act=document.getElementById("pAct");
-  document.getElementById("pSeg").textContent=(seg.label||"Étape ")+(pIdx+1)+" / "+pSegs.length;
+  document.getElementById("pSeg").textContent=(seg.label||"Étape")+" "+(pIdx+1)+"/"+pSegs.length;
   if(seg.kind==="flow"){
     pState.side=1;
     var clock= seg.hold?('<div class="pclock bebas" id="pc">'+seg.hold+'</div>'):'';
@@ -576,10 +586,20 @@ function renderSeg(){
     body.innerHTML=clock+'<div class="pname bebas">'+seg.name+(seg.side?' · Côté 1':'')+'</div>'+sub+'<div class="pcue">'+seg.cue+'</div>';
     if(seg.hold){ startHold(seg); act.innerHTML='<button class="btn btn-ghost" onclick="nextSeg()">Passer</button>'; }
     else { act.innerHTML='<button class="btn btn-acid" onclick="nextSeg()">'+(pIdx===pSegs.length-1?'TERMINER':'SUIVANT')+'</button>'; }
+  } else {
+    renderReady(seg);
   }
-  else if(seg.kind==="emom"){ startEmom(seg); }
-  else if(seg.kind==="amrap"){ startAmrap(seg); }
 }
+function renderReady(seg){
+  document.getElementById("pSeg").textContent=(seg.label||fmtName(seg.kind));
+  document.getElementById("pBody").innerHTML=
+    '<div class="pmin">'+fmtName(seg.kind)+' · '+durLabel(seg)+'</div>'
+    +(seg.name?'<div class="pname bebas">'+seg.name+'</div>':'')
+    +'<div class="pcue">Prépare ton matos. Lance le chrono quand tu es prêt.</div>'
+    +'<div class="plist">'+movesList(seg)+'</div>';
+  document.getElementById("pAct").innerHTML='<button class="btn btn-orange" onclick="startTimed()">▶ DÉMARRER</button>';
+}
+function startTimed(){ unlockAudio(); var seg=pSegs[pIdx]; if(seg.kind==="amrap")startAmrap(seg); else if(seg.kind==="emom")startEmom(seg); else startForTime(seg); }
 function startHold(seg){
   var t=seg.hold; document.getElementById("pc").textContent=t;
   pTimer=setInterval(function(){
@@ -594,12 +614,11 @@ function startHold(seg){
 }
 function startEmom(seg){
   var min=1,sec=60,N=seg.minutes,paused=false;
-  function mv(){return (min%2===1)?seg.odd:seg.even;}
+  function mv(){ return seg.moves[(min-1)%seg.moves.length]; }
   function draw(){var m=mv();document.getElementById("pBody").innerHTML=
     '<div class="pclock bebas" id="pc">'+sec+'</div><div class="pmin">MIN '+min+' / '+N+'</div>'
-    +'<div class="pname bebas">'+m.name+'</div><div class="preps">'+m.reps+'</div><div class="pcue">'+m.cue+'</div>';
+    +'<div class="pname bebas">'+m.name+'</div>'+(m.reps?'<div class="preps">'+m.reps+'</div>':'')+(m.cue?'<div class="pcue">'+m.cue+'</div>':'');
     document.getElementById("pc").className='pclock bebas'+(sec<=3?' hot':(sec<=10?' warn':''));}
-  document.getElementById("pSeg").textContent=seg.label||"EMOM";
   draw();
   document.getElementById("pAct").innerHTML='<button class="btn btn-ghost" id="pPause">Pause</button>';
   document.getElementById("pPause").onclick=function(){paused=!paused;this.textContent=paused?"Reprendre":"Pause";};
@@ -610,6 +629,19 @@ function startEmom(seg){
     draw();
   },1000);
 }
+function startForTime(seg){
+  ftSec=0; var cap=seg.cap||720;
+  function draw(){document.getElementById("pBody").innerHTML=
+    '<div class="pclock bebas" id="pc">'+fmtClock(ftSec)+'</div>'
+    +(seg.name?'<div class="pname bebas">'+seg.name+'</div>':'')
+    +'<div class="preps">'+seg.rounds+' rounds à boucler</div>'
+    +'<div class="plist">'+movesList(seg)+'</div>';
+    document.getElementById("pc").className='pclock bebas'+(ftSec>=cap-10?' hot':(ftSec>=cap-60?' warn':''));}
+  draw();
+  document.getElementById("pAct").innerHTML='<button class="btn btn-go" onclick="finishForTime()">TERMINÉ ✓</button>';
+  pTimer=setInterval(function(){ ftSec++; if(ftSec>=cap){clearInterval(pTimer);dbeep();pState.timeStr=fmtClock(cap)+" (cap)";nextSeg();return;} if(ftSec%60===0)beep(700,.08); draw(); },1000);
+}
+function finishForTime(){ clearInterval(pTimer); pState.timeStr=fmtClock(ftSec); beep(1000,.12); nextSeg(); }
 function startAmrap(seg){
   var sec=seg.sec,rounds=0;
   function fmt(s){var m=Math.floor(s/60),x=s%60;return m+":"+(x<10?"0":"")+x;}
@@ -633,15 +665,17 @@ function finishPlayer(){
   if(pIsSupp){
     // WOD supp = entrée indépendante, validation optionnelle
     var wod=WODS_SUPP[lastWodIdx];
+    var k0=pSegs[0].kind;
+    var score = k0==="fortime" ? (pState.timeStr||"—") : (k0==="amrap" ? ((pState.rounds||0)+" rounds") : "complété");
+    var scoreLbl = k0==="fortime" ? "TEMPS" : (k0==="amrap" ? "ROUNDS" : "FAIT");
     var entry={id:"w_"+Date.now(),dateKey:pKey,ts:Date.now(),
       typeKey:"wod-supp",type:"WOD SUPP",title:wod.name,color:"var(--purp)",
-      rpe:"",zp:"",jambes:"",score:pState.rounds?pState.rounds+" rounds":"",note:""};
+      rpe:"",zp:"",jambes:"",score:score,note:""};
     curKey=pKey; editing=entry;
     openSheet(pKey);
-    // affiche le WOD supp avec option validation
     document.getElementById("shTitle").textContent=wod.name;
-    document.getElementById("shWhy").textContent="WOD supplémentaire — format libre. Valide ou ignore.";
-    document.getElementById("shSpecs").innerHTML='<div class="spec"><b>'+pState.rounds+' rounds</b>SCORE</div>';
+    document.getElementById("shWhy").textContent="WOD supplémentaire ("+fmtName(k0)+") — valide ou ignore.";
+    document.getElementById("shSpecs").innerHTML='<div class="spec"><b>'+score+'</b>'+scoreLbl+'</div>';
     document.getElementById("shForm").style.display="none";
     document.getElementById("shButtons").innerHTML='<button class="btn btn-go" onclick="saveSuppWod()">VALIDER CE WOD</button><button class="btn btn-ghost" onclick="closeSheet()">Ignorer</button>';
   } else {
