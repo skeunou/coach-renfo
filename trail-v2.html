@@ -205,6 +205,7 @@
   <!-- SEMAINE -->
   <section class="view" id="v-week">
     <div class="topline"><div><div class="eyebrow">Vue d'ensemble</div><div class="bigtitle bebas">LA SEMAINE</div></div></div>
+    <div id="coachRead"></div>
     <div id="weekViewBody"></div>
     <div class="capnote" style="margin-top:2px">Repères : VMA 16,5 km/h · FCmax 179 bpm. Allures = références plat ; sur trail (D+), pilote à la FC / sensation. Dis-moi pour ajuster.</div>
   </section>
@@ -244,6 +245,7 @@
       <div class="specs" id="shSpecs" style="margin-bottom:16px"></div>
     </div>
     <div id="shSummary"></div>
+    <div id="shCoach"></div>
     <div id="shPlayBtn"></div>
     <div id="shForm" style="display:none;margin-top:8px">
       <div id="shFields"></div>
@@ -649,6 +651,65 @@ function stravaCompare(s,lk){
 }
 function sessionDone(s){return !!entryFor(s.dateKey)||(s.plan&&s.plan.sid&&isLinked(s.plan.sid));}
 
+/* ===== ANALYSE COACH (V3+) ===== */
+function hrZone(hr){
+  if(!hr)return {z:0,l:"—"};
+  if(hr<FCMAX*0.70)return {z:1,l:"Z1"};
+  if(hr<=FCMAX*0.80)return {z:2,l:"Z2"};
+  if(hr<=FCMAX*0.87)return {z:3,l:"Z3"};
+  if(hr<=FCMAX*0.92)return {z:4,l:"Z4"};
+  return {z:5,l:"Z5"};
+}
+function zColor(z){return z<=2?"var(--grn)":(z===3?"var(--warn)":"var(--orange)");}
+// Déc ouplage Pa:HR sur km plats pleins → distingue "dérive" de "négatif split"
+function decoupling(splits){
+  if(!splits||splits.length<4)return null;
+  var flat=splits.filter(function(s){return s.sec>180&&s.hr&&s.spd&&Math.abs((s.elev/(s.d||1))*100)<3;});
+  if(flat.length<4)return null;
+  var hN=Math.floor(flat.length/2);
+  function rt(a){var s=0;a.forEach(function(l){s+=l.hr/l.spd;});return s/a.length;}
+  var r1=rt(flat.slice(0,hN)), r2=rt(flat.slice(hN));
+  // tendance d'allure : a-t-il accéléré ? (vitesse 2e moitié vs 1re)
+  function av(a,k){var s=0;a.forEach(function(l){s+=l[k];});return s/a.length;}
+  var sp1=av(flat.slice(0,hN),"spd"), sp2=av(flat.slice(hN),"spd");
+  return {dec:(r2-r1)/r1*100, accel:(sp2-sp1)/sp1*100, n:flat.length};
+}
+function coachRun(a,typeKey){
+  var hr=a.hrAvg, z=hrZone(hr), hot=(a.temp!=null&&a.temp>=25);
+  var rows='<div class="summary" style="border-left:3px solid var(--acc)">';
+  rows+='<div class="row"><span style="color:var(--acc);font-weight:700">⌁ Analyse Coach</span><b></b></div>';
+  if(typeKey==="cotes"){
+    var zm=hrZone(a.hrMax);
+    rows+='<div class="row"><span>FC moy / pics</span><b>'+hr+' ('+z.l+') · max '+a.hrMax+' ('+zm.l+')</b></div>';
+    rows+='<div class="row"><span style="font-size:12px;line-height:1.4">Tu touches '+zm.l+' en bosse mais la moyenne reste '+z.l+' : <b style="color:var(--grn)">jamais bloqué cardio</b>. Ta limite en montée est <b>musculaire</b> → le renfo excentrique est le bon levier.</span><b></b></div>';
+  } else {
+    var cible = typeKey==="longue"?"Z2 (≤"+FCZ2HI+")":"Z2 (≤"+FCZ2HI+")";
+    var verdict = z.z<=2?"EF tenu en Z2 ✓":(z.z===3?"un cran trop haut (Z3)":"trop rapide ("+z.l+")");
+    rows+='<div class="row"><span>FC moy</span><b style="color:'+zColor(z.z)+'">'+hr+' = '+z.l+'</b></div>';
+    rows+='<div class="row"><span>Verdict</span><b style="color:'+zColor(z.z)+'">'+verdict+'</b></div>';
+    var dc=decoupling(a.splits);
+    if(dc){
+      var msg;
+      if(dc.dec>5 && dc.accel<2) msg='<b style="color:var(--orange)">dérive +'+dc.dec.toFixed(0)+'%</b> à allure stable → chaleur / sous-alim / fatigue';
+      else if(dc.accel>5) msg='<b>négatif split</b> (+'+dc.accel.toFixed(0)+'% d\'allure) : tu as accéléré, pas dérivé';
+      else msg='<b style="color:var(--grn)">stable</b> (déc. '+dc.dec.toFixed(0)+'%) : effort bien tenu';
+      rows+='<div class="row"><span style="font-size:12px;line-height:1.4">'+msg+'</span><b></b></div>';
+    }
+    if(hot && z.z>2) rows+='<div class="row"><span style="font-size:12px;color:var(--mut);line-height:1.4">⚠️ '+Math.round(a.temp)+'° : une partie de la FC haute est thermique. En chaleur, <b>ralentis pour tenir la zone</b> au lieu de tenir l\'allure.</span><b></b></div>';
+  }
+  rows+='</div>';
+  return rows;
+}
+function loadCoach(activityId,typeKey){
+  var box=document.getElementById("shCoach"); if(!box)return;
+  if(!stravaToken){box.innerHTML="";return;}
+  box.innerHTML='<div class="summary" style="border-left:3px solid var(--acc)"><div class="row"><span style="color:var(--mut)">⌁ Analyse en cours…</span><b></b></div></div>';
+  fetch(NF+"?action=act&token="+encodeURIComponent(stravaToken)+"&id="+encodeURIComponent(activityId))
+    .then(function(r){return r.json();})
+    .then(function(a){ if(a&&!a.error&&a.hrAvg) box.innerHTML=coachRun(a,typeKey); else box.innerHTML=""; })
+    .catch(function(){ box.innerHTML=""; });
+}
+
 /* ================= RENDER TODAY ================= */
 var today=new Date();
 function renderToday(){
@@ -698,6 +759,32 @@ function renderWeekView(){
     out+='</div>';
   }
   document.getElementById("weekViewBody").innerHTML=out;
+  renderCoachRead();
+}
+function renderCoachRead(){
+  var box=document.getElementById("coachRead"); if(!box)return;
+  var mon=new Date(today); mon.setHours(0,0,0,0); mon.setDate(today.getDate()-(dowMon(today)-1));
+  var easyOk=0,easyTot=0,cote=0,hi=0;
+  for(var i=0;i<7;i++){
+    var d=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+i), s=sessionFor(d), sid=s.plan.sid;
+    if(!sid||!isLinked(sid))continue;
+    var lk=linkedData(sid); if(!lk||!lk.hrAvg)continue;
+    if(s.typeKey==="fond"||s.typeKey==="longue"){ easyTot++; if(hrZone(lk.hrAvg).z<=2)easyOk++; else hi++; }
+    else if(s.typeKey==="cotes") cote++;
+  }
+  if(easyTot+cote===0){ box.innerHTML=""; return; }
+  var msg='<div class="summary" style="border-left:3px solid var(--acc);margin-bottom:14px">';
+  msg+='<div class="row"><span style="color:var(--acc);font-weight:700">⌁ Lecture de la semaine</span><b></b></div>';
+  if(easyTot) msg+='<div class="row"><span>EF en zone</span><b style="color:'+(easyOk===easyTot?"var(--grn)":"var(--warn)")+'">'+easyOk+'/'+easyTot+' en Z2</b></div>';
+  if(cote) msg+='<div class="row"><span>Côtes</span><b>'+cote+' faite'+(cote>1?'s':'')+'</b></div>';
+  var sugg;
+  if(hi>=2) sugg="Plusieurs EF trop haut cette semaine. Polarise : tes faciles vraiment faciles (Z2), ça libère de la qualité pour les côtes.";
+  else if(hi===1) sugg="1 EF un cran trop haut — surveille la chaleur, ralentis pour tenir Z2.";
+  else if(easyTot) sugg="EF bien tenus en Z2. Base aérobie propre, continue.";
+  else sugg="Côtes loguées — la qualité avance.";
+  msg+='<div class="row"><span style="font-size:12px;line-height:1.4;color:var(--mut)">💡 '+sugg+'</span><b></b></div>';
+  msg+='</div>';
+  box.innerHTML=msg;
 }
 
 /* ================= SHEET ================= */
@@ -736,6 +823,8 @@ function openSheet(k){
     btns='<button class="btn btn-ghost" onclick="closeSheet()">Fermer</button><button class="btn btn-go" onclick="openForm()">'+(hasPlayer(s.typeKey)?'VALIDER À LA MAIN':'VALIDER')+'</button>';
   }
   document.getElementById("shSummary").innerHTML=sum;
+  var coachBox=document.getElementById("shCoach"); if(coachBox)coachBox.innerHTML="";
+  if(linked && (s.typeKey==="fond"||s.typeKey==="longue"||s.typeKey==="cotes")) loadCoach(linked.id,s.typeKey);
   document.getElementById("shPlayBtn").innerHTML=playBtn;
   document.getElementById("shButtons").innerHTML=btns;
   document.getElementById("shButtons").style.display="flex";
