@@ -225,7 +225,7 @@
   <section class="view" id="v-log">
     <div class="topline">
       <div><div class="eyebrow">Suivi</div><div class="bigtitle bebas">HISTORIQUE</div></div>
-      <div class="blockbadge" style="background:var(--bg);border:1px solid var(--line)">Local</div>
+      <div class="blockbadge" id="syncBadge" style="background:var(--bg);border:1px solid var(--line)">Local</div>
     </div>
     <div class="card"><div class="empty" id="logEmpty">Aucune séance validée pour l'instant.<br>Valide ta première depuis l'accueil.</div><div id="logList"></div></div>
   </section>
@@ -563,14 +563,68 @@ function sessionFor(d){var b=blockFor(d),g=gen(d);return {dateKey:iso(d),date:d,
 /* ================= STORAGE (seam synchro) ================= */
 var LOG_KEY="lvtrail:v2:log";
 function loadLog(){try{return JSON.parse(localStorage.getItem(LOG_KEY)||"[]");}catch(e){return [];}}
-function saveLog(a){localStorage.setItem(LOG_KEY,JSON.stringify(a));}
-function syncPush(){ /* TODO Netlify */ }
+function _writeLog(a){try{localStorage.setItem(LOG_KEY,JSON.stringify(a));}catch(e){}}
+function saveLog(a){_writeLog(a);cloudSave();}
 function entryFor(k){return loadLog().filter(function(e){return e.dateKey===k;})[0]||null;}
+
+/* ===== CLOUD SYNC (Netlify Blobs) ===== */
+var SYNC_URL="https://coach-nutrition.netlify.app/.netlify/functions/lvsync", SYNC_USER="laurent";
+var syncMuted=false, syncTimer=null;
+function setSyncBadge(state){
+  var b=document.getElementById("syncBadge"); if(!b)return;
+  if(state==="ok"){b.textContent="Synchronisé ✓";b.style.color="var(--grn)";b.style.borderColor="var(--grn)";}
+  else if(state==="pending"){b.textContent="Sync…";b.style.color="var(--mut)";b.style.borderColor="var(--line)";}
+  else if(state==="err"){b.textContent="Local (hors-ligne)";b.style.color="var(--orange)";b.style.borderColor="var(--line)";}
+  else {b.textContent="Local";b.style.color="var(--mut)";b.style.borderColor="var(--line)";}
+}
+function cloudSave(){
+  if(syncMuted)return;
+  setSyncBadge("pending");
+  if(syncTimer)clearTimeout(syncTimer);
+  syncTimer=setTimeout(cloudSaveNow,1200); // debounce : 1 écriture par rafale
+}
+function cloudSaveNow(){
+  var payload={log:loadLog(),links:linksGet()};
+  fetch(SYNC_URL+"?action=save&user="+SYNC_USER,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)})
+    .then(function(r){return r.json();})
+    .then(function(d){ setSyncBadge(d&&d.ok?"ok":"err"); })
+    .catch(function(){ setSyncBadge("err"); });
+}
+function cloudPull(cb){
+  fetch(SYNC_URL+"?action=get&user="+SYNC_USER)
+    .then(function(r){return r.json();})
+    .then(function(d){ cb(d&&!d.error?d:null); })
+    .catch(function(){ cb(null); });
+}
+function mergeCloud(d){
+  if(!d)return false;
+  syncMuted=true; // on fusionne sans re-déclencher de push pendant l'opération
+  // liaisons : union (le local prime s'il existe déjà)
+  var locL=linksGet(), cl=d.links||{};
+  Object.keys(cl).forEach(function(k){ if(!locL[k]) locL[k]=cl[k]; });
+  _writeLinks(locL);
+  // journal : union par dateKey, on garde l'entrée la plus récente (_u)
+  var byKey={}; loadLog().forEach(function(e){byKey[e.dateKey]=e;});
+  (d.log||[]).forEach(function(e){ var ex=byKey[e.dateKey]; if(!ex||((e._u||0)>(ex._u||0))) byKey[e.dateKey]=e; });
+  _writeLog(Object.keys(byKey).map(function(k){return byKey[k];}));
+  syncMuted=false;
+  return true;
+}
+function initCloud(){
+  setSyncBadge("pending");
+  cloudPull(function(d){
+    if(d){ mergeCloud(d); renderToday(); renderLog();
+      if(document.getElementById("v-week").classList.contains("on"))renderWeekView();
+      cloudSaveNow(); // re-pousse l'état fusionné (superset) pour aligner le cloud
+    } else setSyncBadge("err");
+  });
+}
 
 /* ===== LIAISON STRAVA ↔ PLAN (V3) ===== */
 var LK="lvtrail:strava:links";
 function linksGet(){try{return JSON.parse(localStorage.getItem(LK)||"{}");}catch(e){return {};}}
-function linksSet(o){try{localStorage.setItem(LK,JSON.stringify(o));}catch(e){}}
+function _writeLinks(o){try{localStorage.setItem(LK,JSON.stringify(o));}catch(e){}}
+function linksSet(o){_writeLinks(o);cloudSave();}
 function parseSid(name){var m=(name||"").match(/\bS(\d+(?:\.\d+)?)\b/i);return m?("S"+m[1]):"";}
 function isLinked(sid){return !!(sid&&linksGet()[sid]);}
 function linkedData(sid){return (sid&&linksGet()[sid])||null;}
@@ -720,13 +774,13 @@ function openForm(prefillScore){
 function val(id){var e=document.getElementById(id);return e?e.value:"";}
 function saveSession(){
   var s=sessionFor(parse(curKey));
-  var entry={id:editing?editing.id:("s_"+Date.now()),dateKey:curKey,ts:Date.now(),
+  var entry={id:editing?editing.id:("s_"+Date.now()),dateKey:curKey,ts:Date.now(),_u:Date.now(),
     typeKey:s.typeKey,type:s.info.type,title:s.info.label,color:s.info.color,
     rpe:val("fRpe"),zp:val("fZp"),jambes:val("fJambes"),score:val("fScore"),
     duree:val("fDuree"),dplus:val("fDplus"),note:(val("fNote")||"").trim()};
   var log=loadLog().filter(function(e){return e.dateKey!==curKey;});
   log.unshift(entry); log.sort(function(a,b){return a.dateKey<b.dateKey?1:-1;});
-  saveLog(log); syncPush();
+  saveLog(log);
   closeSheet(); renderToday(); renderLog();
 }
 function deleteSession(){
@@ -876,12 +930,12 @@ function finishPlayer(){
 }
 function saveSuppWod(){
   var log=loadLog();
-  var entry={id:"w_"+Date.now(),dateKey:curKey,ts:Date.now(),
+  var entry={id:"w_"+Date.now(),dateKey:curKey,ts:Date.now(),_u:Date.now(),
     typeKey:"wod-supp",type:"WOD SUPP",title:editing.title,color:"var(--purp)",
     rpe:"",zp:"",jambes:"",score:editing.score,note:""};
   log.unshift(entry);
   log.sort(function(a,b){return a.dateKey<b.dateKey?1:-1;});
-  saveLog(log); syncPush();
+  saveLog(log);
   closeSheet(); renderToday(); renderLog();
 }
 
@@ -988,6 +1042,7 @@ function nav(v){["today","week","horizon","log"].forEach(function(x){document.ge
 /* ================= INIT ================= */
 renderToday(); renderHorizon(); renderLog(); renderStravaCard();
 if(stravaToken) loadStravaData();
+initCloud();
 </script>
 </body>
 </html>
