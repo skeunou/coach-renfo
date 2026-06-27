@@ -800,6 +800,12 @@ function loadCoach(activityId,typeKey){
 
 /* ================= RENDER TODAY ================= */
 var today=new Date();
+var lastDateKey=iso(today);
+setInterval(function(){
+  var now=new Date();
+  var nowKey=iso(now);
+  if(nowKey!==lastDateKey){ location.reload(); }
+},30000); // Check toutes les 30 sec
 function renderToday(){
   var s=sessionFor(today);
   document.getElementById("todayDate").textContent=JOURS[dowMon(today)-1]+" "+today.getDate()+" "+MOIS[today.getMonth()];
