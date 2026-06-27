@@ -235,7 +235,10 @@
 <!-- SHEET -->
 <div class="sheet" id="sheet" onclick="if(event.target===this)closeSheet()">
   <div class="panel">
-    <div class="grab"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div class="grab"></div>
+      <button class="x" onclick="closeSheet()" style="border:none;background:none;color:var(--acc);font-size:18px;cursor:pointer;padding:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>
     <div class="eyebrow" id="shType">—</div>
     <h2 class="bebas" style="font-size:34px;line-height:1;margin:5px 0 4px" id="shTitle">—</h2>
     <div class="sub" id="shDate" style="margin-bottom:14px;color:var(--mut);font-weight:600"></div>
@@ -764,11 +767,34 @@ function coachRun(a,typeKey){
 }
 function loadCoach(activityId,typeKey){
   var box=document.getElementById("shCoach"); if(!box)return;
-  if(!stravaToken){box.innerHTML="";return;}
-  box.innerHTML='<div class="summary" style="border-left:3px solid var(--acc)"><div class="row"><span style="color:var(--mut)">⌁ Analyse en cours…</span><b></b></div></div>';
+  if(!stravaToken){
+    // Pas de token : affiche une démo si c'est une côte
+    if(typeKey==="cotes"){
+      var demo={hrAvg:148,hrMax:169,reps:{name:"Mont Thou Xpress (exemple)",climb:204,dist:1031,list:[
+        {sec:636,w:300,cad:125,hr:140},{sec:651,w:322,cad:143,hr:156},
+        {sec:671,w:314,cad:144,hr:157},{sec:701,w:300,cad:139,hr:153},
+        {sec:682,w:282,cad:131,hr:151}]}};
+      box.innerHTML=coachCotes(demo);
+    } else box.innerHTML="";
+    return;
+  }
+  box.innerHTML='<div class="summary" style="border-left:3px solid var(--blue)"><div class="row"><span style="color:var(--mut)">⌁ Analyse en cours…</span><b></b></div></div>';
   fetch(NF+"?action=act&token="+encodeURIComponent(stravaToken)+"&id="+encodeURIComponent(activityId))
     .then(function(r){return r.json();})
-    .then(function(a){ if(a&&!a.error&&a.hrAvg) box.innerHTML=coachRun(a,typeKey); else box.innerHTML=""; })
+    .then(function(a){ 
+      if(a&&!a.error&&a.hrAvg){
+        box.innerHTML=coachRun(a,typeKey);
+      } else if(typeKey==="cotes"){
+        // Fallback : erreur Strava sur une côte → démo
+        var demo={hrAvg:148,hrMax:169,reps:{name:"Mont Thou Xpress (exemple)",climb:204,dist:1031,list:[
+          {sec:636,w:300,cad:125,hr:140},{sec:651,w:322,cad:143,hr:156},
+          {sec:671,w:314,cad:144,hr:157},{sec:701,w:300,cad:139,hr:153},
+          {sec:682,w:282,cad:131,hr:151}]}};
+        box.innerHTML=coachCotes(demo);
+      } else {
+        box.innerHTML="";
+      }
+    })
     .catch(function(){ box.innerHTML=""; });
 }
 
