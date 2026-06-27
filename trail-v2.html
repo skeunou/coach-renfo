@@ -868,7 +868,8 @@ function renderWeek(){
   document.getElementById("weekRange").textContent=mon.getDate()+" "+MOIS[mon.getMonth()]+" → "+sun.getDate()+" "+MOIS[sun.getMonth()];
   var html="";
   for(var i=0;i<7;i++){var d=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+i);var s=sessionFor(d);
-    html+='<div class="day'+(iso(d)===iso(today)?' today':'')+(sessionDone(s)?' done':'')+'" onclick="openSheet(\''+iso(d)+'\')">'
+    var hasX=extrasForDay(iso(d)).length>0;
+    html+='<div class="day'+(iso(d)===iso(today)?' today':'')+((sessionDone(s)||hasX)?' done':'')+'" onclick="openSheet(\''+iso(d)+'\')">'
       +'<div class="dow">'+JOURS[i]+'</div><div class="dnum">'+d.getDate()+'</div><div class="pip" style="background:'+s.info.color+'"></div></div>';}
   document.getElementById("weekStrip").innerHTML=html;
 }
@@ -882,7 +883,7 @@ function renderWeekView(){
     var range=mon.getDate()+(mon.getMonth()!==sun.getMonth()?' '+MOIS[mon.getMonth()]:'')+'–'+sun.getDate()+' '+MOIS[sun.getMonth()];
     out+='<div class="wkhead"><div class="wktitle bebas">'+(w===0?'Cette semaine':'Semaine prochaine')+'</div><div class="wkmeta">'+range+' · '+blk.name+'</div></div>';
     out+='<div class="card" style="padding:0;margin-bottom:18px;overflow:hidden">';
-    for(var i=0;i<7;i++){var d=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+i);var s=sessionFor(d);var done=sessionDone(s);var dd=s.plan;
+    for(var i=0;i<7;i++){var d=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+i);var s=sessionFor(d);var done=sessionDone(s)||extrasForDay(iso(d)).length>0;var dd=s.plan;
       out+='<div class="wkrow'+(iso(d)===iso(today)?' wktoday':'')+'" onclick="openSheet(\''+iso(d)+'\')">'
         +'<div class="wkdn bebas">'+JOURS[i]+' '+d.getDate()+'</div>'
         +'<div class="wkdesc"><span class="pip" style="background:'+s.info.color+'"></span><div class="wtxt"><div class="wm">'+(dd.sid?'<span style="color:var(--blue)">'+dd.sid+'</span> · ':'')+dd.label+'</div>'+(dd.sub?'<div class="wsub">'+dd.sub+'</div>':'')+'</div></div>'
