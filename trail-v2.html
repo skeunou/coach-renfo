@@ -190,6 +190,7 @@
       <div class="specs" id="heroSpecs"></div>
       <div id="heroActions"></div>
     </div>
+    <div id="extrasBox"></div>
     <div class="weeklbl"><span class="eyebrow">Ta semaine</span><span class="eyebrow" id="weekRange">—</span></div>
     <div class="week" id="weekStrip"></div>
     <div class="card stravacard">
@@ -255,6 +256,21 @@
       <button class="btn btn-acid" onclick="saveSession()">ENREGISTRER</button>
     </div>
     <div id="shButtons" class="btn-row"></div>
+  </div>
+</div>
+
+<!-- MODAL AJOUTER UNE ACTIVITÉ -->
+<div class="sheet" id="addSheet" onclick="if(event.target===this)closeAdd()">
+  <div class="panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div class="grab"></div>
+      <button class="x" onclick="closeAdd()" style="border:none;background:none;color:var(--acc);font-size:18px;cursor:pointer;padding:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>
+    <div class="eyebrow">Suivi hors plan</div>
+    <h2 class="bebas" style="font-size:30px;line-height:1;margin:4px 0 14px">Ajouter une activité</h2>
+    <div id="addSportRow" style="display:flex;gap:8px;margin-bottom:14px"></div>
+    <div id="addModeRow" style="display:flex;gap:8px;margin-bottom:14px"></div>
+    <div id="addBody"></div>
   </div>
 </div>
 
@@ -589,7 +605,7 @@ function cloudSave(){
   syncTimer=setTimeout(cloudSaveNow,1200); // debounce : 1 écriture par rafale
 }
 function cloudSaveNow(){
-  var payload={log:loadLog(),links:linksGet()};
+  var payload={log:loadLog(),links:linksGet(),extras:extrasGet()};
   fetch(SYNC_URL+"?action=save&user="+SYNC_USER,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)})
     .then(function(r){return r.json();})
     .then(function(d){ setSyncBadge(d&&d.ok?"ok":"err"); })
@@ -612,6 +628,10 @@ function mergeCloud(d){
   var byKey={}; loadLog().forEach(function(e){byKey[e.dateKey]=e;});
   (d.log||[]).forEach(function(e){ var ex=byKey[e.dateKey]; if(!ex||((e._u||0)>(ex._u||0))) byKey[e.dateKey]=e; });
   _writeLog(Object.keys(byKey).map(function(k){return byKey[k];}));
+  // extras : union par xid, on garde le plus récent
+  var byX={}; extrasGet().forEach(function(e){byX[e.xid]=e;});
+  (d.extras||[]).forEach(function(e){ var ex=byX[e.xid]; if(!ex||((e._u||0)>(ex._u||0))) byX[e.xid]=e; });
+  _writeExtras(Object.keys(byX).map(function(k){return byX[k];}));
   syncMuted=false;
   return true;
 }
@@ -641,6 +661,16 @@ function scanLinks(all){
   var added=0; Object.keys(fresh).forEach(function(sid){if(!links[sid])added++; links[sid]=fresh[sid];});
   linksSet(links); return added;
 }
+
+/* ===== ACTIVITÉS EXTRA (vélo, rando… — suivi hors plan) ===== */
+var XK="lvtrail:extras";
+function extrasGet(){try{return JSON.parse(localStorage.getItem(XK)||"[]");}catch(e){return [];}}
+function _writeExtras(a){try{localStorage.setItem(XK,JSON.stringify(a));}catch(e){}}
+function extrasSet(a){_writeExtras(a);cloudSave();}
+function extrasForDay(key){return extrasGet().filter(function(e){return e.dateKey===key;});}
+function addExtra(o){var a=extrasGet().filter(function(e){return !(o.sid&&e.sid===o.sid);});o._u=Date.now();o.xid=o.xid||("x"+Date.now()+Math.floor(Math.random()*1000));a.push(o);extrasSet(a);}
+function delExtra(xid){extrasSet(extrasGet().filter(function(e){return e.xid!==xid;}));}
+var SPORTS={velo_ht:{ic:"🚴",l:"Vélo HT"},velo_route:{ic:"🚴",l:"Vélo route"}};
 function fmtMin(m){return m>=60?(Math.floor(m/60)+"h"+String(m%60).padStart(2,"0")):(m+"′");}
 function stravaCompare(s,lk){
   var tk=s.typeKey,P=s.plan.plan||{},h='<div class="summary" style="border-left:3px solid #fc4c02">';
@@ -824,6 +854,7 @@ function renderToday(){
   else { a='<button class="btn btn-go" onclick="openSheet(\''+s.dateKey+'\')">VOIR / VALIDER</button>'; }
   document.getElementById("heroActions").innerHTML=a;
   renderWeek();
+  renderExtras();
 }
 function renderWeek(){
   var mon=new Date(today); mon.setHours(0,0,0,0); mon.setDate(today.getDate()-(dowMon(today)-1));
@@ -1160,6 +1191,7 @@ function getUrlParam(n){return new URLSearchParams(window.location.search).get(n
 var NF="https://coach-nutrition.netlify.app/.netlify/functions/lvstrava";
 
 var stravaToken=lsGet(SK_TOK), stravaRefresh=lsGet(SK_REF), stravaExp=parseInt(lsGet(SK_EXP)||"0");
+var lastActs=[];
 // capture depuis l'URL après callback
 (function(){
   var t=getUrlParam("strava_token"), rf=getUrlParam("strava_refresh"), ex=getUrlParam("strava_exp"), err=getUrlParam("strava_error");
@@ -1199,6 +1231,7 @@ function fetchStravaData(retried){
         return;
       }
       var n=d.weekCount||0;
+      lastActs=Array.isArray(d.all)?d.all:[];
       var added=scanLinks(d.all);
       var lc=linkCount();
       var linkTxt = lc?(' <span style="color:#fc4c02">· '+lc+' liée'+(lc>1?'s':'')+'</span>'):'';
@@ -1221,6 +1254,100 @@ function renderStravaCard(){
   else { stravaMsg("Strava à connecter"); document.getElementById("stravaGo").textContent='Connecter →'; var el=document.getElementById("stravaActs"); if(el)el.innerHTML=""; }
 }
 function nav(v){["today","week","horizon","log"].forEach(function(x){document.getElementById("v-"+x).classList.toggle("on",x===v);document.getElementById("nav-"+x).classList.toggle("on",x===v);});if(v==="week")renderWeekView();if(v==="horizon")renderHorizon();if(v==="log")renderLog();window.scrollTo(0,0);}
+
+/* ===== UI ACTIVITÉS EXTRA (vélo / suivi hors plan) ===== */
+var addSport="velo_ht", addMode="strava", addShowAll=false;
+function renderExtras(){
+  var box=document.getElementById("extrasBox"); if(!box)return;
+  var list=extrasForDay(iso(today));
+  var h='';
+  if(list.length){
+    h+='<div class="weeklbl" style="margin-top:4px"><span class="eyebrow">Activités du jour</span><span class="eyebrow"></span></div>';
+    list.forEach(function(e){ h+=extraCard(e); });
+  }
+  h+='<button class="btn btn-ghost" style="width:100%;margin-top:8px" onclick="openAdd()">+ Ajouter une activité</button>';
+  box.innerHTML=h;
+}
+function extraCard(e){
+  var sp=SPORTS[e.sport]||{ic:"•",l:e.sport};
+  var stats='';
+  if(e.wAvg) stats+=e.wAvg+'W moy';
+  if(e.hrAvg) stats+=(stats?' · ':'')+'FC '+e.hrAvg+(e.hrMax?' (max '+e.hrMax+')':'');
+  if(e.km) stats+=(stats?' · ':'')+e.km+' km';
+  if(e.note) stats+=(stats?' · ':'')+e.note;
+  var src=e.manual?'<span style="color:var(--mut);font-size:10px"> · manuel</span>':'';
+  return '<div class="card" style="border-left:3px solid var(--blue);padding:12px 14px;margin-top:8px">'+
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start">'+
+    '<div><div style="font-weight:700">'+sp.ic+' '+sp.l+' · '+fmtMin(e.durMin)+src+'</div>'+
+    (stats?'<div style="color:var(--mut);font-size:12.5px;margin-top:3px">'+stats+'</div>':'')+'</div>'+
+    '<button class="x" onclick="delExtraUI(\''+e.xid+'\')" style="border:none;background:none;color:var(--mut);font-size:15px;cursor:pointer;padding:0 0 0 8px">✕</button>'+
+    '</div></div>';
+}
+function delExtraUI(xid){ delExtra(xid); renderExtras(); }
+function openAdd(){ addSport="velo_ht"; addMode="strava"; addShowAll=false; renderAdd(); document.getElementById("addSheet").classList.add("on"); }
+function closeAdd(){ document.getElementById("addSheet").classList.remove("on"); }
+function setAddSport(s){ addSport=s; renderAdd(); }
+function setAddMode(m){ addMode=m; renderAdd(); }
+function renderAdd(){
+  document.getElementById("addSportRow").innerHTML=Object.keys(SPORTS).map(function(k){
+    return '<button class="btn '+(addSport===k?'btn-acid':'btn-ghost')+'" style="flex:1" onclick="setAddSport(\''+k+'\')">'+SPORTS[k].ic+' '+SPORTS[k].l+'</button>';
+  }).join("");
+  document.getElementById("addModeRow").innerHTML=
+    '<button class="btn '+(addMode==="strava"?"btn-go":"btn-ghost")+'" style="flex:1" onclick="setAddMode(\'strava\')">Depuis Strava</button>'+
+    '<button class="btn '+(addMode==="manual"?"btn-go":"btn-ghost")+'" style="flex:1" onclick="setAddMode(\'manual\')">Manuel</button>';
+  var b=document.getElementById("addBody");
+  if(addMode==="manual"){
+    b.innerHTML='<div style="margin-bottom:10px"><label style="font-size:12px;color:var(--mut)">Durée (minutes)</label>'+
+      '<input id="addDur" type="number" inputmode="numeric" placeholder="ex: 60" style="width:100%;padding:11px;border:1px solid var(--line);border-radius:12px;background:var(--paper);font-size:16px;margin-top:4px;box-sizing:border-box"></div>'+
+      '<div style="margin-bottom:14px"><label style="font-size:12px;color:var(--mut)">Note (optionnel)</label>'+
+      '<input id="addNote" type="text" placeholder="ex: récup jambes" style="width:100%;padding:11px;border:1px solid var(--line);border-radius:12px;background:var(--paper);font-size:16px;margin-top:4px;box-sizing:border-box"></div>'+
+      '<button class="btn btn-acid" style="width:100%" onclick="addManual()">Ajouter</button>';
+    return;
+  }
+  if(!stravaToken){ b.innerHTML='<div style="color:var(--mut);font-size:13px;padding:8px 0">Connecte Strava pour lier une activité, ou passe en mode Manuel.</div>'; return; }
+  var rides=lastActs.filter(function(a){return /ride/i.test(a.type||"");});
+  if(!rides.length){ b.innerHTML='<div style="color:var(--mut);font-size:13px;padding:8px 0">Aucune activité vélo récente. Recharge Strava (↻) ou passe en Manuel.</div>'; return; }
+  var show=rides.slice(0,addShowAll?10:3);
+  var h=show.map(function(a){
+    var d=a.date?a.date.split("-").reverse().slice(0,2).join("/"):"";
+    var sub=fmtMin(a.movingMin)+(a.km?' · '+a.km+' km':'')+(a.hrAvg?' · FC '+a.hrAvg:'');
+    return '<div class="card" style="padding:11px 13px;margin-bottom:8px;cursor:pointer" onclick="addPickStrava(\''+a.id+'\')">'+
+      '<div style="font-weight:700;font-size:14px">'+(a.name||"Sortie")+'</div>'+
+      '<div style="color:var(--mut);font-size:12px;margin-top:2px">'+d+' · '+sub+'</div></div>';
+  }).join("");
+  if(!addShowAll && rides.length>3) h+='<button class="btn btn-ghost" style="width:100%" onclick="addShowAll=true;renderAdd()">Voir plus (10 dernières)</button>';
+  b.innerHTML=h;
+}
+function addPickStrava(id){
+  var a=null; lastActs.forEach(function(x){if(String(x.id)===String(id))a=x;});
+  if(!a)return;
+  document.getElementById("addBody").innerHTML='<div style="color:var(--mut);padding:10px 0">Analyse en cours…</div>';
+  var key=a.date||iso(today);
+  fetch(NF+"?action=act&token="+encodeURIComponent(stravaToken)+"&id="+encodeURIComponent(id))
+    .then(function(r){return r.json();})
+    .then(function(det){
+      addExtra({sport:addSport,manual:false,sid:String(id),dateKey:key,
+        durMin:(det&&det.movingMin)||a.movingMin||0, km:(det&&det.km)||a.km||0,
+        hrAvg:(det&&det.hrAvg)||a.hrAvg||null, hrMax:(det&&det.hrMax)||a.hrMax||null,
+        wAvg:(det&&det.wAvg)||null, name:a.name||""});
+      finishAdd(key);
+    })
+    .catch(function(){
+      addExtra({sport:addSport,manual:false,sid:String(id),dateKey:key,durMin:a.movingMin||0,km:a.km||0,hrAvg:a.hrAvg||null,hrMax:a.hrMax||null,name:a.name||""});
+      finishAdd(key);
+    });
+}
+function finishAdd(key){
+  closeAdd(); renderToday();
+  if(key!==iso(today)){ var d=key.split("-").reverse().slice(0,2).join("/"); setTimeout(function(){alert("Activité ajoutée au "+d+" (visible ce jour-là).");},150); }
+}
+function addManual(){
+  var dur=parseInt(document.getElementById("addDur").value||"0");
+  if(!dur||dur<=0){ alert("Indique une durée en minutes."); return; }
+  var note=(document.getElementById("addNote").value||"").trim();
+  addExtra({sport:addSport,manual:true,dateKey:iso(today),durMin:dur,note:note});
+  closeAdd(); renderToday();
+}
 
 /* ================= INIT ================= */
 renderToday(); renderHorizon(); renderLog(); renderStravaCard();
