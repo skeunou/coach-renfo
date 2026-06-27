@@ -1202,6 +1202,7 @@ var lastActs=[];
 
 function stravaMsg(txt,color){ var s=document.getElementById("stravaState"); if(s){s.innerHTML=txt; s.style.color=color||"var(--mut)";} }
 function disconnectStrava(){ stravaToken="";stravaRefresh="";stravaExp=0; lsDel(SK_TOK);lsDel(SK_REF);lsDel(SK_EXP); renderStravaCard(); }
+function reconnectStrava(){ stravaToken="";stravaRefresh="";stravaExp=0; lsDel(SK_TOK);lsDel(SK_REF);lsDel(SK_EXP); window.location.href=NF+"?action=connect"; }
 
 function refreshStrava(cb){
   if(!stravaRefresh){ cb(false); return; }
@@ -1226,8 +1227,8 @@ function fetchStravaData(retried){
   fetch(NF+"?action=data&token="+encodeURIComponent(stravaToken)+"&weekStart="+weekStartUnix())
     .then(r=>r.json()).then(d=>{
       if(d.error){
-        if(!retried){ refreshStrava(function(ok){ if(ok) fetchStravaData(true); else stravaMsg("⚠️ Reconnecte (coche les cases d'accès)","var(--red)"); }); }
-        else stravaMsg("⚠️ Reconnecte (coche les cases d'accès)","var(--red)");
+        if(!retried){ refreshStrava(function(ok){ if(ok) fetchStravaData(true); else stravaMsg('⚠️ Accès incomplet — <a onclick="event.stopPropagation();reconnectStrava()" style="color:#fc4c02;text-decoration:underline;cursor:pointer;font-weight:700">Reconnecter</a> (coche la case activités)',"var(--red)"); }); }
+        else stravaMsg('⚠️ Accès incomplet — <a onclick="event.stopPropagation();reconnectStrava()" style="color:#fc4c02;text-decoration:underline;cursor:pointer;font-weight:700">Reconnecter</a> (coche la case activités)',"var(--red)");
         return;
       }
       var n=d.weekCount||0;
@@ -1245,7 +1246,7 @@ function fetchStravaData(retried){
 }
 function loadStravaData(){
   if(!stravaToken){ renderStravaCard(); return; }
-  if(stravaExp && (Date.now()/1000 > stravaExp-60)){ refreshStrava(function(ok){ if(ok) fetchStravaData(true); else stravaMsg("⚠️ Reconnecte","var(--red)"); }); }
+  if(stravaExp && (Date.now()/1000 > stravaExp-60)){ refreshStrava(function(ok){ if(ok) fetchStravaData(true); else stravaMsg('⚠️ <a onclick="event.stopPropagation();reconnectStrava()" style="color:#fc4c02;text-decoration:underline;cursor:pointer;font-weight:700">Reconnecter Strava</a>',"var(--red)"); }); }
   else fetchStravaData(false);
 }
 function goStrava(){ if(!stravaToken) window.location.href=NF+"?action=connect"; else loadStravaData(); }
