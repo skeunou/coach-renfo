@@ -191,7 +191,7 @@
       <div id="heroActions"></div>
     </div>
     <div id="extrasBox"></div>
-    <div class="weeklbl"><span class="eyebrow">Ta semaine</span><span class="eyebrow" id="weekRange">—</span></div>
+    <div class="weeklbl"><span class="eyebrow" id="weekLbl">Ta semaine</span><span style="display:flex;align-items:center;gap:8px"><span onclick="weekNav(-1)" style="cursor:pointer;font-size:20px;line-height:1;color:var(--blue);user-select:none;padding:2px 6px">‹</span><span class="eyebrow" id="weekRange">—</span><span onclick="weekNav(1)" style="cursor:pointer;font-size:20px;line-height:1;color:var(--blue);user-select:none;padding:2px 6px">›</span></span></div>
     <div class="week" id="weekStrip"></div>
     <div class="card stravacard">
       <div class="strava" onclick="goStrava()">
@@ -862,10 +862,14 @@ function renderToday(){
   renderWeek();
   renderExtras();
 }
+var weekOffset=0;
+function weekNav(d){ weekOffset+=d; renderWeek(); }
 function renderWeek(){
-  var mon=new Date(today); mon.setHours(0,0,0,0); mon.setDate(today.getDate()-(dowMon(today)-1));
+  var mon=new Date(today); mon.setHours(0,0,0,0); mon.setDate(today.getDate()-(dowMon(today)-1)+weekOffset*7);
   var sun=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+6);
   document.getElementById("weekRange").textContent=mon.getDate()+" "+MOIS[mon.getMonth()]+" → "+sun.getDate()+" "+MOIS[sun.getMonth()];
+  var lbl=document.getElementById("weekLbl");
+  if(lbl) lbl.textContent = weekOffset===0?"Ta semaine":(weekOffset<0?("Semaine "+weekOffset):("Semaine +"+weekOffset));
   var html="";
   for(var i=0;i<7;i++){var d=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+i);var s=sessionFor(d);
     var hasX=extrasForDay(iso(d)).length>0;
@@ -1268,14 +1272,7 @@ function nav(v){["today","week","horizon","log"].forEach(function(x){document.ge
 var addSport="course", addMode="strava", addShowAll=false, addDay=null;
 function renderExtras(){
   var box=document.getElementById("extrasBox"); if(!box)return;
-  var list=extrasForDay(iso(today));
-  var h='';
-  if(list.length){
-    h+='<div class="weeklbl" style="margin-top:4px"><span class="eyebrow">Activités du jour</span><span class="eyebrow"></span></div>';
-    list.forEach(function(e){ h+=extraCard(e); });
-  }
-  h+='<button class="btn btn-ghost" style="width:100%;margin-top:8px" onclick="openAdd(\''+iso(today)+'\')">+ Ajouter une activité</button>';
-  box.innerHTML=h;
+  box.innerHTML='<button class="btn btn-ghost" style="width:100%;margin-top:8px" onclick="openAdd(\''+iso(today)+'\')">+ Ajouter une activité</button>';
 }
 function renderSheetExtras(k){
   var box=document.getElementById("shExtras"); if(!box)return;
@@ -1287,6 +1284,21 @@ function renderSheetExtras(k){
   }
   h+='<button class="btn btn-ghost" style="width:100%;margin-top:10px" onclick="openAdd(\''+k+'\')">+ Ajouter une activité</button>';
   box.innerHTML=h;
+}
+function coachExtra(e){
+  if(!e.hrAvg) return ''; // pas de données cardio → pas de verdict (log manuel)
+  var pct=e.hrAvg/FCMAX, p=Math.round(pct*100);
+  var isRide=(e.sport==="velo_ht"||e.sport==="velo_route");
+  var lvl,msg;
+  if(pct<0.60){ lvl="récup"; msg=isRide?"Pédalage très doux : récup active, les jambes tournent sans charge. Idéal lendemain de séance.":"Très facile : récup active, parfait pour relancer sans fatiguer."; }
+  else if(pct<0.72){ lvl="EF"; msg=isRide?"Endurance fondamentale vélo : base aérobie propre, zéro stress musculaire.":"Endurance fondamentale, bien dans la zone facile. C'est le pain quotidien."; }
+  else if(pct<0.82){ lvl="tempo"; msg="Allure modérée (tempo). Bien si c'était voulu — sinon un cran trop haut pour de l'easy."; }
+  else if(pct<0.90){ lvl="soutenu"; msg="Effort soutenu (qualité). À doser : 1-2 fois/semaine max, pas la veille d'une grosse séance."; }
+  else { lvl="intense"; msg="Grosse intensité. Surveille la récup et l'enchaînement derrière."; }
+  var w=e.wAvg?(' · '+e.wAvg+'W'):'';
+  return '<div style="margin-top:9px;padding-top:9px;border-top:1px solid var(--line)">'+
+    '<div style="font-size:11px;color:var(--blue);font-weight:700;letter-spacing:.4px">⌁ COACH · FC '+e.hrAvg+' ('+p+'% · '+lvl+')'+w+'</div>'+
+    '<div style="font-size:12px;color:var(--mut);line-height:1.45;margin-top:3px">'+msg+'</div></div>';
 }
 function extraCard(e){
   var sp=SPORTS[e.sport]||{ic:"•",l:e.sport};
@@ -1302,7 +1314,7 @@ function extraCard(e){
     '<div><div style="font-weight:700">'+sp.ic+' '+sp.l+' · '+fmtMin(e.durMin)+src+'</div>'+
     (stats?'<div style="color:var(--mut);font-size:12.5px;margin-top:3px">'+stats+'</div>':'')+'</div>'+
     '<button class="x" onclick="delExtraUI(\''+e.xid+'\')" style="border:none;background:none;color:var(--mut);font-size:15px;cursor:pointer;padding:0 0 0 8px">✕</button>'+
-    '</div></div>';
+    '</div>'+coachExtra(e)+'</div>';
 }
 function delExtraUI(xid){
   delExtra(xid); renderExtras();
