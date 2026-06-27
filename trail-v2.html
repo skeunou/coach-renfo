@@ -674,29 +674,91 @@ function decoupling(splits){
   var sp1=av(flat.slice(0,hN),"spd"), sp2=av(flat.slice(hN),"spd");
   return {dec:(r2-r1)/r1*100, accel:(sp2-sp1)/sp1*100, n:flat.length};
 }
-function coachRun(a,typeKey){
-  var hr=a.hrAvg, z=hrZone(hr), hot=(a.temp!=null&&a.temp>=25);
-  var rows='<div class="summary" style="border-left:3px solid var(--acc)">';
-  rows+='<div class="row"><span style="color:var(--acc);font-weight:700">⌁ Analyse Coach</span><b></b></div>';
-  if(typeKey==="cotes"){
-    var zm=hrZone(a.hrMax);
-    rows+='<div class="row"><span>FC moy / pics</span><b>'+hr+' ('+z.l+') · max '+a.hrMax+' ('+zm.l+')</b></div>';
-    rows+='<div class="row"><span style="font-size:12px;line-height:1.4">Tu touches '+zm.l+' en bosse mais la moyenne reste '+z.l+' : <b style="color:var(--grn)">jamais bloqué cardio</b>. Ta limite en montée est <b>musculaire</b> → le renfo excentrique est le bon levier.</span><b></b></div>';
-  } else {
-    var cible = typeKey==="longue"?"Z2 (≤"+FCZ2HI+")":"Z2 (≤"+FCZ2HI+")";
-    var verdict = z.z<=2?"EF tenu en Z2 ✓":(z.z===3?"un cran trop haut (Z3)":"trop rapide ("+z.l+")");
-    rows+='<div class="row"><span>FC moy</span><b style="color:'+zColor(z.z)+'">'+hr+' = '+z.l+'</b></div>';
-    rows+='<div class="row"><span>Verdict</span><b style="color:'+zColor(z.z)+'">'+verdict+'</b></div>';
-    var dc=decoupling(a.splits);
-    if(dc){
-      var msg;
-      if(dc.dec>5 && dc.accel<2) msg='<b style="color:var(--orange)">dérive +'+dc.dec.toFixed(0)+'%</b> à allure stable → chaleur / sous-alim / fatigue';
-      else if(dc.accel>5) msg='<b>négatif split</b> (+'+dc.accel.toFixed(0)+'% d\'allure) : tu as accéléré, pas dérivé';
-      else msg='<b style="color:var(--grn)">stable</b> (déc. '+dc.dec.toFixed(0)+'%) : effort bien tenu';
-      rows+='<div class="row"><span style="font-size:12px;line-height:1.4">'+msg+'</span><b></b></div>';
+function mmss(s){var m=Math.floor(s/60),x=s%60;return m+":"+(x<10?"0":"")+x;}
+// Détecte une accélération finale (dernier km nettement + rapide que la médiane)
+function efFinalKick(splits){
+  if(!splits||splits.length<4)return null;
+  var sp=splits.filter(function(s){return s.spd;});
+  if(sp.length<4)return null;
+  var last=sp[sp.length-1].spd;
+  var prev=sp.slice(0,-1).map(function(s){return s.spd;}).sort(function(a,b){return a-b;});
+  var med=prev[Math.floor(prev.length/2)];
+  return med?((last-med)/med*100):null;
+}
+// === Analyse côte : tableau rep-par-rep + verdict croisé puissance/temps ===
+function coachCotes(a){
+  var z=hrZone(a.hrAvg), zm=hrZone(a.hrMax);
+  var out='<div class="summary" style="border-left:3px solid var(--purp)">';
+  out+='<div class="row"><span style="color:var(--purp);font-weight:700">⌁ Côte — analyse</span><b></b></div>';
+
+  if(a.reps && a.reps.list && a.reps.list.length>=3){
+    var R=a.reps.list, n=R.length;
+    var haveW=R.every(function(r){return r.w!=null;});
+    var haveC=R.every(function(r){return r.cad!=null;});
+    // En-tête côte
+    out+='<div class="row"><span style="font-size:12px;color:var(--mut)">'+(a.reps.name||"Côte")+' · '+n+' reps × '+a.reps.climb+'m D+</span><b></b></div>';
+    // Tableau
+    var t='<table style="width:100%;border-collapse:collapse;font-size:13px;margin:6px 0 2px">';
+    t+='<tr style="color:var(--mut);font-size:10px;letter-spacing:.5px"><th style="text-align:left;padding:2px 0">REP</th><th style="text-align:right">TEMPS</th>'+(haveW?'<th style="text-align:right">W</th>':'')+(haveC?'<th style="text-align:right">CAD</th>':'')+'<th style="text-align:right">FC</th></tr>';
+    R.forEach(function(r,i){
+      t+='<tr style="border-top:1px solid var(--line)"><td style="padding:3px 0;font-weight:700">'+(i+1)+'</td>'+
+         '<td style="text-align:right">'+mmss(r.sec)+'</td>'+
+         (haveW?'<td style="text-align:right;color:var(--purp);font-weight:700">'+r.w+'</td>':'')+
+         (haveC?'<td style="text-align:right">'+r.cad+'</td>':'')+
+         '<td style="text-align:right">'+(r.hr||"—")+'</td></tr>';
+    });
+    t+='</table>';
+    out+='<div class="row" style="display:block">'+t+'</div>';
+
+    // Verdict croisé
+    function a2(k,i0,i1){return (R[i0][k]+R[i1][k])/2;}
+    var slow=(a2('sec',n-1,n-2)-a2('sec',0,1))/a2('sec',0,1)*100;
+    var verdict, ressenti='';
+    if(haveW){
+      var wDrop=(a2('w',0,1)-a2('w',n-1,n-2))/a2('w',0,1)*100;
+      if(wDrop>=5 && slow>=3){
+        verdict='Puissance −'+wDrop.toFixed(0)+'% et temps +'+slow.toFixed(0)+'% sur la fin : ta <b>force d\'ascension s\'écroule</b> sous la fatigue, le cardio tient. <b style="color:var(--acid-d)">Renfo excentrique prioritaire.</b>';
+        ressenti='À noter : même si les dernières montées te paraissent plus faciles, c\'est une baisse de régime — pas un gain d\'économie.';
+      } else if(wDrop<=-3){
+        verdict='Tu <b>montes en puissance</b> rep après rep (+'+(-wDrop).toFixed(0)+'%) : départ prudent, finish solide. Bonne gestion d\'allure.';
+      } else {
+        verdict='Puissance et temps quasi constants sur '+n+' reps : <b style="color:var(--grn)">régularité remarquable</b>, réserve bien gérée.';
+      }
+    } else {
+      if(slow>=4) verdict='Tes temps s\'allongent de +'+slow.toFixed(0)+'% sur la fin : la <b>force d\'ascension lâche</b> avant le cardio. <b style="color:var(--acid-d)">Renfo excentrique prioritaire.</b>';
+      else verdict='Temps réguliers sur '+n+' reps : <b style="color:var(--grn)">bonne tenue</b>.';
     }
-    if(hot && z.z>2) rows+='<div class="row"><span style="font-size:12px;color:var(--mut);line-height:1.4">⚠️ '+Math.round(a.temp)+'° : une partie de la FC haute est thermique. En chaleur, <b>ralentis pour tenir la zone</b> au lieu de tenir l\'allure.</span><b></b></div>';
+    out+='<div class="row"><span style="font-size:12.5px;line-height:1.45">'+verdict+'</span><b></b></div>';
+    if(ressenti) out+='<div class="row"><span style="font-size:11.5px;color:var(--mut);line-height:1.4">'+ressenti+'</span><b></b></div>';
+  } else {
+    // Fallback : pas de reps détectées → lecture cardio simple
+    out+='<div class="row"><span>FC moy / pics</span><b>'+a.hrAvg+' ('+z.l+') · max '+a.hrMax+' ('+zm.l+')</b></div>';
+    out+='<div class="row"><span style="font-size:12px;line-height:1.4">Tu touches '+zm.l+' en bosse, moyenne en '+z.l+' : <b style="color:var(--grn)">jamais bloqué cardio</b>. Limite en montée = <b>musculaire</b> → renfo excentrique.</span><b></b></div>';
   }
+  out+='</div>';
+  return out;
+}
+function coachRun(a,typeKey){
+  if(typeKey==="cotes") return coachCotes(a);
+  var hr=a.hrAvg, z=hrZone(hr), hot=(a.temp!=null&&a.temp>=25);
+  var rows='<div class="summary" style="border-left:3px solid var(--blue)">';
+  rows+='<div class="row"><span style="color:var(--blue);font-weight:700">⌁ EF — analyse</span><b></b></div>';
+  var verdict = z.z<=2?"EF tenu en Z2 ✓":(z.z===3?"un cran trop haut (Z3)":"trop rapide ("+z.l+")");
+  rows+='<div class="row"><span>FC moy</span><b style="color:'+zColor(z.z)+'">'+hr+' = '+z.l+'</b></div>';
+  rows+='<div class="row"><span>Verdict</span><b style="color:'+zColor(z.z)+'">'+verdict+'</b></div>';
+  var dc=decoupling(a.splits);
+  if(dc){
+    var msg;
+    if(dc.dec>5 && dc.accel<2) msg='<b style="color:var(--orange)">dérive +'+dc.dec.toFixed(0)+'%</b> à allure stable → chaleur / sous-alim / fatigue';
+    else if(dc.accel>5) msg='<b>négatif split</b> (+'+dc.accel.toFixed(0)+'% d\'allure) : tu as accéléré, pas dérivé';
+    else msg='<b style="color:var(--grn)">stable</b> (déc. '+dc.dec.toFixed(0)+'%) : effort bien tenu';
+    rows+='<div class="row"><span style="font-size:12px;line-height:1.4">'+msg+'</span><b></b></div>';
+  }
+  var kick=efFinalKick(a.splits);
+  if(kick!=null && kick>8){
+    rows+='<div class="row"><span style="font-size:12px;color:var(--mut);line-height:1.4">⚡ Dernier km +'+kick.toFixed(0)+'% : accélération finale (groupe / volontaire). OK ponctuellement, mais garde l\'EM <b>vraiment facile</b> jusqu\'au bout — sinon c\'est un tempo déguisé.</span><b></b></div>';
+  }
+  if(hot && z.z>2) rows+='<div class="row"><span style="font-size:12px;color:var(--mut);line-height:1.4">⚠️ '+Math.round(a.temp)+'° : une partie de la FC haute est thermique. En chaleur, <b>ralentis pour tenir la zone</b> au lieu de tenir l\'allure.</span><b></b></div>';
   rows+='</div>';
   return rows;
 }
