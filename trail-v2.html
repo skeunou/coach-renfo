@@ -193,6 +193,7 @@
     <div id="extrasBox"></div>
     <div class="weeklbl"><span class="eyebrow" id="weekLbl">Ta semaine</span><span style="display:flex;align-items:center;gap:8px"><span onclick="weekNav(-1)" style="cursor:pointer;font-size:20px;line-height:1;color:var(--blue);user-select:none;padding:2px 6px">‹</span><span class="eyebrow" id="weekRange">—</span><span onclick="weekNav(1)" style="cursor:pointer;font-size:20px;line-height:1;color:var(--blue);user-select:none;padding:2px 6px">›</span></span></div>
     <div class="week" id="weekStrip"></div>
+    <div id="weekRecap"></div>
     <div class="card stravacard">
       <div class="strava" onclick="goStrava()">
         <div class="ic">≈</div>
@@ -801,6 +802,30 @@ function coachRun(a,typeKey){
   rows+='</div>';
   return rows;
 }
+// Analyse vélo (réutilise les helpers décVo/drift) — 100% sur du mesuré
+function coachRide(a){
+  var hr=a.hrAvg, z=hr?hrZone(hr):null, hot=(a.temp!=null&&a.temp>=25);
+  var rows='<div class="summary" style="border-left:3px solid var(--blue)">';
+  rows+='<div class="row"><span style="color:var(--blue);font-weight:700">⌁ Vélo — analyse</span><b></b></div>';
+  if(a.wAvg) rows+='<div class="row"><span>Puissance moy</span><b>'+a.wAvg+' W</b></div>';
+  if(hr){
+    var verdict = z.z<=2?"FC en endurance ("+z.l+") — base aérobie propre":(z.z===3?"tempo ("+z.l+") — qualité modérée":"effort soutenu ("+z.l+")");
+    rows+='<div class="row"><span>FC moy</span><b style="color:'+zColor(z.z)+'">'+hr+' = '+z.l+'</b></div>';
+    rows+='<div class="row"><span>Lecture</span><b style="color:'+zColor(z.z)+'">'+verdict+'</b></div>';
+  }
+  var dc=decoupling(a.splits);
+  if(dc){
+    var msg;
+    if(dc.dec>5 && dc.accel<2) msg='<b style="color:var(--orange)">dérive cardiaque +'+dc.dec.toFixed(0)+'%</b> à allure stable → chaleur, déshydratation ou fatigue accumulée';
+    else if(dc.accel>5) msg='<b>tu as accéléré</b> en 2e moitié (+'+dc.accel.toFixed(0)+'%) sans dérive : gestion saine, réserve présente';
+    else msg='<b style="color:var(--grn)">cardio stable</b> (déc. '+dc.dec.toFixed(0)+'%) : effort tenu de bout en bout';
+    rows+='<div class="row"><span style="font-size:12px;line-height:1.4">'+msg+'</span><b></b></div>';
+  }
+  if(hot && z && z.z>2) rows+='<div class="row"><span style="font-size:12px;color:var(--mut);line-height:1.4">⚠️ '+Math.round(a.temp)+'° : une partie de la FC haute est thermique.</span><b></b></div>';
+  if(!hr && !a.wAvg) rows+='<div class="row"><span style="font-size:12px;color:var(--mut)">Pas de capteur FC/puissance sur cette sortie — analyse limitée à la distance et au D+.</span><b></b></div>';
+  rows+='</div>';
+  return rows;
+}
 function loadCoach(activityId,typeKey){
   var box=document.getElementById("shCoach"); if(!box)return;
   if(!stravaToken){
@@ -860,6 +885,7 @@ function renderToday(){
   else { a='<button class="btn btn-go" onclick="openSheet(\''+s.dateKey+'\')">VOIR / VALIDER</button>'; }
   document.getElementById("heroActions").innerHTML=a;
   renderWeek();
+  renderWeekRecap();
   renderExtras();
 }
 var weekOffset=0;
@@ -876,6 +902,42 @@ function renderWeek(){
     html+='<div class="day'+(iso(d)===iso(today)?' today':'')+((sessionDone(s)||hasX)?' done':'')+'" onclick="openSheet(\''+iso(d)+'\')">'
       +'<div class="dow">'+JOURS[i]+'</div><div class="dnum">'+d.getDate()+'</div><div class="pip" style="background:'+s.info.color+'"></div></div>';}
   document.getElementById("weekStrip").innerHTML=html;
+}
+/* ===== RÉCAP VOLUME — semaine en cours (Strava + manuels) ===== */
+function weekRecapData(){
+  var mon=new Date(today); mon.setHours(0,0,0,0); mon.setDate(today.getDate()-(dowMon(today)-1));
+  var monK=iso(mon), sun=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+6), sunK=iso(sun);
+  function inWk(dk){ dk=(dk||"").slice(0,10); return dk>=monK && dk<=sunK; }
+  var r={runKm:0,runD:0,rideKm:0,rideD:0,totMin:0,n:0}, seen={};
+  lastActs.forEach(function(a){
+    if(!inWk(a.date))return;
+    var t=(a.type||"").toLowerCase();
+    r.totMin+=a.movingMin||0; r.n++;
+    if(/run/.test(t)){ r.runKm+=a.km||0; r.runD+=a.dplus||0; }
+    else if(/ride/.test(t)){ r.rideKm+=a.km||0; r.rideD+=a.dplus||0; }
+    if(a.id) seen[String(a.id)]=true;
+  });
+  extrasGet().forEach(function(e){
+    if(!inWk(e.dateKey))return;
+    if(e.sid && seen[String(e.sid)])return; // déjà compté via le flux Strava
+    r.totMin+=e.durMin||0; r.n++;
+    if(e.sport==="course"||e.sport==="trail"){ r.runKm+=e.km||0; r.runD+=e.dplus||0; }
+    else if(e.sport==="velo_ht"||e.sport==="velo_route"){ r.rideKm+=e.km||0; r.rideD+=e.dplus||0; }
+  });
+  return r;
+}
+function renderWeekRecap(){
+  var box=document.getElementById("weekRecap"); if(!box)return;
+  var r=weekRecapData();
+  if(r.n===0){ box.innerHTML=""; return; }
+  var parts=[];
+  if(r.runKm>0||r.runD>0) parts.push('🏃 '+Math.round(r.runKm)+' km · '+Math.round(r.runD)+' m D+');
+  if(r.rideKm>0||r.rideD>0) parts.push('🚴 '+Math.round(r.rideKm)+' km · '+Math.round(r.rideD)+' m D+');
+  if(!parts.length) parts.push('—');
+  box.innerHTML='<div class="card" style="padding:11px 14px;margin-bottom:10px;border-left:3px solid var(--acc)">'+
+    '<div style="font-size:10px;letter-spacing:.6px;color:var(--mut);text-transform:uppercase;font-weight:700;margin-bottom:3px">Cette semaine</div>'+
+    '<div style="font-size:13.5px;font-weight:600;line-height:1.4">'+parts.join(' &nbsp;·&nbsp; ')+
+    ' <span style="color:var(--mut);font-weight:500">— '+durStr(Math.round(r.totMin))+' d\'effort en '+r.n+' activité'+(r.n>1?'s':'')+'</span></div></div>';
 }
 function renderWeekView(){
   var out="";
@@ -1311,12 +1373,34 @@ function extraCard(e){
   if(e.dplus) stats+=(stats?' · ':'')+e.dplus+' m D+';
   if(e.note) stats+=(stats?' · ':'')+e.note;
   var src=e.manual?'<span style="color:var(--mut);font-size:10px"> · manuel</span>':'';
+  var detailBtn = e.sid ? '<button class="btn btn-ghost" style="width:100%;margin-top:9px;font-size:12.5px;padding:7px" onclick="toggleExtraDetail(\''+e.xid+'\')" id="exbtn-'+e.xid+'">+ détails coach</button><div id="exdet-'+e.xid+'" style="display:none;margin-top:8px"></div>' : '';
   return '<div class="card" style="border-left:3px solid var(--blue);padding:12px 14px;margin-top:8px">'+
     '<div style="display:flex;justify-content:space-between;align-items:flex-start">'+
     '<div><div style="font-weight:700">'+sp.ic+' '+sp.l+' · '+fmtMin(e.durMin)+src+'</div>'+
     (stats?'<div style="color:var(--mut);font-size:12.5px;margin-top:3px">'+stats+'</div>':'')+'</div>'+
     '<button class="x" onclick="delExtraUI(\''+e.xid+'\')" style="border:none;background:none;color:var(--mut);font-size:15px;cursor:pointer;padding:0 0 0 8px">✕</button>'+
-    '</div>'+coachExtra(e)+'</div>';
+    '</div>'+coachExtra(e)+detailBtn+'</div>';
+}
+var _exDetCache={};
+function toggleExtraDetail(xid){
+  var det=document.getElementById("exdet-"+xid), btn=document.getElementById("exbtn-"+xid);
+  if(!det)return;
+  if(det.style.display!=="none"){ det.style.display="none"; if(btn)btn.textContent="+ détails coach"; return; }
+  det.style.display="block"; if(btn)btn.textContent="− masquer";
+  if(_exDetCache[xid]){ det.innerHTML=_exDetCache[xid]; return; }
+  var e=null; extrasGet().forEach(function(x){if(x.xid===xid)e=x;});
+  if(!e||!e.sid){ det.innerHTML='<div style="color:var(--mut);font-size:12px;padding:4px 0">Pas de données fines (activité manuelle).</div>'; return; }
+  if(!stravaToken){ det.innerHTML='<div style="color:var(--mut);font-size:12px;padding:4px 0">Connecte Strava pour l\'analyse détaillée.</div>'; return; }
+  det.innerHTML='<div class="summary" style="border-left:3px solid var(--blue)"><div class="row"><span style="color:var(--mut)">⌁ Analyse en cours…</span><b></b></div></div>';
+  fetch(NF+"?action=act&token="+encodeURIComponent(stravaToken)+"&id="+encodeURIComponent(e.sid))
+    .then(function(r){return r.json();})
+    .then(function(a){
+      if(!a||a.error){ det.innerHTML='<div style="color:var(--mut);font-size:12px;padding:4px 0">Analyse indisponible pour cette sortie.</div>'; return; }
+      var isRide=(e.sport==="velo_ht"||e.sport==="velo_route");
+      var html=isRide?coachRide(a):coachRun(a,"fond");
+      _exDetCache[xid]=html; det.innerHTML=html;
+    })
+    .catch(function(){ det.innerHTML='<div style="color:var(--mut);font-size:12px;padding:4px 0">⚠️ Réseau — réessaie.</div>'; });
 }
 function delExtraUI(xid){
   delExtra(xid); renderExtras();
