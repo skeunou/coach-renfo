@@ -1335,14 +1335,19 @@ function copyRefreshTok(){
   if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(stravaRefresh).then(ok).catch(ok); }
   else { ok(); }
 }
+// Bouton d'export du refresh token — en sommeil (utilisé une fois pour configurer le bilan hebdo).
+// Pour le réafficher si le token doit être re-récupéré : dans renderStravaCard, remplacer tx.innerHTML="" par tx.innerHTML=tokExportHTML().
+function tokExportHTML(){
+  return '<div style="padding:10px 14px;border-top:1px solid var(--bdr)">'+
+    '<button id="tokBtn" class="btn btn-ghost" style="width:100%;font-size:12.5px;padding:8px" onclick="copyRefreshTok()">🔑 Copier mon refresh token Strava</button>'+
+    '<input id="tokOut" readonly onclick="this.select()" style="display:none;width:100%;box-sizing:border-box;margin-top:8px;font-size:11px;padding:8px;background:var(--surf2);color:var(--txt);border:1px solid var(--bdr);border-radius:6px">'+
+    '<div style="font-size:10.5px;color:var(--mut);margin-top:6px;line-height:1.45">Colle cette valeur dans Netlify → variable <b>STRAVA_REFRESH_LAURENT</b>.</div>'+
+    '</div>';
+}
 function renderStravaCard(){
   var tx=document.getElementById("tokExport");
   if(stravaToken){ stravaMsg('<span style="color:var(--grn);font-weight:700">✓ Connecté</span>'); document.getElementById("stravaGo").textContent='↻';
-    if(tx) tx.innerHTML='<div style="padding:10px 14px;border-top:1px solid var(--bdr)">'+
-      '<button id="tokBtn" class="btn btn-ghost" style="width:100%;font-size:12.5px;padding:8px" onclick="copyRefreshTok()">🔑 Copier mon refresh token Strava</button>'+
-      '<input id="tokOut" readonly onclick="this.select()" style="display:none;width:100%;box-sizing:border-box;margin-top:8px;font-size:11px;padding:8px;background:var(--surf2);color:var(--txt);border:1px solid var(--bdr);border-radius:6px">'+
-      '<div style="font-size:10.5px;color:var(--mut);margin-top:6px;line-height:1.45">Pour le bilan hebdo : colle cette valeur dans Netlify → variable <b>STRAVA_REFRESH_LAURENT</b>. Bouton temporaire, je le retire après.</div>'+
-      '</div>'; }
+    if(tx) tx.innerHTML=""; /* bouton token retiré — réactiver via tokExportHTML() si besoin */ }
   else { stravaMsg("Strava à connecter"); document.getElementById("stravaGo").textContent='Connecter →'; var el=document.getElementById("stravaActs"); if(el)el.innerHTML=""; if(tx)tx.innerHTML=""; }
 }
 function nav(v){["today","week","horizon","log"].forEach(function(x){document.getElementById("v-"+x).classList.toggle("on",x===v);document.getElementById("nav-"+x).classList.toggle("on",x===v);});if(v==="week")renderWeekView();if(v==="horizon")renderHorizon();if(v==="log")renderLog();window.scrollTo(0,0);}
