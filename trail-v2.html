@@ -282,6 +282,7 @@
 <section id="player">
   <div class="pbar"><span class="pmin" id="pSeg">—</span><button class="x" onclick="quitPlayer()">Quitter</button></div>
   <div class="pprog"><i id="pProg"></i></div>
+  <div id="pSignal" style="display:none"></div>
   <div class="pbody" id="pBody"></div>
   <div class="pact" id="pAct"></div>
 </section>
@@ -561,12 +562,91 @@ var TABATA_ABDO={kind:"tabata",label:"Finisher — Tabata abdo (ZP-safe)",rounds
   {name:"SHOULDER TAPS",cue:"Planche haute, bassin verrouillé. Touche l'épaule opposée sans rouler."},
   {name:"GAINAGE LATÉRAL",cue:"Alterne le côté à chaque tour. Hanche haute, corps aligné."}
 ]};
-function buildSuppRenfo(){
-  var idx; do { idx=Math.floor(Math.random()*RENFO_SUPP.length); } while(idx===lastRenfoIdx && RENFO_SUPP.length>1);
+function buildSuppRenfo(signal){
+  var flags=(signal&&signal.zones)||[];
+  var idx=pickLeastLoading(RENFO_SUPP,"renfo",flags,lastRenfoIdx);
   lastRenfoIdx=idx; var r=RENFO_SUPP[idx];
   var segs=RENFO_WARM.map(function(s){return {kind:"flow",name:s.name,cue:s.cue,reps:s.reps};});
   segs.push(r.emom); segs.push(r.amrap); segs.push(TABATA_ABDO);
   return {name:r.name, segs:segs};
+}
+/* ===== Check-in d'avant-séance : adapte la génération à un signalement ===== */
+var ZONE_LBL={zp:"Zone pubienne",epaule:"Épaule",avantbras:"Avant-bras/poignet",genou:"Genou",dos:"Bas du dos"};
+var ZONE_KW={
+  zp:       /squat|thruster|goblet|front squat|\bjump\b|saut|fente saut|broad|ab wheel|mountain|copenhag/i,
+  epaule:   /press|jerk|overhead|snatch|développ|élévation|hspu|wall walk/i,
+  avantbras:/farmer|suitcase|carry|porté|pull-?up|traction|tirage|\brow\b|renegade|grind|grip|dead ?hang/i,
+  genou:    /step-?up|step-?down|\bbox\b|squat|fente|lunge|\bjump\b|saut/i,
+  dos:      /rdl|deadlift|good ?morning|hinge|\bclean\b|swing/i
+};
+var ZONE_CUE={
+  zp:"reste sur du contrôlé, pas de squat dynamique ni d'impact, gainage doux.",
+  epaule:"allège ou évite l'overhead, charges légères au-dessus de la tête.",
+  avantbras:"sangles sur les tractions, allège le grip et les portés.",
+  genou:"step-up à charge réduite, descente contrôlée, aucun impact.",
+  dos:"hinge léger, gaine fort, pas de charge lourde dos rond."
+};
+function sessionMoveText(sess,kind){
+  var t=[];
+  if(kind==="renfo"){ (sess.emom.moves||[]).forEach(function(m){t.push(m.name||"");}); (sess.amrap.moves||[]).forEach(function(m){t.push(m[1]||"");}); }
+  else { (sess.moves||[]).forEach(function(m){t.push(m[1]||"");}); }
+  return t.join(" · ");
+}
+function zoneScore(sess,kind,flags){
+  var t=sessionMoveText(sess,kind), s=0;
+  flags.forEach(function(z){ if(ZONE_KW[z]&&ZONE_KW[z].test(t)) s++; });
+  return s;
+}
+function pickLeastLoading(bank,kind,flags,lastIdx){
+  if(!flags.length){ var i; do{ i=Math.floor(Math.random()*bank.length);}while(i===lastIdx&&bank.length>1); return i; }
+  var scored=bank.map(function(s,i){return {i:i,sc:zoneScore(s,kind,flags)};});
+  var min=Math.min.apply(null,scored.map(function(x){return x.sc;}));
+  var cand=scored.filter(function(x){return x.sc===min&&x.i!==lastIdx;});
+  if(!cand.length) cand=scored.filter(function(x){return x.sc===min;});
+  return cand[Math.floor(Math.random()*cand.length)].i;
+}
+var checkinFlags=[], pSignal={zones:[],text:""};
+function openCheckin(k,kind){
+  var z=document.getElementById("suppZone"); if(!z)return;
+  checkinFlags=[];
+  var chips=Object.keys(ZONE_LBL).map(function(zk){
+    return '<button type="button" id="ck-'+zk+'" onclick="toggleFlag(\''+zk+'\')" style="border:1px solid var(--line);background:transparent;color:var(--mut);border-radius:999px;padding:6px 11px;font-size:12px;font-weight:600;cursor:pointer">'+ZONE_LBL[zk]+'</button>';
+  }).join("");
+  z.innerHTML='<div class="card" style="padding:13px;margin-top:8px;border-left:3px solid var(--orange)">'+
+    '<div style="font-weight:700;font-size:13.5px;margin-bottom:9px">Quelque chose à signaler aujourd\'hui ?</div>'+
+    '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">'+chips+'</div>'+
+    '<textarea id="ckTxt" placeholder="Optionnel : ex. mal avant-bras droit, raideur épaule…" style="width:100%;box-sizing:border-box;min-height:54px;font-size:13px;padding:9px;background:var(--bg);border:1px solid var(--line);border-radius:10px;color:var(--ink);font-family:inherit"></textarea>'+
+    '<div style="display:flex;gap:8px;margin-top:11px">'+
+      '<button class="btn btn-ghost" style="flex:1" onclick="runCheckin(\''+k+'\',\''+kind+'\',true)">RAS → génère</button>'+
+      '<button class="btn btn-go" style="flex:1" onclick="runCheckin(\''+k+'\',\''+kind+'\',false)">Générer</button>'+
+    '</div>'+
+    '<button class="btn btn-ghost" style="width:100%;margin-top:6px;font-size:12px;padding:6px" onclick="resetSupp(\''+k+'\')">← retour</button>'+
+    '</div>';
+}
+function toggleFlag(z){
+  var el=document.getElementById("ck-"+z); var i=checkinFlags.indexOf(z);
+  if(i>=0){ checkinFlags.splice(i,1); if(el){el.style.background="transparent";el.style.color="var(--mut)";el.style.borderColor="var(--line)";} }
+  else { checkinFlags.push(z); if(el){el.style.background="var(--ink)";el.style.color="#fff";el.style.borderColor="var(--ink)";} }
+}
+function runCheckin(k,kind,ras){
+  var txt=ras?"":(((document.getElementById("ckTxt")||{}).value)||"").trim();
+  var signal={zones:ras?[]:checkinFlags.slice(), text:txt};
+  if(kind==="renfo") startSuppRenfo(k,signal); else startSuppWod(k,signal);
+}
+function signalNote(){
+  var z=(pSignal&&pSignal.zones)||[], t=(pSignal&&pSignal.text)||"";
+  var parts=z.map(function(k){return ZONE_LBL[k];});
+  if(t)parts.push(t);
+  return parts.length?("⚠️ Signalé : "+parts.join(", ")):"";
+}
+function renderSignalBanner(){
+  var el=document.getElementById("pSignal"); if(!el)return;
+  var z=(pSignal&&pSignal.zones)||[], t=(pSignal&&pSignal.text)||"";
+  if(!z.length&&!t){ el.style.display="none"; el.innerHTML=""; return; }
+  var cues=z.map(function(k){return '<b>'+ZONE_LBL[k]+'</b> — '+ZONE_CUE[k];});
+  if(t) cues.push('<b>Note</b> — '+t.replace(/</g,"&lt;"));
+  el.style.display="block";
+  el.innerHTML='<div style="background:#fff3e6;border:1px solid #ffd2a8;border-radius:10px;padding:9px 12px;margin:6px 14px 0;font-size:12px;line-height:1.45;color:#8a4b00">⚠️ Signalé — '+cues.join('<br>')+'</div>';
 }
 
 /* ================= CONTENU DES SÉANCES (player) ================= */
@@ -1209,7 +1289,7 @@ function deleteSession(){
 var pSegs=[],pIdx=0,pKey=null,pTimer=null,pState={},pIsSupp=false,pSuppKind="wod",pSuppName="",ftSec=0;
 function startPlayer(k){
   unlockAudio(); reqWake(); beep(660,.12);
-  pKey=k; pIsSupp=false; pState={}; pSegs=content(k)||[]; pIdx=0;
+  pKey=k; pIsSupp=false; pState={}; pSignal={zones:[],text:""}; pSegs=content(k)||[]; pIdx=0;
   closeSheet(); document.getElementById("player").classList.add("on");
   renderSeg();
 }
@@ -1218,22 +1298,23 @@ function resetSupp(k){ var z=document.getElementById("suppZone"); if(z)z.innerHT
 function chooseSupp(k){
   var z=document.getElementById("suppZone"); if(!z)return;
   z.innerHTML='<div style="display:flex;gap:8px;margin-top:6px">'+
-    '<button class="btn btn-go" style="background:var(--purp);flex:1" onclick="startSuppWod(\''+k+'\')">⚡ WOD</button>'+
-    '<button class="btn btn-go" style="background:var(--orange);flex:1" onclick="startSuppRenfo(\''+k+'\')">🏋️ RENFO</button>'+
+    '<button class="btn btn-go" style="background:var(--purp);flex:1" onclick="openCheckin(\''+k+'\',\'wod\')">⚡ WOD</button>'+
+    '<button class="btn btn-go" style="background:var(--orange);flex:1" onclick="openCheckin(\''+k+'\',\'renfo\')">🏋️ RENFO</button>'+
     '</div>'+
     '<button class="btn btn-ghost" style="margin-top:6px;font-size:12px;padding:6px" onclick="resetSupp(\''+k+'\')">← retour</button>';
 }
-function startSuppRenfo(k){
+function startSuppRenfo(k,signal){
   unlockAudio(); reqWake(); beep(660,.12);
-  pKey=k; pIsSupp=true; pSuppKind="renfo"; pState={};
-  var r=buildSuppRenfo(); pSuppName=r.name; pSegs=r.segs; pIdx=0;
+  pKey=k; pIsSupp=true; pSuppKind="renfo"; pState={}; pSignal=signal||{zones:[],text:""};
+  var r=buildSuppRenfo(pSignal); pSuppName=r.name; pSegs=r.segs; pIdx=0;
   closeSheet(); document.getElementById("player").classList.add("on");
   renderSeg();
 }
-function startSuppWod(k){
+function startSuppWod(k,signal){
   unlockAudio(); reqWake(); beep(660,.12);
-  pKey=k; pIsSupp=true; pSuppKind="wod"; pState={};
-  var wod=randWod(), r=Math.random(), seg;
+  pKey=k; pIsSupp=true; pSuppKind="wod"; pState={}; pSignal=signal||{zones:[],text:""};
+  var idx=pickLeastLoading(WODS_SUPP,"wod",(pSignal.zones||[]),lastWodIdx); lastWodIdx=idx;
+  var wod=WODS_SUPP[idx], r=Math.random(), seg;
   if(r<0.5){ seg={kind:"amrap",sec:600,label:"WOD SUPP",name:wod.name,moves:wod.moves}; }
   else if(r<0.8){ var mv=wod.moves.map(function(m){return {name:m[1],reps:"",cue:m[2]||""};}); var rd=Math.max(3,Math.floor(12/mv.length)); seg={kind:"emom",minutes:rd*mv.length,label:"WOD SUPP",name:wod.name,moves:mv}; }
   else { seg={kind:"fortime",cap:720,rounds:4,label:"WOD SUPP",name:wod.name,moves:wod.moves}; }
@@ -1254,7 +1335,7 @@ function movesList(seg){
   return seg.moves.map(function(m){return '<div class="li"><span class="k">'+(m[0]||'•')+'</span><div><b>'+m[1]+'</b>'+(m[2]?' <span style="color:var(--mut)">· '+m[2]+'</span>':'')+'</div></div>';}).join("");
 }
 function renderSeg(){
-  clearInterval(pTimer); pProg();
+  clearInterval(pTimer); pProg(); renderSignalBanner();
   var seg=pSegs[pIdx], body=document.getElementById("pBody"), act=document.getElementById("pAct");
   document.getElementById("pSeg").textContent=(seg.label||"Étape")+" "+(pIdx+1)+"/"+pSegs.length;
   if(seg.kind==="flow"){
@@ -1403,7 +1484,7 @@ function saveSuppWod(){
   var log=loadLog();
   var entry={id:"w_"+Date.now(),dateKey:curKey,ts:Date.now(),_u:Date.now(),
     typeKey:"wod-supp",type:"WOD SUPP",title:editing.title,color:"var(--purp)",
-    rpe:"",zp:"",jambes:"",score:editing.score,note:"",
+    rpe:"",zp:"",jambes:"",score:editing.score,note:signalNote(),
     sid:editing.sid||"",stravaName:editing.stravaName||"",hrAvg:editing.hrAvg||null,hrMax:editing.hrMax||null,durMin:editing.durMin||null,wAvg:editing.wAvg||null};
   log.unshift(entry);
   log.sort(function(a,b){return a.dateKey<b.dateKey?1:-1;});
@@ -1434,7 +1515,7 @@ function saveSuppRenfo(){
   var log=loadLog();
   var entry={id:"r_"+Date.now(),dateKey:curKey,ts:Date.now(),_u:Date.now(),
     typeKey:"renfo-supp",type:"RENFO SUPP",title:editing.title,color:"var(--orange)",
-    rpe:val("fRpe"),zp:val("fZp"),jambes:val("fJambes"),score:"",note:(val("fNote")||"").trim(),
+    rpe:val("fRpe"),zp:val("fZp"),jambes:val("fJambes"),score:"",note:[signalNote(),(val("fNote")||"").trim()].filter(Boolean).join(" · "),
     sid:editing.sid||"",stravaName:editing.stravaName||"",hrAvg:editing.hrAvg||null,hrMax:editing.hrMax||null,durMin:editing.durMin||null,wAvg:editing.wAvg||null};
   log.unshift(entry);
   log.sort(function(a,b){return a.dateKey<b.dateKey?1:-1;});
