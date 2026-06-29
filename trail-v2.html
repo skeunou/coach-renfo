@@ -182,13 +182,13 @@
       <div><div class="eyebrow" id="todayDate">—</div><div class="bigtitle bebas">AUJOURD'HUI</div></div>
       <div class="blockbadge" id="blockBadge">—</div>
     </div>
-    <div class="card hero" id="heroCard">
+    <div class="card hero" id="heroCard" style="position:relative">
       <div class="type" id="heroType">—</div>
       <div class="sessionid bebas" id="heroId" style="font-size:14px;color:var(--acc);letter-spacing:1px">—</div>
-      <h1 class="bebas" id="heroTitle">—</h1>
+      <h1 class="bebas" id="heroTitle" style="padding-right:104px">—</h1>
       <div class="why" id="heroWhy">—</div>
       <div class="specs" id="heroSpecs"></div>
-      <div id="heroActions"></div>
+      <div id="heroActions" style="position:absolute;top:16px;right:16px"></div>
     </div>
     <div id="extrasBox"></div>
     <div class="weeklbl"><span class="eyebrow" id="weekLbl">Ta semaine</span><span style="display:flex;align-items:center;gap:8px"><span onclick="weekNav(-1)" style="cursor:pointer;font-size:20px;line-height:1;color:var(--blue);user-select:none;padding:2px 6px">‹</span><span class="eyebrow" id="weekRange">—</span><span onclick="weekNav(1)" style="cursor:pointer;font-size:20px;line-height:1;color:var(--blue);user-select:none;padding:2px 6px">›</span></span></div>
@@ -954,11 +954,11 @@ function renderToday(){
   document.getElementById("heroWhy").textContent=s.plan.why;
   document.getElementById("heroSpecs").innerHTML=s.specs.map(function(x){return '<div class="spec"><b>'+x[1]+'</b>'+x[0]+'</div>';}).join("");
   var done=sessionDone(s);
-  var a;
-  if(done){ a='<button class="btn btn-acid" onclick="openSheet(\''+s.dateKey+'\')">VALIDÉE ✓ — voir / modifier</button>'; }
-  else if(hasPlayer(s.typeKey)){ a='<button class="btn btn-orange" onclick="openSheet(\''+s.dateKey+'\')">OUVRIR LA SÉANCE</button>'; }
-  else if(s.typeKey==="repos"){ a='<button class="btn btn-go" onclick="openSheet(\''+s.dateKey+'\')">VOIR / MARQUER</button>'; }
-  else { a='<button class="btn btn-go" onclick="openSheet(\''+s.dateKey+'\')">VOIR / VALIDER</button>'; }
+  var a, bs='style="padding:9px 15px;font-size:13px;white-space:nowrap"';
+  if(done){ a='<button class="btn btn-acid" '+bs+' onclick="openSheet(\''+s.dateKey+'\',true)">VALIDÉE ✓</button>'; }
+  else if(hasPlayer(s.typeKey)){ a='<button class="btn btn-orange" '+bs+' onclick="openSheet(\''+s.dateKey+'\',true)">OUVRIR</button>'; }
+  else if(s.typeKey==="repos"){ a='<button class="btn btn-go" '+bs+' onclick="openSheet(\''+s.dateKey+'\',true)">MARQUER</button>'; }
+  else { a='<button class="btn btn-go" '+bs+' onclick="openSheet(\''+s.dateKey+'\',true)">VALIDER</button>'; }
   document.getElementById("heroActions").innerHTML=a;
   renderWeek();
   renderWeekRecap();
@@ -1065,7 +1065,7 @@ function renderCoachRead(){
 
 /* ================= SHEET ================= */
 var curKey=null, editing=null;
-function openSheet(k){
+function openSheet(k,focus){
   curKey=k; editing=planEntryFor(k);
   var s=sessionFor(parse(k));
   document.getElementById("shType").textContent=s.info.type; document.getElementById("shType").style.color=s.info.color;
@@ -1101,7 +1101,7 @@ function openSheet(k){
   document.getElementById("shSummary").innerHTML=sum;
   var coachBox=document.getElementById("shCoach"); if(coachBox)coachBox.innerHTML="";
   if(linked && (s.typeKey==="fond"||s.typeKey==="longue"||s.typeKey==="cotes")) loadCoach(linked.id,s.typeKey);
-  renderSheetExtras(k);
+  if(focus){ var sx=document.getElementById("shExtras"); if(sx)sx.innerHTML=""; } else { renderSheetExtras(k); }
   document.getElementById("shPlayBtn").innerHTML=playBtn;
   document.getElementById("shButtons").innerHTML=btns;
   document.getElementById("shButtons").style.display="flex";
@@ -1521,7 +1521,15 @@ function nav(v){["today","week","horizon","log"].forEach(function(x){document.ge
 var addSport="course", addMode="strava", addShowAll=false, addDay=null;
 function renderExtras(){
   var box=document.getElementById("extrasBox"); if(!box)return;
-  box.innerHTML='<button class="btn btn-ghost" style="width:100%;margin-top:8px" onclick="openAdd(\''+iso(today)+'\')">+ Ajouter une activité</button>';
+  var k=iso(today), supps=suppEntriesFor(k), list=extrasForDay(k);
+  var h='';
+  if(supps.length||list.length){
+    h+='<div class="eyebrow" style="margin:16px 0 8px">Activités hors plan</div>';
+    supps.forEach(function(e){ h+=suppCard(e); });
+    list.forEach(function(e){ h+=extraCard(e); });
+  }
+  h+='<button class="btn btn-ghost" style="width:100%;margin-top:8px" onclick="openAdd(\''+k+'\')">+ Ajouter une activité</button>';
+  box.innerHTML=h;
 }
 function renderSheetExtras(k){
   var box=document.getElementById("shExtras"); if(!box)return;
