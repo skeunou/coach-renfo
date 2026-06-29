@@ -252,6 +252,7 @@
       <div class="specs" id="shSpecs" style="margin-bottom:16px"></div>
     </div>
     <div id="shSummary"></div>
+    <div id="shPlanLink"></div>
     <div id="shCoach"></div>
     <div id="shExtras"></div>
     <div id="shPlayBtn"></div>
@@ -1021,6 +1022,40 @@ function loadCoach(activityId,typeKey){
     })
     .catch(function(){ box.innerHTML=""; });
 }
+/* ===== Liaison manuelle d'une séance de plan à une activité Strava (déclenche l'analyse coach) ===== */
+function runActsForLink(){ return lastActs.filter(function(a){ return actMatchesSport(a,"course")||actMatchesSport(a,"trail"); }); }
+function renderPlanLink(s){
+  var el=document.getElementById("shPlanLink"); if(!el)return;
+  var isRun=(s.typeKey==="fond"||s.typeKey==="longue"||s.typeKey==="cotes");
+  if(!isRun||!s.plan.sid){ el.innerHTML=""; return; }
+  if(!stravaToken){ el.innerHTML='<div style="color:var(--mut);font-size:12px;margin-top:6px">Connecte Strava pour l\'analyse coach de cette séance.</div>'; return; }
+  var lk=linkedData(s.plan.sid);
+  if(lk){
+    el.innerHTML='<button class="btn btn-ghost" style="width:100%;font-size:11.5px;padding:6px;margin-top:6px;color:var(--mut)" onclick="unlinkPlan(\''+s.plan.sid+'\',\''+s.dateKey+'\')">↗ Lié à « '+(lk.name||"Strava")+' » · délier</button>';
+  } else {
+    el.innerHTML='<button class="btn btn-ghost" style="width:100%;font-size:12.5px;padding:8px;margin-top:6px" onclick="showPlanLinkList(\''+s.dateKey+'\')">🔗 Lier à ma séance Strava (analyse coach)</button><div id="shPlanLinkList"></div>';
+  }
+}
+function showPlanLinkList(k){
+  var el=document.getElementById("shPlanLinkList"); if(!el)return;
+  var acts=runActsForLink().slice(0,6), s=sessionFor(parse(k));
+  if(!acts.length){ el.innerHTML='<div style="color:var(--mut);font-size:12px;padding:6px 0">Aucune course Strava récente. Recharge Strava (↻).</div>'; return; }
+  el.innerHTML=acts.map(function(a){
+    var d=a.date?a.date.split("-").reverse().slice(0,2).join("/"):"";
+    return '<div class="card" style="padding:9px 12px;margin-top:6px;cursor:pointer" onclick="linkPlanStrava(\''+k+'\',\''+s.plan.sid+'\',\''+a.id+'\')"><div style="font-weight:700;font-size:13px">'+(a.name||"Course")+'</div><div style="color:var(--mut);font-size:11px">'+d+(a.km?' · '+a.km+' km':'')+' · '+fmtMin(a.movingMin)+(a.hrAvg?' · FC '+a.hrAvg:'')+'</div></div>';
+  }).join("")+'<button class="btn btn-ghost" style="width:100%;font-size:12px;padding:6px;margin-top:6px" onclick="renderPlanLink(sessionFor(parse(\''+k+'\')))">← annuler</button>';
+}
+function linkPlanStrava(k,sid,id){
+  var a=null; lastActs.forEach(function(x){if(String(x.id)===String(id))a=x;});
+  if(!a)return;
+  var L=linksGet(); L[sid]={id:a.id,name:a.name,km:a.km,dplus:a.dplus,movingMin:a.movingMin,hrAvg:a.hrAvg,hrMax:a.hrMax,date:a.date}; linksSet(L);
+  openSheet(k); renderToday();
+}
+function unlinkPlan(sid,k){
+  if(!confirm("Délier cette séance de Strava ?"))return;
+  var L=linksGet(); delete L[sid]; linksSet(L);
+  openSheet(k); renderToday();
+}
 
 /* ================= RENDER TODAY ================= */
 var today=new Date();
@@ -1236,6 +1271,7 @@ function openSheet(k,focus){
   document.getElementById("shSummary").innerHTML=sum;
   var coachBox=document.getElementById("shCoach"); if(coachBox)coachBox.innerHTML="";
   if(linked && (s.typeKey==="fond"||s.typeKey==="longue"||s.typeKey==="cotes")) loadCoach(linked.id,s.typeKey);
+  renderPlanLink(s);
   if(focus){ var sx=document.getElementById("shExtras"); if(sx)sx.innerHTML=""; } else { renderSheetExtras(k); }
   document.getElementById("shPlayBtn").innerHTML=playBtn;
   document.getElementById("shButtons").innerHTML=btns;
