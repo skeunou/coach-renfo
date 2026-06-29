@@ -194,6 +194,7 @@
     <div class="weeklbl"><span class="eyebrow" id="weekLbl">Ta semaine</span><span style="display:flex;align-items:center;gap:8px"><span onclick="weekNav(-1)" style="cursor:pointer;font-size:20px;line-height:1;color:var(--blue);user-select:none;padding:2px 6px">‹</span><span class="eyebrow" id="weekRange">—</span><span onclick="weekNav(1)" style="cursor:pointer;font-size:20px;line-height:1;color:var(--blue);user-select:none;padding:2px 6px">›</span></span></div>
     <div class="week" id="weekStrip"></div>
     <div id="weekRecap"></div>
+    <div id="loadCard"></div>
     <div class="card stravacard">
       <div class="strava" onclick="goStrava()">
         <div class="ic">≈</div>
@@ -962,6 +963,7 @@ function renderToday(){
   document.getElementById("heroActions").innerHTML=a;
   renderWeek();
   renderWeekRecap();
+  renderLoadCard();
   renderExtras();
 }
 var weekOffset=0;
@@ -1012,10 +1014,57 @@ function renderWeekRecap(){
   if(r.runKm>0||r.runD>0) parts.push('🏃 '+Math.round(r.runKm)+' km · '+Math.round(r.runD)+' m D+');
   if(r.rideKm>0||r.rideD>0) parts.push('🚴 '+Math.round(r.rideKm)+' km · '+Math.round(r.rideD)+' m D+');
   if(!parts.length) parts.push('—');
-  box.innerHTML='<div class="card" style="padding:11px 14px;margin-bottom:10px;border-left:3px solid var(--acc)">'+
+  box.innerHTML='<div class="card" style="padding:11px 14px;margin-bottom:10px;border-left:3px solid var(--acid)">'+
     '<div style="font-size:10px;letter-spacing:.6px;color:var(--mut);text-transform:uppercase;font-weight:700;margin-bottom:3px">Cette semaine</div>'+
     '<div style="font-size:13.5px;font-weight:600;line-height:1.4">'+parts.join(' &nbsp;·&nbsp; ')+
     ' <span style="color:var(--mut);font-weight:500">— '+durStr(Math.round(r.totMin))+' d\'effort en '+r.n+' activité'+(r.n>1?'s':'')+'</span></div></div>';
+}
+/* ===== Charge (ACWR, load pondéré FC) + D+ du mois vs plafond ===== */
+function loadStats(){
+  if(!lastActs.length) return null;
+  function ld(a){ var f=a.hrAvg?(a.hrAvg/179):0.7; return (a.movingMin||0)*f; } // load ~ durée × intensité FC
+  function dMinus(n){ var d=new Date(today); d.setDate(today.getDate()-n); return iso(d); }
+  var d7=dMinus(6), d28=dMinus(27), ym=iso(today).slice(0,7);
+  var acute=0, chronic=0, monthD=0, oldest="9999-99-99";
+  lastActs.forEach(function(a){
+    var dk=(a.date||"").slice(0,10); if(!dk)return;
+    if(dk<oldest)oldest=dk;
+    if(dk>=d28) chronic+=ld(a);
+    if(dk>=d7)  acute+=ld(a);
+    if(dk.slice(0,7)===ym) monthD+=a.dplus||0;
+  });
+  var chronicWk=chronic/4, acwr=chronicWk>0?acute/chronicWk:null;
+  var daysCov=oldest!=="9999-99-99"?Math.round((parse(iso(today))-parse(oldest))/86400000):0;
+  return {acwr:acwr, daysCov:daysCov, monthD:Math.round(monthD)};
+}
+function acwrZone(v){
+  if(v<0.8) return {c:"var(--blue)", l:"sous-charge — tu peux construire"};
+  if(v<=1.3) return {c:"var(--grn)", l:"zone optimale"};
+  if(v<=1.5) return {c:"var(--orange)", l:"en hausse — vigilance"};
+  return {c:"var(--red)", l:"risque élevé — lève le pied"};
+}
+function renderLoadCard(){
+  var box=document.getElementById("loadCard"); if(!box)return;
+  var d=loadStats();
+  if(!d){ box.innerHTML=""; return; }
+  var h='<div class="card" style="padding:11px 14px;margin-bottom:10px">';
+  if(d.acwr!=null && d.daysCov>=14){
+    var z=acwrZone(d.acwr);
+    h+='<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px">'+
+      '<div style="font-size:13px"><span style="color:var(--mut)">⚖️ Charge (ACWR)</span> <b style="color:'+z.c+';font-size:15px">'+d.acwr.toFixed(2)+'</b></div>'+
+      '<div style="font-size:12px;font-weight:700;color:'+z.c+';text-align:right">'+z.l+'</div></div>'+
+      '<div style="font-size:10.5px;color:var(--mut);margin-top:2px">7 derniers jours vs moyenne 4 semaines · cible 0,8–1,3</div>';
+  } else {
+    h+='<div style="font-size:12.5px;color:var(--mut)">⚖️ Charge (ACWR) — pas encore assez d\'historique Strava (reviens dans quelques jours)</div>';
+  }
+  var ceil=5000, amber=4000, pct=Math.min(100,Math.round(d.monthD/ceil*100));
+  var dc=d.monthD>ceil?"var(--red)":(d.monthD>=amber?"var(--orange)":"var(--grn)");
+  h+='<div style="margin-top:10px">'+
+    '<div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px"><span style="color:var(--mut)">⛰️ D+ du mois</span>'+
+    '<b style="color:'+dc+'">'+d.monthD.toLocaleString("fr-FR")+' m <span style="color:var(--mut);font-weight:400">/ '+ceil.toLocaleString("fr-FR")+' m</span></b></div>'+
+    '<div style="height:7px;background:var(--bg);border-radius:4px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+dc+'"></div></div></div>';
+  h+='</div>';
+  box.innerHTML=h;
 }
 function renderWeekView(){
   var out="";
@@ -1169,7 +1218,7 @@ function chooseSupp(k){
   var z=document.getElementById("suppZone"); if(!z)return;
   z.innerHTML='<div style="display:flex;gap:8px;margin-top:6px">'+
     '<button class="btn btn-go" style="background:var(--purp);flex:1" onclick="startSuppWod(\''+k+'\')">⚡ WOD</button>'+
-    '<button class="btn btn-go" style="background:var(--acc2);flex:1" onclick="startSuppRenfo(\''+k+'\')">🏋️ RENFO</button>'+
+    '<button class="btn btn-go" style="background:var(--orange);flex:1" onclick="startSuppRenfo(\''+k+'\')">🏋️ RENFO</button>'+
     '</div>'+
     '<button class="btn btn-ghost" style="margin-top:6px;font-size:12px;padding:6px" onclick="resetSupp(\''+k+'\')">← retour</button>';
 }
@@ -1362,7 +1411,7 @@ function saveSuppWod(){
 }
 function finishSuppRenfo(){
   var entry={id:"r_"+Date.now(),dateKey:pKey,ts:Date.now(),
-    typeKey:"renfo-supp",type:"RENFO SUPP",title:pSuppName,color:"var(--acc2)",
+    typeKey:"renfo-supp",type:"RENFO SUPP",title:pSuppName,color:"var(--orange)",
     rpe:"",zp:"",jambes:"",score:"",note:""};
   openSheet(pKey);
   curKey=pKey; editing=entry;
@@ -1383,7 +1432,7 @@ function finishSuppRenfo(){
 function saveSuppRenfo(){
   var log=loadLog();
   var entry={id:"r_"+Date.now(),dateKey:curKey,ts:Date.now(),_u:Date.now(),
-    typeKey:"renfo-supp",type:"RENFO SUPP",title:editing.title,color:"var(--acc2)",
+    typeKey:"renfo-supp",type:"RENFO SUPP",title:editing.title,color:"var(--orange)",
     rpe:val("fRpe"),zp:val("fZp"),jambes:val("fJambes"),score:"",note:(val("fNote")||"").trim(),
     sid:editing.sid||"",stravaName:editing.stravaName||"",hrAvg:editing.hrAvg||null,hrMax:editing.hrMax||null,durMin:editing.durMin||null,wAvg:editing.wAvg||null};
   log.unshift(entry);
