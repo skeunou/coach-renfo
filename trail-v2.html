@@ -271,7 +271,7 @@
     </div>
     <div class="eyebrow">Suivi hors plan</div>
     <h2 class="bebas" style="font-size:30px;line-height:1;margin:4px 0 14px">Ajouter une activité</h2>
-    <div id="addSportRow" style="display:flex;gap:8px;margin-bottom:14px"></div>
+    <div id="addSportRow" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px"></div>
     <div id="addModeRow" style="display:flex;gap:8px;margin-bottom:14px"></div>
     <div id="addBody"></div>
   </div>
@@ -733,7 +733,8 @@ var SPORTS={
   course:{ic:"🏃",l:"Course",filter:"run"},
   trail:{ic:"⛰️",l:"Trail",filter:"run"},
   velo_ht:{ic:"🚴",l:"Vélo HT",filter:"ride"},
-  velo_route:{ic:"🚴",l:"Vélo route",filter:"ride"}
+  velo_route:{ic:"🚴",l:"Vélo route",filter:"ride"},
+  hiit:{ic:"🥊",l:"HIIT",filter:"workout|weight|crossfit|hiit|highintensit"}
 };
 function fmtMin(m){return m>=60?(Math.floor(m/60)+"h"+String(m%60).padStart(2,"0")):(m+"′");}
 function stravaCompare(s,lk){
@@ -1173,6 +1174,7 @@ function startSuppWod(k){
 function quitPlayer(){ clearInterval(pTimer); document.getElementById("player").classList.remove("on"); }
 function pProg(){ document.getElementById("pProg").style.width=Math.round((pIdx/pSegs.length)*100)+"%"; }
 function nextSeg(){ clearInterval(pTimer); pIdx++; if(pIdx>=pSegs.length){ finishPlayer(); } else { renderSeg(); } }
+function endTimedSeg(){ clearInterval(pTimer); dbeep(); nextSeg(); }
 
 function fmtClock(s){var m=Math.floor(s/60),x=s%60;return m+":"+(x<10?"0":"")+x;}
 function fmtName(k){return k==="amrap"?"AMRAP":k==="emom"?"EMOM":k==="tabata"?"TABATA":"FOR TIME";}
@@ -1226,7 +1228,7 @@ function startEmom(seg){
     +'<div class="pname bebas">'+m.name+'</div>'+(m.reps?'<div class="preps">'+m.reps+'</div>':'')+(m.cue?'<div class="pcue">'+m.cue+'</div>':'');
     document.getElementById("pc").className='pclock bebas'+(sec<=3?' hot':(sec<=10?' warn':''));}
   draw();
-  document.getElementById("pAct").innerHTML='<button class="btn btn-ghost" id="pPause">Pause</button>';
+  document.getElementById("pAct").innerHTML='<div style="display:flex;gap:8px"><button class="btn btn-ghost" id="pPause" style="flex:1">Pause</button><button class="btn btn-go" style="flex:1" onclick="endTimedSeg()">Terminer</button></div>';
   document.getElementById("pPause").onclick=function(){paused=!paused;this.textContent=paused?"Reprendre":"Pause";};
   pTimer=setInterval(function(){
     if(paused)return; sec--;
@@ -1317,8 +1319,10 @@ function finishPlayer(){
     document.getElementById("shTitle").textContent=wod.name;
     document.getElementById("shWhy").textContent="WOD supplémentaire ("+fmtName(k0)+") — valide ou ignore.";
     document.getElementById("shSpecs").innerHTML='<div class="spec"><b>'+score+'</b>'+scoreLbl+'</div>';
+    document.getElementById("shSummary").innerHTML='<div id="suppLink" style="margin-top:8px"></div>';
     document.getElementById("shForm").style.display="none";
     document.getElementById("shButtons").innerHTML='<button class="btn btn-go" onclick="saveSuppWod()">VALIDER CE WOD</button><button class="btn btn-ghost" onclick="closeSheet()">Ignorer</button>';
+    renderSuppLink();
   } else {
     curKey=pKey; editing=entryFor(pKey);
     openSheet(pKey);
@@ -1329,7 +1333,8 @@ function saveSuppWod(){
   var log=loadLog();
   var entry={id:"w_"+Date.now(),dateKey:curKey,ts:Date.now(),_u:Date.now(),
     typeKey:"wod-supp",type:"WOD SUPP",title:editing.title,color:"var(--purp)",
-    rpe:"",zp:"",jambes:"",score:editing.score,note:""};
+    rpe:"",zp:"",jambes:"",score:editing.score,note:"",
+    sid:editing.sid||"",stravaName:editing.stravaName||"",hrAvg:editing.hrAvg||null,hrMax:editing.hrMax||null,durMin:editing.durMin||null,wAvg:editing.wAvg||null};
   log.unshift(entry);
   log.sort(function(a,b){return a.dateKey<b.dateKey?1:-1;});
   saveLog(log);
@@ -1349,16 +1354,18 @@ function finishSuppRenfo(){
     '<div class="field"><label>ZP (zone pubienne) <b id="fzV">2</b></label><input type="range" min="0" max="10" value="2" id="fZp" oninput="fzV.textContent=this.value;document.getElementById(\'zpAl\').style.display=(+this.value>=4?\'block\':\'none\')"></div>'+
     '<div class="field"><label>Note</label><textarea id="fNote" placeholder="Charges, sensations, douleur…"></textarea></div>'+
     '<div class="alert" id="zpAl" style="display:none">ZP ≥ 4 : on coupe hinge + adduction sur les prochaines séances.</div>';
-  document.getElementById("shSummary").innerHTML='<div class="summary" style="padding:12px">'+f+'</div>';
+  document.getElementById("shSummary").innerHTML='<div class="summary" style="padding:12px">'+f+'</div><div id="suppLink" style="margin-top:8px"></div>';
   document.getElementById("shForm").style.display="none";
   document.getElementById("shButtons").style.display="flex";
   document.getElementById("shButtons").innerHTML='<button class="btn btn-ghost" onclick="closeSheet()">Ignorer</button><button class="btn btn-go" onclick="saveSuppRenfo()">VALIDER LE RENFO</button>';
+  renderSuppLink();
 }
 function saveSuppRenfo(){
   var log=loadLog();
   var entry={id:"r_"+Date.now(),dateKey:curKey,ts:Date.now(),_u:Date.now(),
     typeKey:"renfo-supp",type:"RENFO SUPP",title:editing.title,color:"var(--acc2)",
-    rpe:val("fRpe"),zp:val("fZp"),jambes:val("fJambes"),score:"",note:(val("fNote")||"").trim()};
+    rpe:val("fRpe"),zp:val("fZp"),jambes:val("fJambes"),score:"",note:(val("fNote")||"").trim(),
+    sid:editing.sid||"",stravaName:editing.stravaName||"",hrAvg:editing.hrAvg||null,hrMax:editing.hrMax||null,durMin:editing.durMin||null,wAvg:editing.wAvg||null};
   log.unshift(entry);
   log.sort(function(a,b){return a.dateKey<b.dateKey?1:-1;});
   saveLog(log);
@@ -1389,6 +1396,7 @@ function renderLog(){
   document.getElementById("logList").innerHTML=log.map(function(e){
     var d=parse(e.dateKey),meta=[];
     if(e.rpe)meta.push("RPE "+e.rpe); if(e.zp)meta.push("ZP "+e.zp); if(e.dplus)meta.push(e.dplus+"m"); if(e.duree)meta.push(e.duree);
+    if(e.sid){ if(e.hrAvg)meta.push("FC "+e.hrAvg); if(e.durMin)meta.push(fmtMin(e.durMin)); }
     var right=e.score?e.score:(e.rpe?e.rpe+"/10":"✓");
     return '<div class="logitem" onclick="openSheet(\''+e.dateKey+'\')"><span class="pip" style="background:'+(e.color||'var(--mut)')+'"></span>'
       +'<div class="m"><div class="l">'+e.title+'</div><div class="s">'+JOURS[dowMon(d)-1]+' '+d.getDate()+' '+MOIS[d.getMonth()]+(meta.length?' · '+meta.join(' · '):'')+'</div></div>'
@@ -1554,11 +1562,68 @@ function toggleExtraDetail(xid){
     .then(function(a){
       if(!a||a.error){ det.innerHTML='<div style="color:var(--mut);font-size:12px;padding:4px 0">Analyse indisponible pour cette sortie.</div>'; return; }
       var isRide=(e.sport==="velo_ht"||e.sport==="velo_route");
-      var html=isRide?coachRide(a):coachRun(a,"fond");
+      var html=e.sport==="hiit"?coachHiit(a):(isRide?coachRide(a):coachRun(a,"fond"));
       _exDetCache[xid]=html; det.innerHTML=html;
     })
     .catch(function(){ det.innerHTML='<div style="color:var(--mut);font-size:12px;padding:4px 0">⚠️ Réseau — réessaie.</div>'; });
 }
+// Analyse HIIT / renfo — lecture FC/durée (séances sans distance)
+function coachHiit(a){
+  var hr=a.hrAvg, z=hr?hrZone(hr):null;
+  var rows='<div class="summary" style="border-left:3px solid var(--purp)">';
+  rows+='<div class="row"><span style="color:var(--purp);font-weight:700">⚡ HIIT / Renfo — analyse</span><b></b></div>';
+  if(a.movingMin) rows+='<div class="row"><span>Durée</span><b>'+fmtMin(a.movingMin)+'</b></div>';
+  if(hr){
+    rows+='<div class="row"><span>FC moy</span><b style="color:'+zColor(z.z)+'">'+hr+' = '+z.l+'</b></div>';
+    if(a.hrMax) rows+='<div class="row"><span>FC max</span><b>'+a.hrMax+'</b></div>';
+    var lec=z.z>=4?"grosse sollicitation cardio — soigne la récup":(z.z===3?"intensité modérée, registre métabolique":"séance bien contrôlée");
+    rows+='<div class="row"><span>Lecture</span><b style="color:'+zColor(z.z)+'">'+lec+'</b></div>';
+  } else rows+='<div class="row"><span style="font-size:12px;color:var(--mut)">Pas de FC enregistrée sur cette séance.</span><b></b></div>';
+  rows+='</div>'; return rows;
+}
+/* ===== Liaison WOD/RENFO généré <-> séance HIIT Strava ===== */
+function suppLinkHTML(){
+  if(!stravaToken) return '';
+  var e=editing||{};
+  if(e.sid){
+    return '<div class="summary" style="border-left:3px solid #fc4c02;padding:10px 12px">'+
+      '<div class="row"><span style="color:#fc4c02;font-weight:700">↗ Lié à Strava</span><b></b></div>'+
+      '<div class="row"><span style="font-size:12px;max-width:70%">'+(e.stravaName||"Séance")+'</span><b></b></div>'+
+      (e.hrAvg?'<div class="row"><span>FC moy</span><b>'+e.hrAvg+'</b></div>':'')+
+      (e.durMin?'<div class="row"><span>Durée</span><b>'+fmtMin(e.durMin)+'</b></div>':'')+
+      '<button class="btn btn-ghost" style="width:100%;margin-top:6px;font-size:12px;padding:6px" onclick="unlinkSupp()">Délier</button></div>';
+  }
+  return '<button class="btn btn-ghost" style="width:100%;font-size:12.5px;padding:8px" onclick="showSuppLinkList()">🔗 Lier à une séance Strava (HIIT)</button>';
+}
+function renderSuppLink(){ var z=document.getElementById("suppLink"); if(z)z.innerHTML=suppLinkHTML(); }
+function showSuppLinkList(){
+  var z=document.getElementById("suppLink"); if(!z)return;
+  var flt=SPORTS.hiit.filter;
+  var acts=lastActs.filter(function(a){return new RegExp(flt,"i").test(a.type||"");}).slice(0,5);
+  if(!acts.length){ z.innerHTML='<div style="color:var(--mut);font-size:12px;padding:6px 0">Aucune séance HIIT/renfo récente sur Strava. Recharge Strava (↻) ou valide sans lier.</div><button class="btn btn-ghost" style="width:100%;font-size:12px;padding:6px" onclick="renderSuppLink()">← retour</button>'; return; }
+  z.innerHTML=acts.map(function(a){
+    var d=a.date?a.date.split("-").reverse().slice(0,2).join("/"):"";
+    return '<div class="card" style="padding:9px 12px;margin-bottom:6px;cursor:pointer" onclick="linkSuppStrava(\''+a.id+'\')"><div style="font-weight:700;font-size:13px">'+(a.name||"Séance")+'</div><div style="color:var(--mut);font-size:11px">'+d+' · '+fmtMin(a.movingMin)+(a.hrAvg?' · FC '+a.hrAvg:'')+'</div></div>';
+  }).join("")+'<button class="btn btn-ghost" style="width:100%;font-size:12px;padding:6px" onclick="renderSuppLink()">← retour</button>';
+}
+function linkSuppStrava(id){
+  var a=null; lastActs.forEach(function(x){if(String(x.id)===String(id))a=x;});
+  if(!a||!editing)return;
+  var z=document.getElementById("suppLink"); if(z)z.innerHTML='<div style="color:var(--mut);font-size:12px;padding:6px 0">Liaison…</div>';
+  fetch(NF+"?action=act&token="+encodeURIComponent(stravaToken)+"&id="+encodeURIComponent(id))
+    .then(function(r){return r.json();})
+    .then(function(det){
+      editing.sid=String(id); editing.stravaName=a.name||"Séance HIIT";
+      editing.hrAvg=(det&&det.hrAvg)||a.hrAvg||null; editing.hrMax=(det&&det.hrMax)||a.hrMax||null;
+      editing.durMin=(det&&det.movingMin)||a.movingMin||0; editing.wAvg=(det&&det.wAvg)||null;
+      renderSuppLink();
+    })
+    .catch(function(){
+      editing.sid=String(id); editing.stravaName=a.name||"Séance HIIT"; editing.hrAvg=a.hrAvg||null; editing.durMin=a.movingMin||0;
+      renderSuppLink();
+    });
+}
+function unlinkSupp(){ if(editing){ ["sid","stravaName","hrAvg","hrMax","durMin","wAvg"].forEach(function(p){delete editing[p];}); } renderSuppLink(); }
 function delExtraUI(xid){
   delExtra(xid); renderExtras();
   if(curKey) renderSheetExtras(curKey);
