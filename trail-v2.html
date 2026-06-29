@@ -646,6 +646,9 @@ function loadLog(){try{return JSON.parse(localStorage.getItem(LOG_KEY)||"[]");}c
 function _writeLog(a){try{localStorage.setItem(LOG_KEY,JSON.stringify(a));}catch(e){}}
 function saveLog(a){_writeLog(a);cloudSave();}
 function entryFor(k){return loadLog().filter(function(e){return e.dateKey===k;})[0]||null;}
+function isSuppEntry(e){return !!(e&&/-supp$/.test(e.typeKey||""));} // wod-supp, renfo-supp = activités indépendantes
+function planEntryFor(k){return loadLog().filter(function(e){return e.dateKey===k && !isSuppEntry(e);})[0]||null;}
+function suppEntriesFor(k){return loadLog().filter(function(e){return e.dateKey===k && isSuppEntry(e);});}
 
 /* ===== CLOUD SYNC (Netlify Blobs) ===== */
 var SYNC_URL="https://coach-nutrition.netlify.app/.netlify/functions/lvsync", SYNC_USER="laurent";
@@ -747,7 +750,7 @@ function stravaCompare(s,lk){
   h+='<div class="row"><span style="color:var(--mut);font-size:11px;max-width:70%">'+lk.name+'</span><b></b></div>';
   h+='</div>'; return h;
 }
-function sessionDone(s){return !!entryFor(s.dateKey)||(s.plan&&s.plan.sid&&isLinked(s.plan.sid));}
+function sessionDone(s){return !!planEntryFor(s.dateKey)||(s.plan&&s.plan.sid&&isLinked(s.plan.sid));}
 
 /* ===== ANALYSE COACH (V3+) ===== */
 function hrZone(hr){
@@ -956,7 +959,7 @@ function renderWeek(){
   if(lbl) lbl.textContent = weekOffset===0?"Ta semaine":(weekOffset<0?("Semaine "+weekOffset):("Semaine +"+weekOffset));
   var html="";
   for(var i=0;i<7;i++){var d=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+i);var s=sessionFor(d);
-    var hasX=extrasForDay(iso(d)).length>0;
+    var hasX=extrasForDay(iso(d)).length>0||suppEntriesFor(iso(d)).length>0;
     html+='<div class="day'+(iso(d)===iso(today)?' today':'')+((sessionDone(s)||hasX)?' done':'')+'" onclick="openSheet(\''+iso(d)+'\')">'
       +'<div class="dow">'+JOURS[i]+'</div><div class="dnum">'+d.getDate()+'</div><div class="pip" style="background:'+s.info.color+'"></div></div>';}
   document.getElementById("weekStrip").innerHTML=html;
@@ -1007,7 +1010,7 @@ function renderWeekView(){
     var range=mon.getDate()+(mon.getMonth()!==sun.getMonth()?' '+MOIS[mon.getMonth()]:'')+'–'+sun.getDate()+' '+MOIS[sun.getMonth()];
     out+='<div class="wkhead"><div class="wktitle bebas">'+(w===0?'Cette semaine':'Semaine prochaine')+'</div><div class="wkmeta">'+range+' · '+blk.name+'</div></div>';
     out+='<div class="card" style="padding:0;margin-bottom:18px;overflow:hidden">';
-    for(var i=0;i<7;i++){var d=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+i);var s=sessionFor(d);var done=sessionDone(s)||extrasForDay(iso(d)).length>0;var dd=s.plan;
+    for(var i=0;i<7;i++){var d=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+i);var s=sessionFor(d);var done=sessionDone(s)||extrasForDay(iso(d)).length>0||suppEntriesFor(iso(d)).length>0;var dd=s.plan;
       out+='<div class="wkrow'+(iso(d)===iso(today)?' wktoday':'')+'" onclick="openSheet(\''+iso(d)+'\')">'
         +'<div class="wkdn bebas">'+JOURS[i]+' '+d.getDate()+'</div>'
         +'<div class="wkdesc"><span class="pip" style="background:'+s.info.color+'"></span><div class="wtxt"><div class="wm">'+(dd.sid?'<span style="color:var(--blue)">'+dd.sid+'</span> · ':'')+dd.label+'</div>'+(dd.sub?'<div class="wsub">'+dd.sub+'</div>':'')+'</div></div>'
@@ -1046,7 +1049,7 @@ function renderCoachRead(){
 /* ================= SHEET ================= */
 var curKey=null, editing=null;
 function openSheet(k){
-  curKey=k; editing=entryFor(k);
+  curKey=k; editing=planEntryFor(k);
   var s=sessionFor(parse(k));
   document.getElementById("shType").textContent=s.info.type; document.getElementById("shType").style.color=s.info.color;
   document.getElementById("shTitle").textContent=s.plan.displayTitle;
@@ -1124,14 +1127,14 @@ function saveSession(){
     typeKey:s.typeKey,type:s.info.type,title:s.info.label,color:s.info.color,
     rpe:val("fRpe"),zp:val("fZp"),jambes:val("fJambes"),score:val("fScore"),
     duree:val("fDuree"),dplus:val("fDplus"),note:(val("fNote")||"").trim()};
-  var log=loadLog().filter(function(e){return e.dateKey!==curKey;});
+  var log=loadLog().filter(function(e){return e.dateKey!==curKey || isSuppEntry(e);});
   log.unshift(entry); log.sort(function(a,b){return a.dateKey<b.dateKey?1:-1;});
   saveLog(log);
   closeSheet(); renderToday(); renderLog();
 }
 function deleteSession(){
   if(!confirm("Supprimer cette séance du journal ?")) return;
-  saveLog(loadLog().filter(function(e){return e.dateKey!==curKey;}));
+  saveLog(loadLog().filter(function(e){return e.dateKey!==curKey || isSuppEntry(e);}));
   closeSheet(); renderToday(); renderLog();
 }
 
@@ -1324,7 +1327,7 @@ function finishPlayer(){
     document.getElementById("shButtons").innerHTML='<button class="btn btn-go" onclick="saveSuppWod()">VALIDER CE WOD</button><button class="btn btn-ghost" onclick="closeSheet()">Ignorer</button>';
     renderSuppLink();
   } else {
-    curKey=pKey; editing=entryFor(pKey);
+    curKey=pKey; editing=planEntryFor(pKey);
     openSheet(pKey);
     openForm(pState.rounds?(pState.rounds+" rounds"):"");
   }
@@ -1505,14 +1508,33 @@ function renderExtras(){
 }
 function renderSheetExtras(k){
   var box=document.getElementById("shExtras"); if(!box)return;
-  var list=extrasForDay(k);
+  var list=extrasForDay(k), supps=suppEntriesFor(k);
   var h='';
-  if(list.length){
+  if(list.length||supps.length){
     h+='<div class="eyebrow" style="margin:14px 0 6px">Activités hors plan</div>';
+    supps.forEach(function(e){ h+=suppCard(e); });
     list.forEach(function(e){ h+=extraCard(e); });
   }
   h+='<button class="btn btn-ghost" style="width:100%;margin-top:10px" onclick="openAdd(\''+k+'\')">+ Ajouter une activité</button>';
   box.innerHTML=h;
+}
+function suppCard(e){
+  var meta=[];
+  if(e.score)meta.push(e.score);
+  if(e.rpe)meta.push("RPE "+e.rpe); if(e.zp)meta.push("ZP "+e.zp);
+  if(e.sid){ if(e.hrAvg)meta.push("FC "+e.hrAvg); if(e.durMin)meta.push(fmtMin(e.durMin)); }
+  var link=e.sid?'<span style="color:#fc4c02;font-weight:700;font-size:11px"> · ↗ Strava</span>':'';
+  return '<div class="card" style="padding:12px 13px;margin-bottom:8px;border-left:3px solid '+(e.color||'var(--purp)')+'">'+
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start">'+
+    '<div><div style="font-weight:700;font-size:14px">'+(e.type||"SÉANCE")+link+'</div>'+
+    '<div style="color:var(--mut);font-size:12px;margin-top:2px">'+(e.title||"")+(meta.length?' · '+meta.join(' · '):'')+'</div></div>'+
+    '<button class="x" onclick="delSuppUI(\''+e.id+'\')" style="border:none;background:none;color:var(--mut);font-size:15px;cursor:pointer;padding:0 0 0 8px">✕</button>'+
+    '</div></div>';
+}
+function delSuppUI(id){
+  if(!confirm("Supprimer cette séance supplémentaire ?"))return;
+  saveLog(loadLog().filter(function(e){return e.id!==id;}));
+  renderToday(); renderLog(); if(curKey)renderSheetExtras(curKey);
 }
 function coachExtra(e){
   if(!e.hrAvg) return ''; // pas de données cardio → pas de verdict (log manuel)
