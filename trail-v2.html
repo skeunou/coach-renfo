@@ -687,9 +687,10 @@ function mergeCloud(d){
   var locL=linksGet(), cl=d.links||{};
   Object.keys(cl).forEach(function(k){ if(!locL[k]) locL[k]=cl[k]; });
   _writeLinks(locL);
-  // journal : union par dateKey, on garde l'entrée la plus récente (_u)
-  var byKey={}; loadLog().forEach(function(e){byKey[e.dateKey]=e;});
-  (d.log||[]).forEach(function(e){ var ex=byKey[e.dateKey]; if(!ex||((e._u||0)>(ex._u||0))) byKey[e.dateKey]=e; });
+  // journal : union par id (préserve plusieurs entrées le même jour : run validé + supp), on garde la plus récente (_u)
+  function lkey(e){ return e.id || (e.dateKey+"|"+(e.ts||"")); }
+  var byKey={}; loadLog().forEach(function(e){ var k=lkey(e), ex=byKey[k]; if(!ex||((e._u||0)>=(ex._u||0))) byKey[k]=e; });
+  (d.log||[]).forEach(function(e){ var k=lkey(e), ex=byKey[k]; if(!ex||((e._u||0)>(ex._u||0))) byKey[k]=e; });
   _writeLog(Object.keys(byKey).map(function(k){return byKey[k];}));
   // extras : union par xid, on garde le plus récent
   var byX={}; extrasGet().forEach(function(e){byX[e.xid]=e;});
@@ -1449,7 +1450,6 @@ function renderHorizon(){
   var stops=[
     {n:"Aujourd'hui",d:curB.name,cls:"cur"},
     {n:'45K Plateau d\'Hauteville <span class="tag">COURSE</span>',d:"26 sept. 2026 · Mac Sport · 45 km",cls:"race"},
-    {n:'10K Trail de l\'Aqueduc <span class="tag">COURSE</span>',d:"11 oct. 2026 · 10 km · ~300 m D+",cls:"race"},
     {n:'20K de Caluire <span class="tag">COURSE</span>',d:"18 oct. 2026 · nouveau format (ex-10K)",cls:"race"},
     {n:'Chianti Ultra 46K <span class="tag">COURSE</span>',d:"Mars 2027 · affûtage",cls:"race"},
     {n:'Trail de Paladru 84K <span class="tag">COURSE</span>',d:"Avril 2027 · le gros test",cls:"race"},
