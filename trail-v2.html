@@ -512,6 +512,56 @@ function randWod(){
   lastWodIdx=idx; return WODS_SUPP[idx];
 }
 
+/* ============== RENFO SUPPLÉMENTAIRE BANQUE (~30 min, ZP-safe) ==============
+   Force athlétique transférée trail. Chaque séance : échauffement + bloc force
+   (EMOM) + bloc complémentaire (AMRAP). Rowing horizontal présent partout.
+   Aucun hinge lourd / adduction / Copenhagen (sécurité zone pubienne). STEP exploité. */
+var RENFO_SUPP=[
+  {name:"Tractions & Step", emom:{kind:"emom",minutes:14,label:"Bloc force — tirage + unilatéral",moves:[
+      {name:"TRACTIONS",cue:"6-8 reps · amplitude complète, omoplates basses"},
+      {name:"STEP-UP LESTÉ (STEP)",cue:"10 · 5/jambe · montée explosive, descente freinée 2 s"}]},
+    amrap:{kind:"amrap",sec:600,label:"Bloc complémentaire",moves:[
+      ["A","8 Développé incliné","banc · contrôlé"],["B","12 TRX row","omoplates serrées"],["C","30 s Planche iso","gainage neutre"]]}},
+  {name:"Push & Pull", emom:{kind:"emom",minutes:14,label:"Bloc force — poussée + tirage",moves:[
+      {name:"PUSH PRESS",cue:"8 reps · jambes donnent l'impulsion, gainage serré"},
+      {name:"ROWING HALTÈRE",cue:"10 · 5/bras · lourd, tire vers la hanche"}]},
+    amrap:{kind:"amrap",sec:600,label:"Bloc complémentaire",moves:[
+      ["A","5 Tractions","amplitude complète"],["B","8 Step-down (STEP) /jambe","contrôle de la descente"],["C","10 Pallof press /côté","anti-rotation, lent"]]}},
+  {name:"Portés & Force", emom:{kind:"emom",minutes:12,label:"Bloc force — portés + tirage",moves:[
+      {name:"FARMER CARRY ~20 m",cue:"2× le plus lourd tenable, buste droit"},
+      {name:"TRACTIONS",cue:"6 reps · sans à-coup"}]},
+    amrap:{kind:"amrap",sec:600,label:"Bloc complémentaire",moves:[
+      ["A","8 KB clean & press /bras","explosif puis stable"],["B","12 TRX row","tempo"],["C","10 Step-up box","4/jambe lesté"]]}},
+  {name:"Unilatéral fort", emom:{kind:"emom",minutes:14,label:"Bloc force — jambe + poussée",moves:[
+      {name:"STEP-UP LESTÉ LOURD (STEP)",cue:"8 · 4/jambe · charge lourde, descente 3 s"},
+      {name:"DÉVELOPPÉ",cue:"6 reps lourd · gainage serré"}]},
+    amrap:{kind:"amrap",sec:540,label:"Bloc complémentaire",moves:[
+      ["A","12 Face pull élastique","rotation externe"],["B","12 Rowing élastique","dos large"],["C","20 Shoulder tap","planche stable, bassin fixe"]]}},
+  {name:"Tirage complet", emom:{kind:"emom",minutes:14,label:"Bloc force — vertical + horizontal",moves:[
+      {name:"TRACTIONS PRONATION",cue:"6 reps · dos large"},
+      {name:"ROWING HALTÈRE UNILATÉRAL",cue:"10/bras · amplitude, omoplate"}]},
+    amrap:{kind:"amrap",sec:600,label:"Bloc complémentaire",moves:[
+      ["A","8 Push press haltères","jambes + épaules"],["B","12 Step-up lesté (STEP)","6/jambe"],["C","Pallof walk 15 m","Medium élastique, anti-rotation"]]}},
+  {name:"Épaules & gainage", emom:{kind:"emom",minutes:12,label:"Bloc force — épaules + tirage",moves:[
+      {name:"PUSH PRESS",cue:"8 reps · explosif"},
+      {name:"TRX ROW",cue:"12 reps · serre les omoplates"}]},
+    amrap:{kind:"amrap",sec:600,label:"Bloc complémentaire",moves:[
+      ["A","12 Élévations latérales","5 kg · contrôlé"],["B","10 Curls","tempo"],["C","40 s Planche iso","gainage"],["D","10 Step-up (STEP)","5/jambe"]]}},
+  {name:"Swing & Step", emom:{kind:"emom",minutes:14,label:"Bloc force — hanche + jambe",moves:[
+      {name:"KB SWING AMÉRICAIN",cue:"15 reps · propulsion hanche, bras passifs (ZP-safe)"},
+      {name:"STEP-UP LESTÉ (STEP)",cue:"10 · 5/jambe · explosif"}]},
+    amrap:{kind:"amrap",sec:540,label:"Bloc complémentaire",moves:[
+      ["A","5 Tractions","amplitude"],["B","8 Développé incliné","contrôlé"],["C","Farmer carry ~20 m","2× lourd"]]}}
+];
+var lastRenfoIdx=-1;
+function buildSuppRenfo(){
+  var idx; do { idx=Math.floor(Math.random()*RENFO_SUPP.length); } while(idx===lastRenfoIdx && RENFO_SUPP.length>1);
+  lastRenfoIdx=idx; var r=RENFO_SUPP[idx];
+  var segs=RENFO_WARM.map(function(s){return {kind:"flow",name:s.name,cue:s.cue,reps:s.reps};});
+  segs.push(r.emom); segs.push(r.amrap);
+  return {name:r.name, segs:segs};
+}
+
 /* ================= CONTENU DES SÉANCES (player) ================= */
 var MOBI_A=[
   {name:"Respiration 4-6",cue:"Assis ou allongé. Inspire 4 s, souffle 6 s. Relâche les épaules.",hold:40},
@@ -1018,7 +1068,7 @@ function openSheet(k){
     btns='<button class="btn btn-ghost" onclick="closeSheet()">Fermer</button><button class="btn btn-go" onclick="openForm()">AJOUTER LE RESSENTI</button>';
   } else {
     if(hasPlayer(s.typeKey)) playBtn='<button class="btn btn-orange" style="margin-bottom:8px" onclick="startPlayer(\''+k+'\')">▶ DÉMARRER (guidé · chrono)</button>';
-    playBtn+='<button class="btn btn-go" style="background:var(--purp);margin-top:6px" onclick="startSuppWod(\''+k+'\')">⚡ WOD SUPPLÉMENTAIRE</button>';
+    playBtn+='<div id="suppZone">'+suppBtn(k)+'</div>';
     btns='<button class="btn btn-ghost" onclick="closeSheet()">Fermer</button><button class="btn btn-go" onclick="openForm()">'+(hasPlayer(s.typeKey)?'VALIDER À LA MAIN':'VALIDER')+'</button>';
   }
   document.getElementById("shSummary").innerHTML=sum;
@@ -1079,16 +1129,33 @@ function deleteSession(){
 }
 
 /* ================= PLAYER ================= */
-var pSegs=[],pIdx=0,pKey=null,pTimer=null,pState={},pIsSupp=false,ftSec=0;
+var pSegs=[],pIdx=0,pKey=null,pTimer=null,pState={},pIsSupp=false,pSuppKind="wod",pSuppName="",ftSec=0;
 function startPlayer(k){
   unlockAudio(); reqWake(); beep(660,.12);
   pKey=k; pIsSupp=false; pState={}; pSegs=content(k)||[]; pIdx=0;
   closeSheet(); document.getElementById("player").classList.add("on");
   renderSeg();
 }
+function suppBtn(k){ return '<button class="btn btn-go" style="background:var(--purp);margin-top:6px" onclick="chooseSupp(\''+k+'\')">⚡ WOD / RENFO SUPPLÉMENTAIRE</button>'; }
+function resetSupp(k){ var z=document.getElementById("suppZone"); if(z)z.innerHTML=suppBtn(k); }
+function chooseSupp(k){
+  var z=document.getElementById("suppZone"); if(!z)return;
+  z.innerHTML='<div style="display:flex;gap:8px;margin-top:6px">'+
+    '<button class="btn btn-go" style="background:var(--purp);flex:1" onclick="startSuppWod(\''+k+'\')">⚡ WOD</button>'+
+    '<button class="btn btn-go" style="background:var(--acc2);flex:1" onclick="startSuppRenfo(\''+k+'\')">🏋️ RENFO</button>'+
+    '</div>'+
+    '<button class="btn btn-ghost" style="margin-top:6px;font-size:12px;padding:6px" onclick="resetSupp(\''+k+'\')">← retour</button>';
+}
+function startSuppRenfo(k){
+  unlockAudio(); reqWake(); beep(660,.12);
+  pKey=k; pIsSupp=true; pSuppKind="renfo"; pState={};
+  var r=buildSuppRenfo(); pSuppName=r.name; pSegs=r.segs; pIdx=0;
+  closeSheet(); document.getElementById("player").classList.add("on");
+  renderSeg();
+}
 function startSuppWod(k){
   unlockAudio(); reqWake(); beep(660,.12);
-  pKey=k; pIsSupp=true; pState={};
+  pKey=k; pIsSupp=true; pSuppKind="wod"; pState={};
   var wod=randWod(), r=Math.random(), seg;
   if(r<0.5){ seg={kind:"amrap",sec:600,label:"WOD SUPP",name:wod.name,moves:wod.moves}; }
   else if(r<0.8){ var mv=wod.moves.map(function(m){return {name:m[1],reps:"",cue:m[2]||""};}); var rd=Math.max(3,Math.floor(12/mv.length)); seg={kind:"emom",minutes:rd*mv.length,label:"WOD SUPP",name:wod.name,moves:mv}; }
@@ -1196,6 +1263,7 @@ function finishPlayer(){
   document.getElementById("player").classList.remove("on");
   dbeep();
   if(pIsSupp){
+    if(pSuppKind==="renfo"){ finishSuppRenfo(); return; }
     // WOD supp = entrée indépendante, validation optionnelle
     var wod=WODS_SUPP[lastWodIdx];
     var k0=pSegs[0].kind;
@@ -1227,6 +1295,35 @@ function saveSuppWod(){
   saveLog(log);
   closeSheet(); renderToday(); renderLog();
 }
+function finishSuppRenfo(){
+  var entry={id:"r_"+Date.now(),dateKey:pKey,ts:Date.now(),
+    typeKey:"renfo-supp",type:"RENFO SUPP",title:pSuppName,color:"var(--acc2)",
+    rpe:"",zp:"",jambes:"",score:"",note:""};
+  curKey=pKey; editing=entry;
+  openSheet(pKey);
+  document.getElementById("shTitle").textContent=pSuppName;
+  document.getElementById("shWhy").textContent="Renfo supplémentaire (~30 min) — note ton ressenti, surtout la ZP.";
+  document.getElementById("shSpecs").innerHTML='<div class="spec"><b>≈30′</b>FAIT</div>';
+  var f='<div class="field"><label>RPE <b id="frV">6</b></label><input type="range" min="1" max="10" value="6" id="fRpe" oninput="frV.textContent=this.value"></div>'+
+    '<div class="field"><label>Jambes <b id="fjV">6</b></label><input type="range" min="1" max="10" value="6" id="fJambes" oninput="fjV.textContent=this.value"></div>'+
+    '<div class="field"><label>ZP (zone pubienne) <b id="fzV">2</b></label><input type="range" min="0" max="10" value="2" id="fZp" oninput="fzV.textContent=this.value;document.getElementById(\'zpAl\').style.display=(+this.value>=4?\'block\':\'none\')"></div>'+
+    '<div class="field"><label>Note</label><textarea id="fNote" placeholder="Charges, sensations, douleur…"></textarea></div>'+
+    '<div class="alert" id="zpAl" style="display:none">ZP ≥ 4 : on coupe hinge + adduction sur les prochaines séances.</div>';
+  document.getElementById("shSummary").innerHTML='<div class="summary" style="padding:12px">'+f+'</div>';
+  document.getElementById("shForm").style.display="none";
+  document.getElementById("shButtons").style.display="flex";
+  document.getElementById("shButtons").innerHTML='<button class="btn btn-ghost" onclick="closeSheet()">Ignorer</button><button class="btn btn-go" onclick="saveSuppRenfo()">VALIDER LE RENFO</button>';
+}
+function saveSuppRenfo(){
+  var log=loadLog();
+  var entry={id:"r_"+Date.now(),dateKey:curKey,ts:Date.now(),_u:Date.now(),
+    typeKey:"renfo-supp",type:"RENFO SUPP",title:editing.title,color:"var(--acc2)",
+    rpe:val("fRpe"),zp:val("fZp"),jambes:val("fJambes"),score:"",note:(val("fNote")||"").trim()};
+  log.unshift(entry);
+  log.sort(function(a,b){return a.dateKey<b.dateKey?1:-1;});
+  saveLog(log);
+  closeSheet(); renderToday(); renderLog();
+}
 
 /* ================= HORIZON ================= */
 function renderHorizon(){
@@ -1236,7 +1333,6 @@ function renderHorizon(){
   var stops=[
     {n:"Aujourd'hui",d:curB.name,cls:"cur"},
     {n:'45K Plateau d\'Hauteville <span class="tag">COURSE</span>',d:"26 sept. 2026 · Mac Sport · 45 km",cls:"race"},
-    {n:'10K Trail de l\'Aqueduc <span class="tag">COURSE</span>',d:"11 oct. 2026 · 10 km · ~300 m D+",cls:"race"},
     {n:'20K de Caluire <span class="tag">COURSE</span>',d:"18 oct. 2026 · nouveau format (ex-10K)",cls:"race"},
     {n:'Chianti Ultra 46K <span class="tag">COURSE</span>',d:"Mars 2027 · affûtage",cls:"race"},
     {n:'Trail de Paladru 84K <span class="tag">COURSE</span>',d:"Avril 2027 · le gros test",cls:"race"},
