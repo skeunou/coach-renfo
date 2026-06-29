@@ -554,11 +554,17 @@ var RENFO_SUPP=[
       ["A","5 Tractions","amplitude"],["B","8 Développé incliné","contrôlé"],["C","Farmer carry ~20 m","2× lourd"]]}}
 ];
 var lastRenfoIdx=-1;
+var TABATA_ABDO={kind:"tabata",label:"Finisher — Tabata abdo (ZP-safe)",rounds:8,work:20,rest:10,moves:[
+  {name:"HOLLOW HOLD",cue:"Lombaires plaquées au sol, bras tendus. Trop dur ? genoux fléchis."},
+  {name:"DEAD BUG",cue:"Bras/jambe opposés, dos neutre collé au sol. Lent et contrôlé."},
+  {name:"SHOULDER TAPS",cue:"Planche haute, bassin verrouillé. Touche l'épaule opposée sans rouler."},
+  {name:"GAINAGE LATÉRAL",cue:"Alterne le côté à chaque tour. Hanche haute, corps aligné."}
+]};
 function buildSuppRenfo(){
   var idx; do { idx=Math.floor(Math.random()*RENFO_SUPP.length); } while(idx===lastRenfoIdx && RENFO_SUPP.length>1);
   lastRenfoIdx=idx; var r=RENFO_SUPP[idx];
   var segs=RENFO_WARM.map(function(s){return {kind:"flow",name:s.name,cue:s.cue,reps:s.reps};});
-  segs.push(r.emom); segs.push(r.amrap);
+  segs.push(r.emom); segs.push(r.amrap); segs.push(TABATA_ABDO);
   return {name:r.name, segs:segs};
 }
 
@@ -1169,10 +1175,10 @@ function pProg(){ document.getElementById("pProg").style.width=Math.round((pIdx/
 function nextSeg(){ clearInterval(pTimer); pIdx++; if(pIdx>=pSegs.length){ finishPlayer(); } else { renderSeg(); } }
 
 function fmtClock(s){var m=Math.floor(s/60),x=s%60;return m+":"+(x<10?"0":"")+x;}
-function fmtName(k){return k==="amrap"?"AMRAP":k==="emom"?"EMOM":"FOR TIME";}
-function durLabel(seg){ if(seg.kind==="amrap")return Math.round(seg.sec/60)+" min"; if(seg.kind==="emom")return seg.minutes+" min"; return seg.rounds+" rounds · cap "+Math.round(seg.cap/60)+"′"; }
+function fmtName(k){return k==="amrap"?"AMRAP":k==="emom"?"EMOM":k==="tabata"?"TABATA":"FOR TIME";}
+function durLabel(seg){ if(seg.kind==="amrap")return Math.round(seg.sec/60)+" min"; if(seg.kind==="emom")return seg.minutes+" min"; if(seg.kind==="tabata")return seg.rounds+" × "+seg.work+"/"+seg.rest+"″ · "+Math.round(seg.rounds*(seg.work+seg.rest)/60)+" min"; return seg.rounds+" rounds · cap "+Math.round(seg.cap/60)+"′"; }
 function movesList(seg){
-  if(seg.kind==="emom") return seg.moves.map(function(m,i){return '<div class="li"><span class="k">'+(i+1)+'</span><div><b>'+m.name+'</b>'+(m.cue?' <span style="color:var(--mut)">· '+m.cue+'</span>':'')+'</div></div>';}).join("");
+  if(seg.kind==="emom"||seg.kind==="tabata") return seg.moves.map(function(m,i){return '<div class="li"><span class="k">'+(i+1)+'</span><div><b>'+m.name+'</b>'+(m.cue?' <span style="color:var(--mut)">· '+m.cue+'</span>':'')+'</div></div>';}).join("");
   return seg.moves.map(function(m){return '<div class="li"><span class="k">'+(m[0]||'•')+'</span><div><b>'+m[1]+'</b>'+(m[2]?' <span style="color:var(--mut)">· '+m[2]+'</span>':'')+'</div></div>';}).join("");
 }
 function renderSeg(){
@@ -1199,7 +1205,7 @@ function renderReady(seg){
     +'<div class="plist">'+movesList(seg)+'</div>';
   document.getElementById("pAct").innerHTML='<button class="btn btn-orange" onclick="startTimed()">▶ DÉMARRER</button>';
 }
-function startTimed(){ unlockAudio(); var seg=pSegs[pIdx]; if(seg.kind==="amrap")startAmrap(seg); else if(seg.kind==="emom")startEmom(seg); else startForTime(seg); }
+function startTimed(){ unlockAudio(); var seg=pSegs[pIdx]; if(seg.kind==="amrap")startAmrap(seg); else if(seg.kind==="emom")startEmom(seg); else if(seg.kind==="tabata")startTabata(seg); else startForTime(seg); }
 function startHold(seg){
   var t=seg.hold; document.getElementById("pc").textContent=t;
   pTimer=setInterval(function(){
@@ -1258,6 +1264,40 @@ function startAmrap(seg){
   document.getElementById("pAct").innerHTML='<button class="btn btn-go" onclick="nextSeg()">TERMINER</button>';
   pTimer=setInterval(function(){ sec--; if(sec<=0){clearInterval(pTimer);sec=0;draw();dbeep();nextSeg();return;} if(sec===60)beep(800,.2); if(sec<=5)beep(700,.07); draw(); },1000);
 }
+function startTabata(seg){
+  var N=seg.rounds||8, work=seg.work||20, rest=seg.rest||10;
+  var round=1, phase="work", sec=work, paused=false;
+  function curMove(){ return seg.moves[(round-1)%seg.moves.length]; }
+  function nextMove(){ return seg.moves[round%seg.moves.length]; }
+  function draw(){
+    if(phase==="work"){ var m=curMove();
+      document.getElementById("pBody").innerHTML=
+        '<div class="pclock bebas" id="pc">'+sec+'</div><div class="pmin">WORK · ROUND '+round+' / '+N+'</div>'
+        +'<div class="pname bebas">'+m.name+'</div>'+(m.cue?'<div class="pcue">'+m.cue+'</div>':'');
+    } else {
+      document.getElementById("pBody").innerHTML=
+        '<div class="pclock bebas warn" id="pc">'+sec+'</div><div class="pmin">REPOS</div>'
+        +'<div class="pname bebas" style="color:var(--mut)">Prochain : '+nextMove().name+'</div>';
+    }
+    var c=document.getElementById("pc"); if(c) c.className='pclock bebas'+(sec<=3?' hot':(phase==="rest"?' warn':''));
+  }
+  document.getElementById("pSeg").textContent=seg.label||"TABATA";
+  draw();
+  document.getElementById("pAct").innerHTML='<button class="btn btn-ghost" id="pPause">Pause</button>';
+  document.getElementById("pPause").onclick=function(){paused=!paused;this.textContent=paused?"Reprendre":"Pause";};
+  pTimer=setInterval(function(){
+    if(paused)return; sec--;
+    if(sec<=0){
+      if(phase==="work"){
+        if(round>=N){ clearInterval(pTimer); dbeep(); nextSeg(); return; }
+        phase="rest"; sec=rest; beep(520,.18);
+      } else { phase="work"; round++; sec=work; beep(950,.18); }
+      draw(); return;
+    }
+    if(sec<=3) beep(700,.07);
+    draw();
+  },1000);
+}
 function finishPlayer(){
   clearInterval(pTimer);
   document.getElementById("player").classList.remove("on");
@@ -1272,8 +1312,8 @@ function finishPlayer(){
     var entry={id:"w_"+Date.now(),dateKey:pKey,ts:Date.now(),
       typeKey:"wod-supp",type:"WOD SUPP",title:wod.name,color:"var(--purp)",
       rpe:"",zp:"",jambes:"",score:score,note:""};
-    curKey=pKey; editing=entry;
     openSheet(pKey);
+    curKey=pKey; editing=entry;
     document.getElementById("shTitle").textContent=wod.name;
     document.getElementById("shWhy").textContent="WOD supplémentaire ("+fmtName(k0)+") — valide ou ignore.";
     document.getElementById("shSpecs").innerHTML='<div class="spec"><b>'+score+'</b>'+scoreLbl+'</div>';
@@ -1299,8 +1339,8 @@ function finishSuppRenfo(){
   var entry={id:"r_"+Date.now(),dateKey:pKey,ts:Date.now(),
     typeKey:"renfo-supp",type:"RENFO SUPP",title:pSuppName,color:"var(--acc2)",
     rpe:"",zp:"",jambes:"",score:"",note:""};
-  curKey=pKey; editing=entry;
   openSheet(pKey);
+  curKey=pKey; editing=entry;
   document.getElementById("shTitle").textContent=pSuppName;
   document.getElementById("shWhy").textContent="Renfo supplémentaire (~30 min) — note ton ressenti, surtout la ZP.";
   document.getElementById("shSpecs").innerHTML='<div class="spec"><b>≈30′</b>FAIT</div>';
