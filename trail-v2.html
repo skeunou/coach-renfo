@@ -519,41 +519,46 @@ function randWod(){
    (EMOM) + bloc complémentaire (AMRAP). Rowing horizontal présent partout.
    Aucun hinge lourd / adduction / Copenhagen (sécurité zone pubienne). STEP exploité. */
 var RENFO_SUPP=[
-  {name:"Tractions & Step", emom:{kind:"emom",minutes:14,label:"Bloc force — tirage + unilatéral",moves:[
-      {name:"TRACTIONS",cue:"6-8 reps · amplitude complète, omoplates basses"},
-      {name:"STEP-UP LESTÉ (STEP)",cue:"10 · 5/jambe · montée explosive, descente freinée 2 s"}]},
-    amrap:{kind:"amrap",sec:600,label:"Bloc complémentaire",moves:[
-      ["A","8 Développé incliné","banc · contrôlé"],["B","12 TRX row","omoplates serrées"],["C","30 s Planche iso","gainage neutre"]]}},
-  {name:"Push & Pull", emom:{kind:"emom",minutes:14,label:"Bloc force — poussée + tirage",moves:[
-      {name:"PUSH PRESS",cue:"8 reps · jambes donnent l'impulsion, gainage serré"},
-      {name:"ROWING HALTÈRE",cue:"10 · 5/bras · lourd, tire vers la hanche"}]},
-    amrap:{kind:"amrap",sec:600,label:"Bloc complémentaire",moves:[
-      ["A","5 Tractions","amplitude complète"],["B","8 Step-down (STEP) /jambe","contrôle de la descente"],["C","10 Pallof press /côté","anti-rotation, lent"]]}},
-  {name:"Portés & Force", emom:{kind:"emom",minutes:12,label:"Bloc force — portés + tirage",moves:[
-      {name:"FARMER CARRY ~20 m",cue:"2× le plus lourd tenable, buste droit"},
-      {name:"TRACTIONS",cue:"6 reps · sans à-coup"}]},
-    amrap:{kind:"amrap",sec:600,label:"Bloc complémentaire",moves:[
-      ["A","8 KB clean & press /bras","explosif puis stable"],["B","12 TRX row","tempo"],["C","10 Step-up box","4/jambe lesté"]]}},
-  {name:"Unilatéral fort", emom:{kind:"emom",minutes:14,label:"Bloc force — jambe + poussée",moves:[
-      {name:"STEP-UP LESTÉ LOURD (STEP)",cue:"8 · 4/jambe · charge lourde, descente 3 s"},
-      {name:"DÉVELOPPÉ",cue:"6 reps lourd · gainage serré"}]},
-    amrap:{kind:"amrap",sec:540,label:"Bloc complémentaire",moves:[
-      ["A","12 Face pull élastique","rotation externe"],["B","12 Rowing élastique","dos large"],["C","20 Shoulder tap","planche stable, bassin fixe"]]}},
-  {name:"Tirage complet", emom:{kind:"emom",minutes:14,label:"Bloc force — vertical + horizontal",moves:[
-      {name:"TRACTIONS PRONATION",cue:"6 reps · dos large"},
-      {name:"ROWING HALTÈRE UNILATÉRAL",cue:"10/bras · amplitude, omoplate"}]},
-    amrap:{kind:"amrap",sec:600,label:"Bloc complémentaire",moves:[
-      ["A","8 Push press haltères","jambes + épaules"],["B","12 Step-up lesté (STEP)","6/jambe"],["C","Pallof walk 15 m","Medium élastique, anti-rotation"]]}},
-  {name:"Épaules & gainage", emom:{kind:"emom",minutes:12,label:"Bloc force — épaules + tirage",moves:[
-      {name:"PUSH PRESS",cue:"8 reps · explosif"},
-      {name:"TRX ROW",cue:"12 reps · serre les omoplates"}]},
-    amrap:{kind:"amrap",sec:600,label:"Bloc complémentaire",moves:[
-      ["A","12 Élévations latérales","5 kg · contrôlé"],["B","10 Curls","tempo"],["C","40 s Planche iso","gainage"],["D","10 Step-up (STEP)","5/jambe"]]}},
-  {name:"Swing & Step", emom:{kind:"emom",minutes:14,label:"Bloc force — hanche + jambe",moves:[
-      {name:"KB SWING AMÉRICAIN",cue:"15 reps · propulsion hanche, bras passifs (ZP-safe)"},
-      {name:"STEP-UP LESTÉ (STEP)",cue:"10 · 5/jambe · explosif"}]},
-    amrap:{kind:"amrap",sec:540,label:"Bloc complémentaire",moves:[
-      ["A","5 Tractions","amplitude"],["B","8 Développé incliné","contrôlé"],["C","Farmer carry ~20 m","2× lourd"]]}}
+  {zpsafe:false, name:"Hinge & Tirage", emom:{kind:"emom",minutes:14,label:"Force — hinge + tirage",moves:[
+      {name:"RDL BARRE",cue:"8 reps · charge lourde, hanche en arrière, dos neutre"},
+      {name:"TRACTIONS",cue:"6-8 · amplitude complète, omoplates basses"}]},
+    amrap:{kind:"amrap",sec:600,label:"Complémentaire",moves:[
+      ["A","10 Hip thrust barre","verrouille les fessiers en haut"],["B","12 TRX row","omoplates serrées"],["C","30 s Planche iso","gainage neutre"]]}},
+  {zpsafe:false, name:"Squat & Poussée", emom:{kind:"emom",minutes:14,label:"Force — squat + poussée",moves:[
+      {name:"GOBLET SQUAT KB",cue:"10 · lourd, buste droit, profondeur"},
+      {name:"DÉVELOPPÉ INCLINÉ",cue:"8 · contrôlé, amplitude"}]},
+    amrap:{kind:"amrap",sec:600,label:"Complémentaire",moves:[
+      ["A","8 Bulgarian split squat /jambe (STEP)","pied arrière sur le step"],["B","12 Rowing haltère /bras","tire vers la hanche"],["C","10 Pallof press /côté","anti-rotation"]]}},
+  {zpsafe:false, name:"Soulevé & Press", emom:{kind:"emom",minutes:14,label:"Force — chaîne post. + épaules",moves:[
+      {name:"SOULEVÉ DE TERRE JAMBES TENDUES",cue:"8 · ischios sous tension, dos plat"},
+      {name:"PUSH PRESS",cue:"8 · jambes donnent l'impulsion"}]},
+    amrap:{kind:"amrap",sec:600,label:"Complémentaire",moves:[
+      ["A","10 Step-up lesté /jambe (STEP)","montée explosive"],["B","12 TRX row","omoplates"],["C","6 Tractions","sans à-coup"]]}},
+  {zpsafe:false, name:"Chaîne postérieure", emom:{kind:"emom",minutes:14,label:"Force — fessiers + tirage",moves:[
+      {name:"HIP THRUST BARRE",cue:"10 · pause 1 s en haut, fessiers"},
+      {name:"TRACTIONS PRONATION",cue:"6 · dos large"}]},
+    amrap:{kind:"amrap",sec:540,label:"Complémentaire",moves:[
+      ["A","8 RDL unilatéral KB /jambe","équilibre, hanche en arrière"],["B","15 Face pull élastique","rotation externe"],["C","Gainage latéral 30 s /côté","hanche haute"]]}},
+  {zpsafe:false, name:"Squat & Tirage", emom:{kind:"emom",minutes:14,label:"Force — squat + rowing",moves:[
+      {name:"FRONT SQUAT BARRE",cue:"6 · coudes hauts, profondeur"},
+      {name:"ROWING BARRE",cue:"8 · buste penché, dos gainé"}]},
+    amrap:{kind:"amrap",sec:600,label:"Complémentaire",moves:[
+      ["A","10 Fentes marchées lestées /jambe","grand pas, genou contrôlé"],["B","6 Tractions","amplitude"],["C","10 Pallof walk /côté","gainage"]]}},
+  {zpsafe:false, name:"Puissance", emom:{kind:"emom",minutes:14,label:"Force — puissance",moves:[
+      {name:"POWER CLEAN",cue:"5 · explosif, triple extension"},
+      {name:"PUSH PRESS",cue:"8 · enchaîné, gainage serré"}]},
+    amrap:{kind:"amrap",sec:540,label:"Complémentaire",moves:[
+      ["A","15 KB swing américain","propulsion hanche"],["B","10 Step-up lesté /jambe","explosif"],["C","12 TRX row","omoplates"]]}},
+  {zpsafe:true, name:"Haut du corps & gainage", emom:{kind:"emom",minutes:12,label:"Haut du corps — tirage + poussée",moves:[
+      {name:"TRACTIONS",cue:"6-8 · amplitude complète"},
+      {name:"DÉVELOPPÉ INCLINÉ",cue:"8 · contrôlé"}]},
+    amrap:{kind:"amrap",sec:600,label:"Complémentaire",moves:[
+      ["A","12 TRX row","serre les omoplates"],["B","8 Push press","gainage serré"],["C","10 Pallof press /côté","anti-rotation"],["D","40 s Planche iso","neutre"]]}},
+  {zpsafe:true, name:"Tirage & épaules", emom:{kind:"emom",minutes:12,label:"Haut du corps — tirage + épaules",moves:[
+      {name:"TRACTIONS PRONATION",cue:"6 · dos large"},
+      {name:"ROWING HALTÈRE",cue:"10 /bras · amplitude, omoplate"}]},
+    amrap:{kind:"amrap",sec:600,label:"Complémentaire",moves:[
+      ["A","12 Face pull élastique","rotation externe"],["B","12 Élévations latérales","5 kg, contrôlé"],["C","10 Curls /bras","tempo"],["D","20 Shoulder taps","bassin fixe"]]}}
 ];
 var lastRenfoIdx=-1;
 var TABATA_ABDO={kind:"tabata",label:"Finisher — Tabata abdo (ZP-safe)",rounds:8,work:20,rest:10,moves:[
@@ -573,7 +578,7 @@ function buildSuppRenfo(signal){
 /* ===== Check-in d'avant-séance : adapte la génération à un signalement ===== */
 var ZONE_LBL={zp:"Zone pubienne",epaule:"Épaule",avantbras:"Avant-bras/poignet",genou:"Genou",dos:"Bas du dos"};
 var ZONE_KW={
-  zp:       /squat|thruster|goblet|front squat|\bjump\b|saut|fente saut|broad|ab wheel|mountain|copenhag/i,
+  zp:       /squat|thruster|goblet|front squat|back squat|\bjump\b|saut|\bfente|lunge|broad|ab wheel|mountain|copenhag|rdl|deadlift|soulev|hip ?thrust|bulgarian|adduct|good ?morning|swing/i,
   epaule:   /press|jerk|overhead|snatch|développ|élévation|hspu|wall walk/i,
   avantbras:/farmer|suitcase|carry|porté|pull-?up|traction|tirage|\brow\b|renegade|grind|grip|dead ?hang/i,
   genou:    /step-?up|step-?down|\bbox\b|squat|fente|lunge|\bjump\b|saut/i,
