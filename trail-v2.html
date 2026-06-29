@@ -740,6 +740,21 @@ var SPORTS={
   hiit:{ic:"🥊",l:"HIIT",filter:"workout|weight|crossfit|hiit|highintensit"}
 };
 function fmtMin(m){return m>=60?(Math.floor(m/60)+"h"+String(m%60).padStart(2,"0")):(m+"′");}
+// Classification par préfixe du titre Strava (convention Laurent). Retourne null si non préfixé.
+function actSport(a){
+  var n=(a.name||"").trim();
+  if(/^hiit\s*-/i.test(n)) return "hiit";
+  if(/^h\.?\s*t\s*-/i.test(n)) return "velo_ht";
+  if(/^vdr\s*-/i.test(n)) return "velo_route";
+  if(/^t\s*-/i.test(n)) return "trail";
+  if(/^r\s*-/i.test(n)) return "course";
+  return null;
+}
+function actMatchesSport(a,sport){
+  var sp=actSport(a);
+  if(sp) return sp===sport;                                    // préfixe reconnu → classement exact
+  return new RegExp(SPORTS[sport].filter,"i").test(a.type||""); // sinon repli sur le type Strava
+}
 function stravaCompare(s,lk){
   var tk=s.typeKey,P=s.plan.plan||{},h='<div class="summary" style="border-left:3px solid #fc4c02">';
   h+='<div class="row"><span style="color:#fc4c02;font-weight:700">✓ Réalisé · Strava</span><b>'+(lk.date||"").split("-").reverse().slice(0,2).join("/")+'</b></div>';
@@ -972,10 +987,12 @@ function weekRecapData(){
   var r={runKm:0,runD:0,rideKm:0,rideD:0,totMin:0,n:0}, seen={};
   lastActs.forEach(function(a){
     if(!inWk(a.date))return;
-    var t=(a.type||"").toLowerCase();
+    var t=(a.type||"").toLowerCase(), sp=actSport(a);
+    var isRun = sp ? (sp==="trail"||sp==="course") : /run/.test(t);
+    var isRide = sp ? (sp==="velo_ht"||sp==="velo_route") : /ride/.test(t);
     r.totMin+=a.movingMin||0; r.n++;
-    if(/run/.test(t)){ r.runKm+=a.km||0; r.runD+=a.dplus||0; }
-    else if(/ride/.test(t)){ r.rideKm+=a.km||0; r.rideD+=a.dplus||0; }
+    if(isRun){ r.runKm+=a.km||0; r.runD+=a.dplus||0; }
+    else if(isRide){ r.rideKm+=a.km||0; r.rideD+=a.dplus||0; }
     if(a.id) seen[String(a.id)]=true;
   });
   extrasGet().forEach(function(e){
@@ -1620,8 +1637,7 @@ function suppLinkHTML(){
 function renderSuppLink(){ var z=document.getElementById("suppLink"); if(z)z.innerHTML=suppLinkHTML(); }
 function showSuppLinkList(){
   var z=document.getElementById("suppLink"); if(!z)return;
-  var flt=SPORTS.hiit.filter;
-  var acts=lastActs.filter(function(a){return new RegExp(flt,"i").test(a.type||"");}).slice(0,5);
+  var acts=lastActs.filter(function(a){return actMatchesSport(a,"hiit");}).slice(0,5);
   if(!acts.length){ z.innerHTML='<div style="color:var(--mut);font-size:12px;padding:6px 0">Aucune séance HIIT/renfo récente sur Strava. Recharge Strava (↻) ou valide sans lier.</div><button class="btn btn-ghost" style="width:100%;font-size:12px;padding:6px" onclick="renderSuppLink()">← retour</button>'; return; }
   z.innerHTML=acts.map(function(a){
     var d=a.date?a.date.split("-").reverse().slice(0,2).join("/"):"";
@@ -1673,8 +1689,8 @@ function renderAdd(){
     return;
   }
   if(!stravaToken){ b.innerHTML='<div style="color:var(--mut);font-size:13px;padding:8px 0">Connecte Strava pour lier une activité, ou passe en mode Manuel.</div>'; return; }
-  var flt=SPORTS[addSport].filter; // "run" ou "ride"
-  var acts=lastActs.filter(function(a){return new RegExp(flt,"i").test(a.type||"");});
+  var flt=SPORTS[addSport].filter; // "run"/"ride"/"workout…" (repli)
+  var acts=lastActs.filter(function(a){return actMatchesSport(a,addSport);});
   if(!acts.length){ b.innerHTML='<div style="color:var(--mut);font-size:13px;padding:8px 0">Aucune activité '+(flt==="ride"?"vélo":"course")+' récente. Recharge Strava (↻) ou passe en Manuel.</div>'; return; }
   var show=acts.slice(0,addShowAll?10:3);
   var h=show.map(function(a){
