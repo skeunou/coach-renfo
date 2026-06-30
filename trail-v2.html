@@ -966,6 +966,48 @@ function coachRun(a,typeKey){
   rows+='</div>';
   return rows;
 }
+function fmtPace(minkm){ if(!isFinite(minkm)||minkm<=0)return "—"; var m=Math.floor(minkm), s=Math.round((minkm-m)*60); if(s===60){m++;s=0;} return m+":"+String(s).padStart(2,"0"); }
+function zoneTime(splits){
+  var t=[0,0,0,0,0,0], tot=0;
+  (splits||[]).forEach(function(s){ if(!s.hr||!s.sec)return; var z=hrZone(s.hr).z; t[z]+=s.sec; tot+=s.sec; });
+  return tot?{t:t,tot:tot}:null;
+}
+// Analyse détaillée d'un run EF : allure, zones, moitiés, + synthèse en phrases (que du mesuré)
+function coachRunDetail(a){
+  var rows='<div class="summary" style="border-left:3px solid var(--blue)">';
+  rows+='<div class="row"><span style="color:var(--blue);font-weight:700">⌁ Détails coach</span><b></b></div>';
+  var paceMK=(a.km&&a.movingMin)?a.movingMin/a.km:null;
+  if(paceMK) rows+='<div class="row"><span>Allure moy</span><b>'+fmtPace(paceMK)+' /km</b></div>';
+  if(a.km) rows+='<div class="row"><span>Distance · D+</span><b>'+a.km+' km · '+(a.dplus||0)+' m</b></div>';
+  if(a.hrMax) rows+='<div class="row"><span>FC max</span><b>'+a.hrMax+'</b></div>';
+  var zt=zoneTime(a.splits);
+  if(zt){ function pc(i){return Math.round(zt.t[i]/zt.tot*100);}
+    rows+='<div class="row"><span>Temps en zone</span><b style="font-size:12px">Z1-2 '+(pc(1)+pc(2))+'% · Z3 '+pc(3)+'% · Z4+ '+(pc(4)+pc(5))+'%</b></div>'; }
+  var dc=decoupling(a.splits);
+  if(dc) rows+='<div class="row"><span style="font-size:12px;line-height:1.4">'+(dc.accel>3?'2e moitié plus rapide (+'+dc.accel.toFixed(0)+'%)':(dc.accel<-3?'2e moitié plus lente ('+dc.accel.toFixed(0)+'%)':'allure régulière'))+' · dérive cardiaque '+(dc.dec>0?'+':'')+dc.dec.toFixed(0)+'%</span><b></b></div>';
+  // synthèse coach en phrases (déterministe, sur les seuls chiffres mesurés)
+  var hr=a.hrAvg, z=hrZone(hr), p=[];
+  p.push('Sortie de '+(a.km||'?')+' km en '+fmtMin(a.movingMin||0)+', FC moyenne '+hr+' ('+z.l+')'+(a.dplus?(' pour '+a.dplus+' m de D+'):'')+'.');
+  if(z.z<=2) p.push('Intensité bien tenue en endurance fondamentale, exactement la cible de l\'EF.');
+  else if(z.z===3) p.push('Tu es monté en Z3 : pour une EF, vise un cran plus bas la prochaine fois, ça libère de la fraîcheur pour les séances de qualité.');
+  else p.push('FC élevée pour une EF : soit c\'était une vraie séance de qualité, soit l\'EF a été trop poussée.');
+  if(dc){
+    if(dc.dec>5&&dc.accel<2) p.push('La dérive de +'+dc.dec.toFixed(0)+'% à allure stable trahit chaleur, déshydratation ou fatigue de fond — surveille l\'hydratation et le sommeil.');
+    else if(dc.accel>5) p.push('Tu as accéléré en 2e moitié sans dériver : très bonne gestion, il restait de la réserve.');
+    else p.push('Cardio stable du début à la fin : effort propre et bien maîtrisé.');
+  }
+  if(a.temp!=null&&a.temp>=25&&z.z>2) p.push('Avec '+Math.round(a.temp)+'°, une partie de la FC est thermique : en chaleur, ralentis pour tenir la zone plutôt que l\'allure.');
+  rows+='</div><div style="border-left:3px solid var(--blue);background:var(--bg);border-radius:8px;padding:11px 13px;margin-top:8px;font-size:12.5px;line-height:1.6;color:var(--ink)">'+p.join(' ')+'</div>';
+  return rows;
+}
+var _runDetA=null;
+function toggleRunDetail(){
+  var d=document.getElementById("runDet"), b=document.getElementById("runDetBtn");
+  if(!d)return;
+  if(d.style.display!=="none"){ d.style.display="none"; if(b)b.textContent="+ détails coach"; return; }
+  d.style.display="block"; if(b)b.textContent="− masquer";
+  d.innerHTML=_runDetA?coachRunDetail(_runDetA):'<div style="color:var(--mut);font-size:12px">Détails indisponibles.</div>';
+}
 // Analyse vélo (réutilise les helpers décVo/drift) — 100% sur du mesuré
 function coachRide(a){
   var hr=a.hrAvg, z=hr?hrZone(hr):null, hot=(a.temp!=null&&a.temp>=25);
@@ -1008,7 +1050,8 @@ function loadCoach(activityId,typeKey){
     .then(function(r){return r.json();})
     .then(function(a){ 
       if(a&&!a.error&&a.hrAvg){
-        box.innerHTML=coachRun(a,typeKey);
+        _coachAct=a;
+        box.innerHTML=coachRun(a,typeKey)+coachDetailBtn(a);
       } else if(typeKey==="cotes"){
         // Fallback : erreur Strava sur une côte → démo
         var demo={hrAvg:148,hrMax:169,reps:{name:"Mont Thou Xpress (exemple)",climb:204,dist:1031,list:[
@@ -1023,6 +1066,45 @@ function loadCoach(activityId,typeKey){
     .catch(function(){ box.innerHTML=""; });
 }
 /* ===== Liaison manuelle d'une séance de plan à une activité Strava (déclenche l'analyse coach) ===== */
+/* ===== + détails coach sur une séance de plan (run) : découpage par km ===== */
+var _coachAct=null;
+function fmtPace(secPerKm){ if(!secPerKm||!isFinite(secPerKm))return "—"; var m=Math.floor(secPerKm/60), s=Math.round(secPerKm%60); if(s===60){m++;s=0;} return m+"'"+String(s).padStart(2,"0")+'"'; }
+function coachDetailBtn(a){
+  if(!a||!a.splits||!a.splits.length) return "";
+  return '<button class="btn btn-ghost" style="width:100%;margin-top:8px;font-size:12.5px;padding:7px" id="cdBtn" onclick="toggleCoachDetail()">+ détails coach</button><div id="cdDet" style="display:none;margin-top:8px"></div>';
+}
+function toggleCoachDetail(){
+  var det=document.getElementById("cdDet"), btn=document.getElementById("cdBtn"); if(!det)return;
+  if(det.style.display!=="none"){ det.style.display="none"; btn.textContent="+ détails coach"; return; }
+  det.style.display="block"; btn.textContent="− masquer"; det.innerHTML=coachSplits(_coachAct);
+}
+function coachSplits(a){
+  if(!a||!a.splits||!a.splits.length) return '<div style="color:var(--mut);font-size:12px">Pas de découpage par km disponible.</div>';
+  var sp=a.splits, paces=[];
+  var rows=sp.map(function(s,i){
+    var perKm=s.d?s.sec/(s.d/1000):s.sec; paces.push({km:i+1,p:perKm,hr:s.hr});
+    var fc=s.hr?('<b style="color:'+zColor(hrZone(s.hr).z)+'">'+s.hr+'</b>'):'—';
+    var elev=(s.elev>0?'+':'')+s.elev;
+    return '<tr><td style="padding:4px 6px;color:var(--mut)">'+(i+1)+'</td><td style="padding:4px 6px;text-align:right;font-weight:700">'+fmtPace(perKm)+'</td><td style="padding:4px 6px;text-align:right">'+fc+'</td><td style="padding:4px 6px;text-align:right;color:var(--mut)">'+elev+' m</td></tr>';
+  }).join("");
+  // phrases de synthèse (sur du mesuré)
+  var phrases=[];
+  if(paces.length>=3){
+    var fast=paces.slice().sort(function(a,b){return a.p-b.p;})[0], slow=paces.slice().sort(function(a,b){return b.p-a.p;})[0];
+    phrases.push('Km le plus rapide : <b>#'+fast.km+'</b> ('+fmtPace(fast.p)+') · le plus lent : <b>#'+slow.km+'</b> ('+fmtPace(slow.p)+').');
+    var n=paces.length, t=Math.max(1,Math.floor(n/3));
+    var hr1=paces.slice(0,t).filter(function(x){return x.hr;}), hr3=paces.slice(n-t).filter(function(x){return x.hr;});
+    if(hr1.length&&hr3.length){
+      var a1=Math.round(hr1.reduce(function(s,x){return s+x.hr;},0)/hr1.length), a3=Math.round(hr3.reduce(function(s,x){return s+x.hr;},0)/hr3.length);
+      var dv=a3-a1;
+      phrases.push('FC moyenne : <b>'+a1+'</b> sur le 1er tiers → <b>'+a3+'</b> sur le dernier ('+(dv>=0?'+':'')+dv+' bpm)'+(dv>=8?' — dérive nette, surveille hydratation/chaleur.':(dv<=2?' — cardio très stable, sortie maîtrisée.':'.')));
+    }
+  }
+  var ph=phrases.length?('<div style="font-size:12px;line-height:1.5;color:var(--ink);margin-bottom:8px">'+phrases.join('<br>')+'</div>'):'';
+  return '<div class="summary" style="border-left:3px solid var(--blue);padding:11px 12px">'+
+    '<div style="font-weight:700;color:var(--blue);font-size:12.5px;margin-bottom:7px">↘ Découpage par km</div>'+ph+
+    '<table style="width:100%;border-collapse:collapse;font-size:12px"><tr style="color:var(--mut);font-size:10px;text-transform:uppercase;letter-spacing:.5px"><td style="padding:2px 6px">Km</td><td style="padding:2px 6px;text-align:right">Allure</td><td style="padding:2px 6px;text-align:right">FC</td><td style="padding:2px 6px;text-align:right">D±</td></tr>'+rows+'</table></div>';
+}
 function runActsForLink(){ return lastActs.filter(function(a){ return actMatchesSport(a,"course")||actMatchesSport(a,"trail"); }); }
 function renderPlanLink(s){
   var el=document.getElementById("shPlanLink"); if(!el)return;
