@@ -1050,7 +1050,7 @@ function loadCoach(activityId,typeKey){
     .then(function(r){return r.json();})
     .then(function(a){ 
       if(a&&!a.error&&a.hrAvg){
-        _coachAct=a;
+        _coachAct=a; _coachType=typeKey;
         box.innerHTML=coachRun(a,typeKey)+coachDetailBtn(a);
       } else if(typeKey==="cotes"){
         // Fallback : erreur Strava sur une côte → démo
@@ -1067,7 +1067,45 @@ function loadCoach(activityId,typeKey){
 }
 /* ===== Liaison manuelle d'une séance de plan à une activité Strava (déclenche l'analyse coach) ===== */
 /* ===== + détails coach sur une séance de plan (run) : découpage par km ===== */
-var _coachAct=null;
+var _coachAct=null, _coachType="fond";
+function coachFactsText(a,typeKey){
+  var typeLbl = typeKey==="cotes"?"séance de côtes":(typeKey==="longue"?"sortie longue":"endurance fondamentale (EF)");
+  var L=["Type : "+typeLbl+"."];
+  if(a.km) L.push("Distance "+a.km+" km · D+ "+(a.dplus||0)+" m · durée "+fmtMin(a.movingMin||0)+".");
+  if(a.hrAvg){ var z=hrZone(a.hrAvg); L.push("FC moyenne "+a.hrAvg+" (zone "+z.l+") · FC max "+(a.hrMax||"?")+"."); }
+  var dc=decoupling(a.splits);
+  if(dc) L.push("Dérive cardiaque à allure stable "+(dc.dec>=0?"+":"")+dc.dec.toFixed(0)+"% · accélération 2e moitié "+(dc.accel>=0?"+":"")+dc.accel.toFixed(0)+"%.");
+  if(a.splits&&a.splits.length>=3){
+    var paces=a.splits.map(function(s,i){return {km:i+1,p:s.d?s.sec/(s.d/1000):s.sec,hr:s.hr};});
+    var fast=paces.slice().sort(function(x,y){return x.p-y.p;})[0], slow=paces.slice().sort(function(x,y){return y.p-x.p;})[0];
+    L.push("Km le plus rapide #"+fast.km+" ("+fmtPace(fast.p)+") · le plus lent #"+slow.km+" ("+fmtPace(slow.p)+").");
+    var n=paces.length,t=Math.max(1,Math.floor(n/3));
+    var h1=paces.slice(0,t).filter(function(x){return x.hr;}), h3=paces.slice(n-t).filter(function(x){return x.hr;});
+    if(h1.length&&h3.length){ var a1=Math.round(h1.reduce(function(s,x){return s+x.hr;},0)/h1.length), a3=Math.round(h3.reduce(function(s,x){return s+x.hr;},0)/h3.length); L.push("FC 1er tiers "+a1+" → dernier tiers "+a3+" ("+(a3-a1>=0?"+":"")+(a3-a1)+" bpm)."); }
+  }
+  if(a.temp!=null) L.push("Température "+Math.round(a.temp)+"°C.");
+  return L.join("\n");
+}
+function loadCoachLaius(regen){
+  var box=document.getElementById("cdLaius"); if(!box||!_coachAct)return;
+  box.innerHTML='<div style="color:var(--mut);font-size:12px;padding:6px 0">⌁ Le coach rédige…</div>';
+  var facts=coachFactsText(_coachAct,_coachType);
+  var sys="Tu es le coach trail personnel de Laurent (athlète diesel d'ultra-endurance, prépare l'UT4M 180 en 2027). Tu commentes UNE séance de course. RÈGLES ABSOLUES : (1) appuie-toi UNIQUEMENT sur les données chiffrées fournies, n'invente AUCUN chiffre ni fait absent ; (2) ton direct de coach à athlète, tutoiement, français ; (3) 4 à 6 phrases en prose continue (pas de liste, pas de titre) ; (4) termine par 1 à 2 pistes concrètes d'amélioration ou de réglage pour la prochaine fois ; (5) pas de blabla motivationnel creux, relie les chiffres entre eux.";
+  fetch(GEN,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
+    model:"claude-haiku-4-5",max_tokens:500,system:sys,
+    messages:[{role:"user",content:"DONNÉES MESURÉES (n'utilise rien d'autre) :\n"+facts+"\n\nRédige le mot du coach sur cette séance."+(regen?" Reformule différemment de d'habitude.":"")}]
+  })})
+  .then(function(r){return r.json();})
+  .then(function(d){
+    var txt=(d&&d.content)?d.content.map(function(c){return c.text||"";}).join("").trim():"";
+    if(!txt){ box.innerHTML='<div style="color:var(--mut);font-size:12px;padding:4px 0">Mot du coach indisponible (réessaie).</div>'; return; }
+    box.innerHTML='<div class="summary" style="border-left:3px solid var(--orange);padding:12px 13px">'+
+      '<div style="font-weight:700;color:var(--orange);font-size:11px;letter-spacing:.5px;text-transform:uppercase;margin-bottom:7px">Le mot du coach</div>'+
+      '<div style="font-size:13.5px;line-height:1.6;white-space:pre-wrap">'+txt.replace(/</g,"&lt;")+'</div>'+
+      '<button class="btn btn-ghost" style="margin-top:9px;font-size:11.5px;padding:5px 11px" onclick="loadCoachLaius(true)">⟳ Régénérer</button></div>';
+  })
+  .catch(function(){ box.innerHTML='<div style="color:var(--mut);font-size:12px;padding:4px 0">⚠️ Réseau — réessaie.</div>'; });
+}
 function fmtPace(secPerKm){ if(!secPerKm||!isFinite(secPerKm))return "—"; var m=Math.floor(secPerKm/60), s=Math.round(secPerKm%60); if(s===60){m++;s=0;} return m+"'"+String(s).padStart(2,"0")+'"'; }
 function coachDetailBtn(a){
   if(!a||!a.splits||!a.splits.length) return "";
@@ -1076,7 +1114,8 @@ function coachDetailBtn(a){
 function toggleCoachDetail(){
   var det=document.getElementById("cdDet"), btn=document.getElementById("cdBtn"); if(!det)return;
   if(det.style.display!=="none"){ det.style.display="none"; btn.textContent="+ détails coach"; return; }
-  det.style.display="block"; btn.textContent="− masquer"; det.innerHTML=coachSplits(_coachAct);
+  det.style.display="block"; btn.textContent="− masquer"; det.innerHTML=coachSplits(_coachAct)+'<div id="cdLaius" style="margin-top:8px"></div>';
+  loadCoachLaius(false);
 }
 function coachSplits(a){
   if(!a||!a.splits||!a.splits.length) return '<div style="color:var(--mut);font-size:12px">Pas de découpage par km disponible.</div>';
@@ -1685,6 +1724,7 @@ function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
 function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
 function getUrlParam(n){return new URLSearchParams(window.location.search).get(n);}
 var NF="https://coach-nutrition.netlify.app/.netlify/functions/lvstrava";
+var GEN="https://coach-nutrition.netlify.app/.netlify/functions/generate";
 
 var stravaToken=lsGet(SK_TOK), stravaRefresh=lsGet(SK_REF), stravaExp=parseInt(lsGet(SK_EXP)||"0");
 var lastActs=[];
