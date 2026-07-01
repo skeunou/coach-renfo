@@ -331,7 +331,8 @@ var TYPES={
   fond:{label:"Sortie fond",type:"ENDURANCE Z2",color:"var(--grn)",why:"Aérobie facile, nez qui respire. Tu construis le moteur de fond."},
   cotes:{label:"Côtes / VAM",type:"CÔTES · VAM",color:"var(--orange)",why:"Ton limiteur : l'économie de grimpe. Répétitions gainé, économe."},
   longue:{label:"Sortie longue",type:"SORTIE LONGUE",color:"var(--orange-d)",why:"Durabilité. Allure tenue, gestion nutrition, jambes qui encaissent."},
-  renfo:{label:"Renfo",type:"RENFO TRAIL",color:"var(--ink)",why:"ZP-safe. Force athlétique transférée au trail, format WOD guidé."},
+  renfo:{label:"Renfo",type:"RENFO TRAIL",color:"var(--ink)",why:"Force athlétique transférée au trail, format guidé."},
+  trailforce:{label:"Renfo trail",type:"RENFO TRAIL",color:"var(--ink)",why:"Force spécifique coureur : 3 plans de mouvement + soléaire & psoas."},
   wod:{label:"WOD",type:"WOD",color:"var(--purp)",why:"Conditionnement métabolique adapté au bloc. Optionnel selon la charge."}
 };
 var EPOCH_START=parse("2026-06-22"), EPOCH_SWITCH=parse("2027-01-01");
@@ -399,7 +400,7 @@ function gen(d){
   if(ph==="recup"){
     // Récup post-course : lundi EF facile club, mar repos, mer EF léger, jeu repos, ven marche
     if(dow==="lun"){ o.typeKey="longue"; o.label="EF Club facile"; o.short="EF Club 1h"; o.sub="~1h · Z2 · club"; o.why="Récupération active en groupe."; o.detail=["1h EF avec le club (lundi midi fixe).","Allure vraiment facile, nez qui respire.","Social et mobilisation sans charge."]; o.color="var(--grn)"; o.plan={durMin:60}; }
-    else if(dow==="mar"){ o.typeKey="mobilite"; o.mobiIdx=(wi.wb-1)%3; var mf=MOBI_FOCUS[o.mobiIdx]; o.label="Mobilité guidée"; o.sub="~15′ · "+mf; o.why="Récup active : mobilité guidée."; o.detail=["Routine guidée ~15′ · focus "+mf+".","ZP-safe (pas d'adduction agressive).","Parfait en récup post-course."]; o.color="var(--blue)"; o.plan={mobiIdx:o.mobiIdx}; }
+    else if(dow==="mar"){ o.typeKey="trailforce"; o.tfIdx=(wi.wb-1)%3; o.label="Renfo trail"; o.sub="~35′ · 7 blocs · 3 plans"; o.why="Force spécifique coureur : sagittal, frontal/transverse, prépa nerveuse + soléaire & psoas."; o.detail=["7 blocs en séries droites (~35′) : les 3 plans de mouvement + prépa nerveuse + accessoires soléaire/psoas.","Échauffement coureur tournant (3 versions selon la semaine).","Charge : monte quand la dernière série passe propre et contrôlée.","Déplaçable selon ta semaine."]; o.color="var(--ink)"; o.plan={tfIdx:o.tfIdx}; }
     else if(dow==="mer"){ o.typeKey="fond"; o.label="EF léger doux"; o.short="EF 35' souple"; o.sub="30–40′ · Z2"; o.why="Mobilisation douce."; o.detail=["30–40′ EF très facile, solo ou avec pote.","Réveil des jambes sans fatigue."]; o.color="var(--grn)"; o.plan={durMin:35}; }
     else if(dow==="jeu"){ o.typeKey="repos"; o.label="Repos"; o.sub="récup"; o.why="Jour allégé."; }
     else if(dow==="ven"){ o.typeKey="fond"; o.label="Marche facile"; o.short="EF souple 30'"; o.sub="30′ · Z1"; o.why="Mobilisation extrêmement douce."; o.detail=["30′ marche ou EF ultra-léger.","Pas de charge."]; o.color="var(--grn)"; o.plan={durMin:30}; }
@@ -458,8 +459,8 @@ function gen(d){
     var renfoVar=(ph==="base")?"ADAPT":"FORCE";
     var renfoDays=(ph==="base")?["ven"]:["mer","ven"];
     if(renfoDays.indexOf(dow)!==-1){
-      o.typeKey="renfo"; o.label="Renfo "+(renfoVar==="FORCE"?"force":"adaptation"); o.sub="~30′ · EMOM+AMRAP · ZP-safe";
-      o.why=renfoVar==="FORCE"?"Force structurelle spécifique trail, ZP-safe.":"Adaptation : volume modéré, technique, ZP-safe.";
+      o.typeKey="renfo"; o.label="Renfo "+(renfoVar==="FORCE"?"force":"adaptation"); o.sub="~30′ · EMOM+AMRAP";
+      o.why=renfoVar==="FORCE"?"Force structurelle spécifique trail.":"Adaptation : volume modéré, technique.";
       o.detail=["Format guidé : échauff + EMOM + AMRAP (~30′).","Charge semaine "+wi.wb+(wi.deload?" — allégée (deload)":" — monte d'un cran si la dernière passait bien")+".","Mouvements-clés stables sur le bloc, accessoires tournants.","Déplaçable : c'est une ancre, pas une prison."];
       o.color="var(--ink)"; o.plan={renfoVar:renfoVar,week:wi.wb};
     }
@@ -479,8 +480,9 @@ function gen(d){
   var t=o.typeKey;
   if(t==="fond"||t==="longue"){ o.specs=[["Durée",o.plan.durMin?durStr(o.plan.durMin):(o.sub.split(" · ")[0])],["Zone","Z2"],["FC",t==="longue"?("<"+FCZ2HI):FCZ2]]; }
   else if(t==="cotes"){ o.specs=[["Format",o.plan.format||"Côtes"],["Séries",(o.plan.reps||"?")+"×"],["FC",">"+FCZ4]]; }
-  else if(t==="renfo"){ o.specs=[["Format","EMOM+AMRAP"],["Durée","~30′"],["ZP","safe"]]; }
+  else if(t==="renfo"){ o.specs=[["Format","EMOM+AMRAP"],["Durée","~30′"]]; }
   else if(t==="mobilite"){ o.specs=[["Durée","~15′"],["Focus",MOBI_FOCUS[(o.plan&&o.plan.mobiIdx)||0]]]; }
+  else if(t==="trailforce"){ o.specs=[["Format","Séries droites"],["Durée","~35′"],["Blocs","7"]]; }
   else { o.specs=[]; }
   // Titre façon Strava : "S1 — EF 30' Z2" (runs) · sinon le label simple
   o.displayTitle = (o.sid && o.short) ? (o.sid+" — "+o.short) : o.label;
@@ -492,7 +494,7 @@ function gen(d){
 
 /* ================= WOD SUPPLÉMENTAIRE BANQUE ================= */
 var WODS_SUPP=[
-  {name:"Swing & Push",sec:600,moves:[["","12 KB swing américain","ZP-safe"],["","8 Push press","jambes donnent impulsion"],["","10 Farmer carry ~15m","2× lourd"]]},
+  {name:"Swing & Push",sec:600,moves:[["","12 KB swing américain","propulsion hanche"],["","8 Push press","jambes donnent impulsion"],["","10 Farmer carry ~15m","2× lourd"]]},
   {name:"Portés & Squat",sec:600,moves:[["","Suitcase carry 20m","1 côté puis l'autre"],["","8 Goblet squat","KB lourd"],["","10 TRX row","omoplates"]]},
   {name:"Snatch ladder",sec:600,moves:[["","8 DB snatch (alt)","explosif gainé"],["","10 Push press","même DB"],["","12 Swing KB","prop hanche"]]},
   {name:"Anti-rotation",sec:600,moves:[["","Pallof press walk 15m","Medium élastique"],["","12 Tirage MB","tirage explosif"],["","10 Step-up lesté","5/jambe"]]},
@@ -515,7 +517,7 @@ function randWod(){
   lastWodIdx=idx; return WODS_SUPP[idx];
 }
 
-/* ============== RENFO SUPPLÉMENTAIRE BANQUE (~30 min, ZP-safe) ==============
+/* ============== RENFO SUPPLÉMENTAIRE BANQUE (~30 min) ==============
    Force athlétique transférée trail. Chaque séance : échauffement + bloc force
    (EMOM) + bloc complémentaire (AMRAP). Rowing horizontal présent partout.
    Aucun hinge lourd / adduction / Copenhagen (sécurité zone pubienne). STEP exploité. */
@@ -562,7 +564,7 @@ var RENFO_SUPP=[
       ["A","12 Face pull élastique","rotation externe"],["B","12 Élévations latérales","5 kg, contrôlé"],["C","10 Curls /bras","tempo"],["D","20 Shoulder taps","bassin fixe"]]}}
 ];
 var lastRenfoIdx=-1;
-var TABATA_ABDO={kind:"tabata",label:"Finisher — Tabata abdo (ZP-safe)",rounds:8,work:20,rest:10,moves:[
+var TABATA_ABDO={kind:"tabata",label:"Finisher — Tabata abdo",rounds:8,work:20,rest:10,moves:[
   {name:"HOLLOW HOLD",cue:"Lombaires plaquées au sol, bras tendus. Trop dur ? genoux fléchis."},
   {name:"DEAD BUG",cue:"Bras/jambe opposés, dos neutre collé au sol. Lent et contrôlé."},
   {name:"SHOULDER TAPS",cue:"Planche haute, bassin verrouillé. Touche l'épaule opposée sans rouler."},
@@ -577,16 +579,14 @@ function buildSuppRenfo(signal){
   return {name:r.name, segs:segs};
 }
 /* ===== Check-in d'avant-séance : adapte la génération à un signalement ===== */
-var ZONE_LBL={zp:"Zone pubienne",epaule:"Épaule",avantbras:"Avant-bras/poignet",genou:"Genou",dos:"Bas du dos"};
+var ZONE_LBL={epaule:"Épaule",avantbras:"Avant-bras/poignet",genou:"Genou",dos:"Bas du dos"};
 var ZONE_KW={
-  zp:       /squat|thruster|goblet|front squat|back squat|\bjump\b|saut|\bfente|lunge|broad|ab wheel|mountain|copenhag|rdl|deadlift|soulev|hip ?thrust|bulgarian|adduct|good ?morning|swing/i,
   epaule:   /press|jerk|overhead|snatch|développ|élévation|hspu|wall walk/i,
   avantbras:/farmer|suitcase|carry|porté|pull-?up|traction|tirage|\brow\b|renegade|grind|grip|dead ?hang/i,
   genou:    /step-?up|step-?down|\bbox\b|squat|fente|lunge|\bjump\b|saut/i,
   dos:      /rdl|deadlift|good ?morning|hinge|\bclean\b|swing/i
 };
 var ZONE_CUE={
-  zp:"reste sur du contrôlé, pas de squat dynamique ni d'impact, gainage doux.",
   epaule:"allège ou évite l'overhead, charges légères au-dessus de la tête.",
   avantbras:"sangles sur les tractions, allège le grip et les portés.",
   genou:"step-up à charge réduite, descente contrôlée, aucun impact.",
@@ -687,6 +687,33 @@ var MOBI_C=[
   {name:"Retour 4-6",cue:"Souffle long, relâche tout.",hold:50}
 ];
 var MOBIS=[MOBI_A,MOBI_B,MOBI_C];
+/* ===== RENFO TRAIL (mardi réathlé) — séries droites, inspiré trame coureur 3 plans ===== */
+var TF_WARM=[
+  [ {name:"Mobilité cheville au mur",cue:"Genou vers le mur sans décoller le talon, cherche l'amplitude.",reps:"10 / côté"},
+    {name:"Balancers de jambe",cue:"Avant-arrière puis latéral, relâché, amplitude progressive.",reps:"10 / sens / côté"},
+    {name:"Montées sur pointes lentes",cue:"Monte haut, descends contrôlé, cheville stable.",reps:"15"},
+    {name:"Fentes marchées + rotation buste",cue:"Grand pas, ouvre le buste côté jambe avant.",reps:"8 / côté"},
+    {name:"Glute bridge",cue:"Verrouille les fessiers en haut 1s.",reps:"15"} ],
+  [ {name:"Chien tête en bas → cobra",cue:"Flux lent, respire, étire la chaîne postérieure.",reps:"6 cycles"},
+    {name:"World's greatest stretch",cue:"Fente + rotation + coude au sol, ouvre la hanche.",reps:"5 / côté"},
+    {name:"Bird-dog",cue:"Bras/jambe opposés, bassin fixe, gainage.",reps:"8 / côté"},
+    {name:"Talons-fesses + montées de genou",cue:"Sur place, dynamique, monte la cadence.",reps:"20 pas"},
+    {name:"Corde à sauter légère",cue:"Rebond souple sur l'avant-pied.",hold:40} ],
+  [ {name:"Skips A (montées de genou)",cue:"Genou haut, appui bref, bras actifs.",reps:"20 pas"},
+    {name:"Talons-fesses",cue:"Rapide, buste droit.",reps:"20 pas"},
+    {name:"Pas chassés",cue:"Bassin bas, gainé, change de sens.",reps:"10 / côté"},
+    {name:"Squats tempo poids du corps",cue:"3s descente, remontée dynamique.",reps:"12"},
+    {name:"Pogo hops légers",cue:"Chevilles ressort, contact sol minimal.",reps:"20"} ]
+];
+var TRAIL_FORCE=[
+  {label:"Plan sagittal · force unilatérale",name:"Soulevé de terre unilatéral (DB/KB)",reps:"3 × 8 / côté · récup 60″",cue:"Jambe libre en arrière, hanche qui recule, dos neutre, descente contrôlée 3s. Cherche l'équilibre autant que la charge."},
+  {label:"Plan sagittal · force + stabilité",name:"Split squat bulgare",reps:"3 × 8 / côté · récup 60″",cue:"Pied arrière sur le banc, descente verticale, genou avant dans l'axe du pied, poussée talon. Buste légèrement penché."},
+  {label:"Prépa nerveuse (CNS)",name:"Step-up explosif sur box",reps:"3 × 4 / côté · récup 90″",cue:"Intention maximale à chaque répétition, extension complète de hanche en haut. Repos long entre séries : c'est de la qualité nerveuse, pas du volume."},
+  {label:"Force sous fatigue",name:"Montée de genou lestée sur banc",reps:"3 × 5 / côté · récup 60″",cue:"Monte le genou libre haut et contrôlé malgré la fatigue accumulée, gaine le tronc, aucune impulsion parasite."},
+  {label:"Plan frontal + transverse · stabilité",name:"Gainage latéral pied surélevé + rotation",reps:"3 × 8 / côté · récup 45″",cue:"Pied sur le banc, bassin haut aligné, passe le bras libre sous le buste puis rouvre en déroulant. Contrôle la rotation."},
+  {label:"Accessoire soléaire",name:"Mollet genou fléchi (soléaire)",reps:"3 × 12 / côté · récup 45″",cue:"Avant-pied sur un disque, genou fléchi ~30°, haltère posé sur la cuisse. Amplitude complète, pause 1s en haut. Clé pour encaisser les descentes."},
+  {label:"Accessoire fléchisseurs de hanche",name:"Montée de genou élastique debout",reps:"3 × 8 / côté · récup 45″",cue:"Élastique à la cheville, monte le genou au-dessus de la hanche, buste droit et stable, descente freinée. Renforce le psoas, moteur de la foulée."}
+];
 var RENFO_WARM=[
   {name:"Bascules de hanche",cue:"Good morning à vide ou élastique. Réveille la charnière sans la charger.",reps:"10 lentes"},
   {name:"Fentes marchées",cue:"Amplitude contrôlée, genou stable. Pas de rebond.",reps:"8 / jambe"},
@@ -708,15 +735,21 @@ var RENFO_FORCE={
 function content(k){
   var g=gen(parse(k)), t=g.typeKey;
   if(t==="mobilite"){ return MOBIS[g.mobiIdx].map(function(s){return {kind:"flow",name:s.name,cue:s.cue,hold:s.hold,reps:s.reps,side:s.side};}); }
+  if(t==="trailforce"){
+    var wi=(g.plan&&g.plan.tfIdx)||0;
+    var warm=TF_WARM[wi].map(function(s){return {kind:"flow",name:s.name,cue:s.cue,reps:s.reps,hold:s.hold,label:"Échauffement coureur"};});
+    var work=TRAIL_FORCE.map(function(s){return {kind:"flow",name:s.name,cue:s.cue,reps:s.reps,label:s.label};});
+    return warm.concat(work);
+  }
   if(t==="renfo"){
     var src=g.renfoVar==="FORCE"?RENFO_FORCE:RENFO_ADAPT;
     var segs=RENFO_WARM.map(function(s){return {kind:"flow",name:s.name,cue:s.cue,reps:s.reps};});
     segs.push(src.emom); segs.push(src.amrap); return segs;
   }
-  if(t==="wod"){ return [{kind:"amrap",sec:720,moves:[["","12 KB swing américain","ZP-safe"],["","8 Push press",""],["","10 Box step-up lesté",""],["","8 Tractions",""]]}]; }
+  if(t==="wod"){ return [{kind:"amrap",sec:720,moves:[["","12 KB swing américain","propulsion hanche"],["","8 Push press",""],["","10 Box step-up lesté",""],["","8 Tractions",""]]}]; }
   return null;
 }
-function hasPlayer(t){ return t==="mobilite"||t==="renfo"||t==="wod"; }
+function hasPlayer(t){ return t==="mobilite"||t==="trailforce"||t==="renfo"||t==="wod"; }
 
 /* ================= DATES ================= */
 function iso(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
@@ -1419,9 +1452,8 @@ function openForm(prefillScore){
       f+='<div class="field"><label>Jambes <b id="fjV">'+(e.jambes||6)+'</b></label><input type="range" min="1" max="10" value="'+(e.jambes||6)+'" id="fJambes" oninput="fjV.textContent=this.value"></div>';
     }
     f+='<div class="field"><label>RPE <b id="frV">'+(e.rpe||6)+'</b></label><input type="range" min="1" max="10" value="'+(e.rpe||6)+'" id="fRpe" oninput="frV.textContent=this.value"></div>';
-    f+='<div class="field"><label>ZP (zone pubienne) <b id="fzV">'+(e.zp||2)+'</b></label><input type="range" min="0" max="10" value="'+(e.zp||2)+'" id="fZp" oninput="fzV.textContent=this.value;document.getElementById(\'zpAl\').style.display=(+this.value>=4?\'block\':\'none\')"></div>';
     f+='<div class="field"><label>Note</label><textarea id="fNote" placeholder="Ressenti, charge, douleur…">'+(e.note||"")+'</textarea></div>';
-    f+='<div class="alert" id="zpAl" style="display:'+((e.zp&&+e.zp>=4)?'block':'none')+'">ZP ≥ 4 : on coupe hinge + adduction sur les prochaines séances.</div>';
+    f+='';
   }
   document.getElementById("shFields").innerHTML=f;
   document.getElementById("shForm").style.display="block";
@@ -1664,9 +1696,8 @@ function finishSuppRenfo(){
   document.getElementById("shSpecs").innerHTML='<div class="spec"><b>≈30′</b>FAIT</div>';
   var f='<div class="field"><label>RPE <b id="frV">6</b></label><input type="range" min="1" max="10" value="6" id="fRpe" oninput="frV.textContent=this.value"></div>'+
     '<div class="field"><label>Jambes <b id="fjV">6</b></label><input type="range" min="1" max="10" value="6" id="fJambes" oninput="fjV.textContent=this.value"></div>'+
-    '<div class="field"><label>ZP (zone pubienne) <b id="fzV">2</b></label><input type="range" min="0" max="10" value="2" id="fZp" oninput="fzV.textContent=this.value;document.getElementById(\'zpAl\').style.display=(+this.value>=4?\'block\':\'none\')"></div>'+
     '<div class="field"><label>Note</label><textarea id="fNote" placeholder="Charges, sensations, douleur…"></textarea></div>'+
-    '<div class="alert" id="zpAl" style="display:none">ZP ≥ 4 : on coupe hinge + adduction sur les prochaines séances.</div>';
+    '';
   document.getElementById("shSummary").innerHTML='<div class="summary" style="padding:12px">'+f+'</div><div id="suppLink" style="margin-top:8px"></div>';
   document.getElementById("shForm").style.display="none";
   document.getElementById("shButtons").style.display="flex";
