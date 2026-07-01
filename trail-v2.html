@@ -575,10 +575,22 @@ function buildSuppRenfo(signal){
   var flags=(signal&&signal.zones)||[];
   var idx=pickLeastLoading(RENFO_SUPP,"renfo",flags,lastRenfoIdx);
   lastRenfoIdx=idx; var r=RENFO_SUPP[idx];
-  var segs=RENFO_WARM.map(function(s){return {kind:"flow",name:s.name,cue:s.cue,reps:s.reps};});
-  segs.push(r.emom); segs.push(r.amrap); segs.push(TABATA_ABDO);
+  var warm=rnd(RENFO_WARMS).map(function(s){return {kind:"flow",name:s.name,cue:s.cue,reps:s.reps};});
+  var emom=Object.assign({},r.emom,{minutes:rnd([12,14,16])});
+  var amrap=Object.assign({},r.amrap,{sec:rnd([480,600,720])});
+  var main, pick=Math.floor(Math.random()*5);
+  if(pick===0) main=[emom,amrap];
+  else if(pick===1) main=[amrap,emom];
+  else if(pick===2) main=[emom, amrapAsFortime(r.amrap, rnd([600,720]))];
+  else if(pick===3) main=[amrapAsFortime(r.amrap, rnd([600,720])), emom];
+  else main=[emom, amrapAsEmom(r.amrap, rnd([8,10]))];
+  var fin=rnd([TABATA_ABDO, TABATA_ABDO, null]); // ~2/3 avec finisher
+  var segs=warm.concat(main); if(fin) segs.push(fin);
   return {name:r.name, segs:segs};
 }
+function rnd(a){ return a[Math.floor(Math.random()*a.length)]; }
+function amrapAsEmom(amrap,minutes){ return {kind:"emom",minutes:minutes,label:"EMOM densité",moves:(amrap.moves||[]).map(function(x){return {name:x[1],cue:x[2]||""};})}; }
+function amrapAsFortime(amrap,sec){ return {kind:"fortime",sec:sec,label:"For Time",name:amrap.name||"",moves:amrap.moves}; }
 /* ===== Check-in d'avant-séance : adapte la génération à un signalement ===== */
 var ZONE_LBL={epaule:"Épaule",avantbras:"Avant-bras/poignet",genou:"Genou",dos:"Bas du dos"};
 var ZONE_KW={
@@ -833,6 +845,19 @@ var RENFO_WARM=[
   {name:"KB swing technique",cue:"KB léger. Tu cherches le timing hanche.",reps:"15 légers"},
   {name:"Wall walk / planche",cue:"Gainage épaules. Prêt à grimper.",reps:"3 ou 30 s"}
 ];
+var RENFO_WARM2=[
+  {name:"Rotations épaules + bras",cue:"Réveille les épaules avant tirages/poussées.",reps:"15"},
+  {name:"Squats à vide tempo",cue:"3s à la descente, ouvre les hanches.",reps:"10"},
+  {name:"Good morning élastique",cue:"Charnière de hanche, dos gainé.",reps:"12"},
+  {name:"Montées de genoux + talons-fesses",cue:"Cardio léger, monte la température.",reps:"30 s"}
+];
+var RENFO_WARM3=[
+  {name:"Cat-cow + bird-dog",cue:"Mobilise la colonne, active le tronc.",reps:"8"},
+  {name:"Band pull-apart",cue:"Réveille le haut du dos.",reps:"15"},
+  {name:"Fentes + rotation thoracique",cue:"Hanche + ouverture du buste.",reps:"6 / côté"},
+  {name:"Planche + shoulder taps",cue:"Gainage anti-rotation.",reps:"20"}
+];
+var RENFO_WARMS=[RENFO_WARM,RENFO_WARM2,RENFO_WARM3];
 var RENFO_ADAPT={
   emom:{kind:"emom",minutes:14,label:"Moteur de grimpe",moves:[
     {name:"STEP-UP LESTÉ",reps:"12 · 6/jambe",cue:"Box mi-hauteur · montée explosive, descente freinée 2 s."},
