@@ -829,13 +829,43 @@ function runWeekCheckin(ras){
   var signal={zones:ras?[]:checkinFlags.slice(), text:txt};
   launchWeeklyRenfo(_wkIdx,_wkSlot,signal);
 }
+function orgLabel(o){ return o==="superset"?"supersets":(o==="circuit"?"circuit qualité":(o==="cluster5"?"5×5 lourd":"séries droites")); }
+function repHead(reps){ return (reps||"").split("·")[0].trim(); }
+function buildWeeklyWork(s,org){
+  var b=s.blocks;
+  if(org==="superset"){
+    var segs=[];
+    for(var i=0;i<b.length;i+=2){
+      if(i+1<b.length){
+        segs.push({kind:"flow",label:"Superset "+(Math.floor(i/2)+1),name:b[i].name+"  +  "+b[i+1].name,
+          reps:repHead(b[i].reps)+"   +   "+repHead(b[i+1].reps),
+          cue:"Enchaîne les 2 sans repos entre, récup 75″ après la paire.\n• "+b[i].name+" : "+b[i].cue+"\n• "+b[i+1].name+" : "+b[i+1].cue});
+      } else { segs.push({kind:"flow",label:b[i].label,name:b[i].name,reps:b[i].reps,cue:b[i].cue}); }
+    }
+    return segs;
+  }
+  if(org==="circuit"){
+    var rounds=3, list=b.map(function(x){return "• "+x.name+" — "+repHead(x.reps);}).join("\n");
+    var segs=[];
+    for(var r=1;r<=rounds;r++){ segs.push({kind:"flow",label:"Circuit qualité — Tour "+r+"/"+rounds,name:"Tour "+r+" / "+rounds,reps:"1 série de chaque exo",cue:"Enchaîne dans l'ordre, repos court entre exos, technique impeccable :\n"+list+"\nRécup 90″ après le tour."}); }
+    return segs;
+  }
+  if(org==="cluster5"){
+    var segs=[{kind:"flow",label:b[0].label+" · 5×5 lourd",name:b[0].name,reps:"5 × 5 · charge lourde · récup 2′",cue:"Bloc de force principal : 5 séries de 5, plus lourd que d'habitude, récup longue. "+b[0].cue}];
+    for(var j=1;j<b.length;j++){ segs.push({kind:"flow",label:b[j].label,name:b[j].name,reps:b[j].reps,cue:b[j].cue}); }
+    return segs;
+  }
+  return b.map(function(x){return {kind:"flow",label:x.label,name:x.name,reps:x.reps,cue:x.cue};});
+}
 function launchWeeklyRenfo(idx,slot,signal){
   unlockAudio(); reqWake(); beep(660,.12);
   pKey=iso(new Date()); pIsSupp=true; pSuppKind="renfo"; pWeekly=true; _wkSlot=slot; _wkIdx=idx;
   pState={}; pSignal=signal||{zones:[],text:""};
-  var s=RENFO_WEEK[idx]; pSuppName=s.name;
+  var s=RENFO_WEEK[idx];
+  var org=rnd(s.cat==="A"?["sets","sets","superset","cluster5"]:["sets","superset","circuit"]);
+  pSuppName=s.name+" · "+orgLabel(org);
   var warm=TF_WARM[weekCounter()%TF_WARM.length].map(function(w){return {kind:"flow",name:w.name,cue:w.cue,reps:w.reps,hold:w.hold,label:"Échauffement coureur"};});
-  var work=s.blocks.map(function(b){return {kind:"flow",name:b.name,cue:b.cue,reps:b.reps,label:b.label};});
+  var work=buildWeeklyWork(s,org);
   pSegs=warm.concat(work); pIdx=0;
   document.getElementById("player").classList.add("on"); renderSeg();
 }
@@ -1675,7 +1705,7 @@ function renderSeg(){
     pState.side=1;
     var clock= seg.hold?('<div class="pclock bebas" id="pc">'+seg.hold+'</div>'):'';
     var sub= seg.hold?'':('<div class="preps">'+(seg.reps||"")+'</div>');
-    body.innerHTML=clock+'<div class="pname bebas">'+seg.name+(seg.side?' · Côté 1':'')+'</div>'+sub+'<div class="pcue">'+seg.cue+'</div>';
+    body.innerHTML=clock+'<div class="pname bebas">'+seg.name+(seg.side?' · Côté 1':'')+'</div>'+sub+'<div class="pcue">'+(seg.cue||"").replace(/\n/g,"<br>")+'</div>';
     if(seg.hold){ startHold(seg); act.innerHTML='<button class="btn btn-ghost" onclick="nextSeg()">Passer</button>'; }
     else { act.innerHTML='<button class="btn btn-acid" onclick="nextSeg()">'+(pIdx===pSegs.length-1?'TERMINER':'SUIVANT')+'</button>'; }
   } else {
