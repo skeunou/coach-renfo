@@ -196,6 +196,7 @@
     <div id="weekRecap"></div>
     <div id="loadCard"></div>
     <div id="renfoWeek"></div>
+    <div id="slWeek"></div>
     <div class="card stravacard">
       <div class="strava" onclick="goStrava()">
         <div class="ic">≈</div>
@@ -342,8 +343,8 @@ var EPOCH_START=parse("2026-06-22"), EPOCH_SWITCH=parse("2027-01-01");
 function classify(d){
   var wi=weekInfo(d), dow=getByDow(d), ph=wi.phase;
   if(ph==="recup"){
-    if(dow==="lun")return "longue"; if(dow==="mar")return "mobilite";
-    if(dow==="mer")return "fond"; if(dow==="ven")return "fond"; return "repos";
+    if(dow==="lun")return "fond"; if(dow==="mar")return "mobilite";
+    if(dow==="mer")return "fond"; if(dow==="ven")return "fond"; if(dow==="sam")return "longue"; return "repos";
   }
   if(ph==="base"||ph==="force"||ph==="build"){
     var renfoDays=[]; // renfo géré par la carte "Renfo de la semaine" (2 slots flexibles)
@@ -399,13 +400,14 @@ function gen(d){
   var o={typeKey:"repos",label:"Repos",sub:"",why:"",detail:[],color:"var(--mut)",plan:{},sid:sid};
   
   if(ph==="recup"){
-    // Récup post-course : lundi EF facile club, mar repos, mer EF léger, jeu repos, ven marche
-    if(dow==="lun"){ o.typeKey="longue"; o.label="EF Club facile"; o.short="EF Club 1h"; o.sub="~1h · Z2 · club"; o.why="Récupération active en groupe."; o.detail=["1h EF avec le club (lundi midi fixe).","Allure vraiment facile, nez qui respire.","Social et mobilisation sans charge."]; o.color="var(--grn)"; o.plan={durMin:60}; }
-    else if(dow==="mar"){ o.typeKey="mobilite"; o.mobiIdx=(wi.wb-1)%3; var mf=MOBI_FOCUS[o.mobiIdx]; o.label="Mobilité guidée"; o.sub="~15′ · "+mf; o.why="Récup active : mobilité guidée."; o.detail=["Routine guidée ~15′ · focus "+mf+".","Récup active post-course."]; o.color="var(--blue)"; o.plan={mobiIdx:o.mobiIdx}; }
-    else if(dow==="mer"){ o.typeKey="fond"; o.label="EF léger doux"; o.short="EF 35' souple"; o.sub="30–40′ · Z2"; o.why="Mobilisation douce."; o.detail=["30–40′ EF très facile, solo ou avec pote.","Réveil des jambes sans fatigue."]; o.color="var(--grn)"; o.plan={durMin:35}; }
-    else if(dow==="jeu"){ o.typeKey="repos"; o.label="Repos"; o.sub="récup"; o.why="Jour allégé."; }
-    else if(dow==="ven"){ o.typeKey="fond"; o.label="Marche facile"; o.short="EF souple 30'"; o.sub="30′ · Z1"; o.why="Mobilisation extrêmement douce."; o.detail=["30′ marche ou EF ultra-léger.","Pas de charge."]; o.color="var(--grn)"; o.plan={durMin:30}; }
-    else { o.typeKey="repos"; }
+    // Récup post-100K qui REMONTE vers l'entraînement : lundi club facile → sortie longue progressive le samedi.
+    if(dow==="lun"){ o.typeKey="fond"; o.label="EF Club facile"; o.short="EF Club 55'"; o.sub="~55′ · Z2 · club"; o.why="Reprise en douceur, footing social."; o.detail=["~55′ EF avec le club (lundi midi fixe).","Allure vraiment facile, nez qui respire.","Social, aucune charge."]; o.color="var(--grn)"; o.plan={durMin:55}; }
+    else if(dow==="mar"){ o.typeKey="mobilite"; o.mobiIdx=(wi.wb-1)%3; var mf=MOBI_FOCUS[o.mobiIdx]; o.label="Mobilité guidée"; o.sub="~15′ · "+mf; o.why="Récup active : mobilité guidée."; o.detail=["Routine guidée ~15′ · focus "+mf+".","Réveil articulaire, pas de charge."]; o.color="var(--blue)"; o.plan={mobiIdx:o.mobiIdx}; }
+    else if(dow==="mer"){ o.typeKey="fond"; o.label="EF moyen"; o.short="EF 45' Z2"; o.sub="~45′ · Z2"; o.why="Volume aérobie facile, on remonte doucement."; o.detail=["~45′ EF facile, solo ou avec pote.","Jambes qui tournent, zéro forcing."]; o.color="var(--grn)"; o.plan={durMin:45}; }
+    else if(dow==="jeu"){ o.typeKey="repos"; o.label="Repos"; o.sub="récup"; o.why="Jour allégé avant la longue du week-end."; }
+    else if(dow==="ven"){ o.typeKey="fond"; o.label="EF relance courte"; o.short="EF 35' souple"; o.sub="~35′ · Z2"; o.why="Déverrouille les jambes avant la longue."; o.detail=["~35′ EF très facile.","Prépare la sortie longue de samedi."]; o.color="var(--grn)"; o.plan={durMin:35}; }
+    else if(dow==="sam"){ o.typeKey="longue"; o.label="Sortie longue progressive"; o.short="Longue ~1h15"; o.sub="~1h15 · Z2 · un peu de D+"; o.why="La clé de la semaine : on rebâtit la durabilité."; o.detail=["~1h10–1h20 EF en Z2, allure de conversation.","Cherche un peu de dénivelé si possible, sans forcer.","Gestion nutrition/hydratation comme à l'entraînement."]; o.color="var(--orange-d)"; o.plan={durMin:75}; }
+    else { o.typeKey="repos"; o.label="Repos"; o.sub="famille"; o.why="Repos complet, tu as fait ta longue hier."; }
   }
   else if(ph==="base"||ph==="force"||ph==="build"){
     var isBuild=ph==="build", isForce=ph==="force";
@@ -929,6 +931,68 @@ function launchWeeklyRenfo(idx,slot,signal){
   pSegs=warm.concat(work); pIdx=0;
   document.getElementById("player").classList.add("on"); renderSeg();
 }
+/* ===== SORTIE LONGUE flottante (slot hebdo, rythme 3:1) ===== */
+function slWeekTarget(){
+  var wcyc=((weekCounter()%4)+4)%4; // 0,1,2 = charge · 3 = absorption
+  if(wcyc===3) return {absorption:true};
+  return {absorption:false, dur:[75,90,105][wcyc], dplus:[400,550,700][wcyc], wcyc:wcyc};
+}
+function fmtDur(min){ var h=Math.floor(min/60), m=min%60; return h?(h+"h"+(m?String(m).padStart(2,"0"):"")):(m+"′"); }
+function slDoneEntry(){ var wk=mondayKey(), r=null; loadLog().forEach(function(e){ if(e.typeKey==="sl-week"&&e.wk===wk) r=e; }); return r; }
+function renderSLWeek(){
+  var box=document.getElementById("slWeek"); if(!box)return;
+  var t=slWeekTarget();
+  if(t.absorption){
+    box.innerHTML='<div class="card" style="padding:13px;margin-top:10px"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><div style="font-weight:800;font-size:13px;letter-spacing:.5px">SORTIE LONGUE</div><div style="font-size:10.5px;color:var(--mut)">semaine d\'absorption</div></div><div style="font-size:12px;color:var(--mut)">Pas de longue cette semaine — récup relative. Laisse le corps encaisser, tu reviens plus fort la semaine prochaine.</div></div>';
+    return;
+  }
+  var head='<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px"><div style="font-weight:800;font-size:13px;letter-spacing:.5px">SORTIE LONGUE DE LA SEMAINE</div><div style="font-size:10.5px;color:var(--mut)">où tu veux</div></div>';
+  var e=slDoneEntry();
+  if(e){
+    box.innerHTML='<div class="card" style="padding:13px;margin-top:10px;border-left:4px solid var(--grn)">'+head+
+      '<div style="font-size:10.5px;font-weight:800;color:var(--grn);letter-spacing:.5px;margin-bottom:4px">✓ FAITE</div>'+
+      '<div style="font-size:14px;font-weight:700;color:var(--ink)">'+(e.stravaName||"Sortie longue")+'</div>'+
+      '<div style="font-size:11.5px;color:var(--mut);margin-top:4px">'+(e.km?e.km+' km · ':'')+(e.dplus?e.dplus+' m D+ · ':'')+fmtMin(e.durMin||0)+(e.hrAvg?' · FC '+e.hrAvg:'')+'</div>'+
+      '<button class="btn btn-ghost" style="width:100%;margin-top:9px;font-size:12.5px;padding:7px" id="slCdBtn" onclick="toggleSLCoach(\''+(e.sid||"")+'\')">+ détails coach</button>'+
+      '<div id="slCoach" style="margin-top:8px"></div>'+
+      '<button class="btn btn-ghost" style="width:100%;margin-top:6px;font-size:11px;padding:5px;color:var(--mut)" onclick="unlinkSL()">délier</button></div>';
+    return;
+  }
+  box.innerHTML='<div class="card" style="padding:13px;margin-top:10px;border-left:4px solid var(--blue)">'+head+
+    '<div style="font-size:13px;color:var(--ink);font-weight:700">Cible : ~'+fmtDur(t.dur)+' · '+t.dplus+' m D+</div>'+
+    '<div style="font-size:11px;color:var(--mut);margin-top:4px">Pose-la quand ta vie le permet. Pas de créneau long ? 2 sorties moyennes rapprochées (ven. soir + sam. matin) = back-to-back, tout aussi bénéfique pour l\'UT4M.</div>'+
+    '<button class="btn btn-go" style="width:100%;margin-top:10px;background:var(--blue)" onclick="showSLLinkList()">🔗 Lier ma sortie longue (Strava)</button>'+
+    '<div id="slLinkList"></div></div>';
+}
+function showSLLinkList(){
+  var el=document.getElementById("slLinkList"); if(!el)return;
+  if(!stravaToken){ el.innerHTML='<div style="color:var(--mut);font-size:12px;padding:6px 0">Connecte Strava pour lier ta sortie.</div>'; return; }
+  var acts=runActsForLink().slice(0,8);
+  if(!acts.length){ el.innerHTML='<div style="color:var(--mut);font-size:12px;padding:6px 0">Aucune course Strava récente. Recharge Strava (↻).</div>'; return; }
+  el.innerHTML=acts.map(function(a){
+    var d=a.date?a.date.split("-").reverse().slice(0,2).join("/"):"";
+    return '<div class="card" style="padding:9px 12px;margin-top:6px;cursor:pointer" onclick="linkSLStrava(\''+a.id+'\')"><div style="font-weight:700;font-size:13px">'+(a.name||"Course")+'</div><div style="color:var(--mut);font-size:11px">'+d+(a.km?' · '+a.km+' km':'')+(a.dplus?' · '+a.dplus+' m D+':'')+' · '+fmtMin(a.movingMin)+'</div></div>';
+  }).join("")+'<button class="btn btn-ghost" style="width:100%;font-size:12px;padding:6px;margin-top:6px" onclick="renderSLWeek()">← annuler</button>';
+}
+function linkSLStrava(id){
+  var a=null; lastActs.forEach(function(x){if(String(x.id)===String(id))a=x;}); if(!a)return;
+  var log=loadLog();
+  log.unshift({id:"sl_"+Date.now(),dateKey:a.date||iso(new Date()),ts:Date.now(),_u:Date.now(),
+    typeKey:"sl-week",type:"SORTIE LONGUE",title:"Sortie longue",color:"var(--blue)",wk:mondayKey(),
+    sid:a.id,stravaName:a.name||"",km:a.km,dplus:a.dplus,durMin:a.movingMin,hrAvg:a.hrAvg||null,hrMax:a.hrMax||null});
+  log.sort(function(x,y){return x.dateKey<y.dateKey?1:-1;});
+  saveLog(log); renderSLWeek(); renderLog();
+}
+function unlinkSL(){
+  if(!confirm("Délier la sortie longue de la semaine ?"))return;
+  var wk=mondayKey(); saveLog(loadLog().filter(function(e){return !(e.typeKey==="sl-week"&&e.wk===wk);})); renderSLWeek(); renderLog();
+}
+function toggleSLCoach(sid){
+  var det=document.getElementById("slCoach"), btn=document.getElementById("slCdBtn"); if(!det)return;
+  if(det.innerHTML.trim()){ det.innerHTML=""; btn.textContent="+ détails coach"; return; }
+  if(!sid){ det.innerHTML='<div style="color:var(--mut);font-size:12px">Pas d\'activité Strava liée.</div>'; return; }
+  btn.textContent="− masquer"; loadCoach(sid,"longue","slCoach");
+}
 var RENFO_WARM=[
   {name:"Bascules de hanche",cue:"Good morning à vide ou élastique. Réveille la charnière sans la charger.",reps:"10 lentes"},
   {name:"Fentes marchées",cue:"Amplitude contrôlée, genou stable. Pas de rebond.",reps:"8 / jambe"},
@@ -1293,8 +1357,8 @@ function coachRide(a){
   rows+='</div>';
   return rows;
 }
-function loadCoach(activityId,typeKey){
-  var box=document.getElementById("shCoach"); if(!box)return;
+function loadCoach(activityId,typeKey,boxId){
+  var box=document.getElementById(boxId||"shCoach"); if(!box)return;
   if(!stravaToken){
     // Pas de token : affiche une démo si c'est une côte
     if(typeKey==="cotes"){
@@ -1469,6 +1533,7 @@ function renderToday(){
   renderLoadCard();
   renderExtras();
   renderRenfoWeek();
+  renderSLWeek();
 }
 var weekOffset=0;
 function weekNav(d){ weekOffset+=d; renderWeek(); }
