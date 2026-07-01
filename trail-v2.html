@@ -855,11 +855,11 @@ function renderRenfoWeek(){
   var p=renfoPair();
   function btn(slot,idx){
     var done=slotDone(slot), s=RENFO_WEEK[idx];
-    var bg=done?"var(--grn)":(slot===1?"var(--orange)":"var(--purp)"), lab=done?"✓ FAIT":("Renfo "+slot);
-    return '<button class="btn btn-go" style="background:'+bg+';flex:1;flex-direction:column;align-items:flex-start;text-align:left;padding:10px 12px" onclick="startWeeklyRenfo('+slot+')">'+
-      '<span style="font-size:11px;opacity:.85;letter-spacing:.5px">'+lab+'</span>'+
-      '<span style="font-size:13px;font-weight:700;line-height:1.2">'+s.name+'</span>'+
-      '<span style="font-size:10.5px;opacity:.8">'+s.blocks.length+' blocs · '+(s.cat==="A"?"force":"puissance/access.")+'</span></button>';
+    var accent=done?"var(--grn)":"var(--acid)";
+    return '<button style="flex:1;background:var(--paper);border:1px solid var(--line);border-left:4px solid '+accent+';border-radius:12px;padding:12px 13px;text-align:left;cursor:pointer;font-family:inherit" onclick="startWeeklyRenfo('+slot+')">'+
+      (done?'<div style="font-size:10.5px;font-weight:800;color:var(--grn);letter-spacing:.5px;margin-bottom:4px">✓ FAIT</div>':'')+
+      '<div style="font-size:14px;font-weight:700;line-height:1.25;color:var(--ink)">'+s.name+'</div>'+
+      '<div style="font-size:11px;color:var(--mut);margin-top:6px">'+s.blocks.length+' blocs · '+(s.cat==="A"?"force":"puissance / access.")+'</div></button>';
   }
   box.innerHTML='<div class="card" style="padding:13px;margin-top:10px">'+
     '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px"><div style="font-weight:800;font-size:13px;letter-spacing:.5px">RENFO DE LA SEMAINE</div><div style="font-size:10.5px;color:var(--mut)">2 séances · où tu veux</div></div>'+
