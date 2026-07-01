@@ -400,26 +400,22 @@ function gen(d){
   var o={typeKey:"repos",label:"Repos",sub:"",why:"",detail:[],color:"var(--mut)",plan:{},sid:sid};
   
   if(ph==="recup"){
-    // Récup post-100K qui REMONTE vers l'entraînement : lundi club facile → sortie longue progressive le samedi.
-    if(dow==="lun"){ o.typeKey="fond"; o.label="EF Club facile"; o.short="EF Club 55'"; o.sub="~55′ · Z2 · club"; o.why="Reprise en douceur, footing social."; o.detail=["~55′ EF avec le club (lundi midi fixe).","Allure vraiment facile, nez qui respire.","Social, aucune charge."]; o.color="var(--grn)"; o.plan={durMin:55}; }
-    else if(dow==="mar"){ o.typeKey="mobilite"; o.mobiIdx=(wi.wb-1)%3; var mf=MOBI_FOCUS[o.mobiIdx]; o.label="Mobilité guidée"; o.sub="~15′ · "+mf; o.why="Récup active : mobilité guidée."; o.detail=["Routine guidée ~15′ · focus "+mf+".","Réveil articulaire, pas de charge."]; o.color="var(--blue)"; o.plan={mobiIdx:o.mobiIdx}; }
-    else if(dow==="mer"){ o.typeKey="fond"; o.label="EF moyen"; o.short="EF 45' Z2"; o.sub="~45′ · Z2"; o.why="Volume aérobie facile, on remonte doucement."; o.detail=["~45′ EF facile, solo ou avec pote.","Jambes qui tournent, zéro forcing."]; o.color="var(--grn)"; o.plan={durMin:45}; }
-    else if(dow==="jeu"){ o.typeKey="repos"; o.label="Repos"; o.sub="récup"; o.why="Jour allégé avant la longue du week-end."; }
-    else if(dow==="ven"){ o.typeKey="fond"; o.label="EF relance courte"; o.short="EF 35' souple"; o.sub="~35′ · Z2"; o.why="Déverrouille les jambes avant la longue."; o.detail=["~35′ EF très facile.","Prépare la sortie longue de samedi."]; o.color="var(--grn)"; o.plan={durMin:35}; }
-    else if(dow==="sam"){ o.typeKey="longue"; o.label="Sortie longue progressive"; o.short="Longue ~1h15"; o.sub="~1h15 · Z2 · un peu de D+"; o.why="La clé de la semaine : on rebâtit la durabilité."; o.detail=["~1h10–1h20 EF en Z2, allure de conversation.","Cherche un peu de dénivelé si possible, sans forcer.","Gestion nutrition/hydratation comme à l'entraînement."]; o.color="var(--orange-d)"; o.plan={durMin:75}; }
-    else { o.typeKey="repos"; o.label="Repos"; o.sub="famille"; o.why="Repos complet, tu as fait ta longue hier."; }
+    // Réathlé post-100K : semaine PLATE (pas dégressive), ancre lundi club, longue = slot flottant (carte accueil).
+    if(dow==="lun"){ o.typeKey="fond"; o.label="EF Club facile"; o.short="EF Club 50'"; o.sub="~50′ · Z2 · club"; o.why="Ancre de la semaine : footing club facile (lundi midi)."; o.detail=["~50′ EF avec le club, allure de conversation.","Nez qui respire, zéro forcing.","Rendez-vous fixe #1."]; o.color="var(--grn)"; o.plan={durMin:50}; }
+    else if(dow==="mar"){ o.typeKey="mobilite"; o.mobiIdx=(wi.wb-1)%3; var mf=MOBI_FOCUS[o.mobiIdx]; o.label="Mobilité guidée"; o.sub="~15′ · "+mf; o.why="Réathlé : mobilité — les côtes reviennent au bloc base."; o.detail=["Routine guidée ~15′ · focus "+mf+".","On ménage encore le post-100K."]; o.color="var(--blue)"; o.plan={mobiIdx:o.mobiIdx}; }
+    else if(dow==="mer"){ o.typeKey="fond"; o.label="EF moyen"; o.short="EF 50' Z2"; o.sub="~50′ · Z2 · flexible"; o.why="Volume aérobie facile."; o.detail=["~50′ EF facile, solo ou pote.","Flexible : décale-le si journée chargée."]; o.color="var(--grn)"; o.plan={durMin:50}; }
+    else if(dow==="jeu"){ o.typeKey="fond"; o.label="EF relance"; o.short="EF 40' souple"; o.sub="~40′ · Z2 · flexible"; o.why="Footing souple — optionnel selon la semaine."; o.detail=["~40′ très facile.","À faire en grosse semaine, à sauter en petite."]; o.color="var(--grn)"; o.plan={durMin:40}; }
+    else if(dow==="ven"){ o.typeKey="repos"; o.label="Repos / fraîcheur"; o.sub="repos"; o.why="Repos — ou un de tes 2 renfos si tu veux."; o.plan={}; }
+    else { o.typeKey="repos"; o.label="Repos"; o.sub="week-end"; o.why="Repos + ta sortie longue de la semaine, à caler quand tu peux (carte accueil)."; o.plan={}; }
   }
   else if(ph==="base"||ph==="force"||ph==="build"){
     var isBuild=ph==="build", isForce=ph==="force";
     
     if(dow==="lun"){
-      // Longue : ancre de la semaine
-      var durBase=isBuild?110:75, durAct=round5(durBase*wi.m);
-      var var_formats=["vallonné · nutrition","+ descente technique","esprit UT4M"], vfmt=var_formats[(wi.wb-1)%3];
-      o.typeKey="longue"; o.label="Sortie longue"; o.short="Longue "+durStr(durAct)+" Z2"; o.sub=durStr(durAct)+" · "+vfmt;
-      o.why="Durabilité : l'ancre de la semaine.";
-      o.detail=["Durée : "+durStr(durAct)+" en Z2 (FC <"+FCZ2HI+").","Focus : "+vfmt.toLowerCase()+".","~30-45min solo vallonné + 1h EF club fixe (lundi midi).","Allure plat indicative "+Z2PACE+"/km — en côte, FC-piloted."];
-      o.color="var(--grn)"; o.plan={durMin:durAct};
+      o.typeKey="fond"; o.label="EF Club facile"; o.short="EF Club 50'"; o.sub="~50′ · Z2 · club";
+      o.why="Ancre #1 : footing club facile (lundi midi).";
+      o.detail=["~50′ EF facile avec le club, allure de conversation.","Récup active, nez qui respire.","Rendez-vous fixe avec le mardi (côtes)."];
+      o.color="var(--grn)"; o.plan={durMin:50};
     }
     else if(dow==="mar"){
       // Côte : pilier du bloc
@@ -434,26 +430,27 @@ function gen(d){
       o.color="var(--orange)"; o.plan={reps:reps,format:fmt.n};
     }
     else if(dow==="mer"){
-      var dur=round5(45*wi.m), var_focus=["EF continu fluide","+ 6 lignes droites Z3 (30″)","progressif : dernier tiers Z3"];
-      o.typeKey="fond"; o.label="Endurance"; o.short="EF "+dur+"' Z2"; o.sub=dur+"′ · Z2 · flexible";
-      o.why="Volume aérobie, flexible selon la fatigue.";
-      o.detail=["Durée : "+dur+"′ en Z2 ("+Z2PACE+"/km).","Variante : "+var_focus[(wi.wb-1)%3].toLowerCase()+".","Peut être déplacée si la journée a un client lourd."];
+      var dur=round5((isBuild?60:55)*wi.m), var_focus=["EF continu fluide","+ 6 lignes droites Z3 (30″)","progressif : dernier tiers Z3"];
+      o.typeKey="fond"; o.label="EF moyen"; o.short="EF "+dur+"' Z2"; o.sub=dur+"′ · Z2 · volume aérobie";
+      o.why="Le footing qui nourrit le moteur diesel.";
+      o.detail=["Durée : "+dur+"′ en Z2 ("+Z2PACE+"/km).","Variante : "+var_focus[(wi.wb-1)%3].toLowerCase()+".","Flexible : décale-le si journée chargée."];
       o.color="var(--grn)"; o.plan={durMin:dur};
     }
     else if(dow==="jeu"){
-      o.typeKey="fond"; o.label="EF relance"; o.short="EF relance 1h"; o.sub="~1h · Z2";
-      o.why="Relance sur jambes fatiguées (mar côte + mer).";
-      o.detail=["~1h EF conversation, nez qui respire.","Jeudi 12-14h = créneau fixe avec toi.","Pas de charge, récup active."];
-      o.color="var(--grn)"; o.plan={durMin:60};
+      var durj=round5(50*wi.m);
+      o.typeKey="fond"; o.label="EF relance"; o.short="EF relance "+durj+"'"; o.sub="~"+durj+"′ · Z2 · flexible";
+      o.why="Relance facile — optionnelle selon ta semaine.";
+      o.detail=["~"+durj+"′ EF conversation, nez qui respire.","Jeudi 12-14h = ton créneau.","À faire en grosse semaine, à sauter en petite."];
+      o.color="var(--grn)"; o.plan={durMin:durj};
     }
     else if(dow==="ven"){
-      o.typeKey="fond"; o.label="EF avec pote"; o.short="EF pote 50'"; o.sub="~50′ · Z2";
-      o.why="Récup active sociale.";
-      o.detail=["~50′ EF facile avec footing pote.","Allure légère, social."];
-      o.color="var(--grn)"; o.plan={durMin:50};
+      o.typeKey="repos"; o.label="Repos / fraîcheur"; o.sub="repos";
+      o.why="Repos — ou un de tes 2 renfos si tu veux du gainage avant le week-end.";
+      o.plan={};
     }
     else {
-      o.typeKey="repos"; o.label="Repos"; o.sub="famille"; o.why="Repos ou léger (dimanche AM possible).";
+      o.typeKey="repos"; o.label="Repos"; o.sub="week-end";
+      o.why="Repos + ta sortie longue de la semaine (carte accueil), à caler quand ta vie le permet. Grosse semaine : possible EF facile l'autre jour.";
       o.plan={};
     }
     
@@ -470,8 +467,8 @@ function gen(d){
   }
   else if(ph==="affutage"){
     // Affûtage : très allègement progressif
-    if(dow==="lun"){ o.typeKey="longue"; o.label="Sortie souple"; o.short="EF souple 1h"; o.sub="~1h EF · affûtage";
-      o.why="Affûtage : allègement."; o.detail=["~1h EF très facile avec le club.","Très léger, prés à l'effort."]; o.color="var(--grn)"; o.plan={durMin:60}; }
+    if(dow==="lun"){ o.typeKey="fond"; o.label="EF souple club"; o.short="EF souple 50'"; o.sub="~50′ EF · affûtage";
+      o.why="Affûtage : allègement, footing club facile."; o.detail=["~50′ EF très facile avec le club.","Très léger, jambes fraîches."]; o.color="var(--grn)"; o.plan={durMin:50}; }
     else if(dow==="mar"){ o.typeKey="cotes"; o.label="Accent léger"; o.short="Côtes 4×2′ Z3"; o.sub="4×2′ Z3 · affûtage";
       o.why="Affûtage : tonalité, pas fatigue."; o.detail=["4×2′ en montée modérée Z3 (pas max).","Juste une tonalité neuro, récup complète."]; o.color="var(--orange)"; o.plan={reps:4,format:"Accent léger"}; }
     else if(dow==="mer"||dow==="jeu"||dow==="ven"){ o.typeKey="fond"; o.label="EF léger"; o.short="EF léger 40'"; o.sub="30–45′ · Z2";
