@@ -170,6 +170,31 @@
   .plist .li{display:flex;gap:11px;padding:7px 0;border-bottom:1px solid var(--line);font-size:14px}
   .plist .li:last-child{border-bottom:none}
   .plist .li .k{font-family:'Bebas Neue',sans-serif;font-size:19px;color:var(--acid-d);min-width:22px}
+  /* ===== RENFO : figurine + compteur série/récup + cue repliable ===== */
+  .rfig{width:118px;height:132px;display:flex;align-items:center;justify-content:center}
+  .rfig svg{width:100%;height:100%}
+  .rchip{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:#1a1d12;background:var(--acid);border-radius:999px;padding:5px 18px}
+  .rrow{display:flex;gap:12px;width:100%;max-width:360px}
+  .rserie,.rrecup{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;border:1.5px solid var(--line);border-radius:16px;padding:12px 8px;background:var(--paper)}
+  .rserie{cursor:pointer;font-family:inherit;transition:background .12s,border-color .12s}
+  .rserie:active{background:var(--bg)}
+  .rserie.done{border-color:var(--grn);background:rgba(31,157,85,.08)}
+  .rrecup.run{border-color:var(--orange);background:rgba(255,107,53,.07)}
+  .rrecup.ready{border-color:var(--grn);background:rgba(31,157,85,.08)}
+  .rlab{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--mut);font-weight:700}
+  .rcnt,.rtime{font-family:'Bebas Neue',sans-serif;font-size:40px;line-height:.9;color:var(--ink)}
+  .rrecup.run .rtime{color:var(--orange)} .rrecup.ready .rtime{color:var(--grn);font-size:30px}
+  .rserie.done .rcnt{color:var(--grn)}
+  .rcueBtn{background:none;border:none;color:var(--mut);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;padding:4px 0}
+  .rcueBody{font-size:13.5px;color:var(--ink2);line-height:1.5;max-width:340px;text-align:left;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+  /* ===== BILAN : récap + mot du coach repliable ===== */
+  .recapWrap{margin-bottom:12px}
+  .recapHead{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mut);font-weight:700;margin-bottom:8px}
+  .recapEx{border:1px solid var(--line);border-radius:12px;padding:9px 12px;margin-bottom:7px;background:var(--paper)}
+  .recapName{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:14px;font-weight:700;color:var(--ink)}
+  .recapReps{font-size:11.5px;color:var(--mut);font-weight:600;white-space:nowrap}
+  .coachBtn{background:none;border:none;color:var(--acid-d);font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;padding:6px 0 2px}
+  .coachBody{font-size:13px;color:var(--ink2);line-height:1.5;margin-top:4px}
   .pact{flex:0 0 auto;padding-top:12px}
 </style>
 </head>
@@ -852,7 +877,7 @@ function mondayKey(){ return iso(mondayOf(new Date())); }
 function renfoPair(){ var wc=weekCounter(), na=RENFO_CAT_A.length, nb=RENFO_CAT_B.length; return { a:RENFO_CAT_A[((wc%na)+na)%na], b:RENFO_CAT_B[(((wc+Math.floor(wc/nb))%nb)+nb)%nb] }; }
 function slotIdx(slot){ var p=renfoPair(); return slot===1?p.a:p.b; }
 function slotDone(slot){ var wk=mondayKey(); return loadLog().some(function(e){return e.typeKey==="renfo-supp"&&e.wk===wk&&e.wslot===slot;}); }
-var _wkSlot=0,_wkIdx=-1,pWeekly=false;
+var _wkSlot=0,_wkIdx=-1,pWeekly=false,pRenfoBlocks=[];
 function renderRenfoWeek(){
   var box=document.getElementById("renfoWeek"); if(!box)return;
   var p=renfoPair();
@@ -927,9 +952,11 @@ function launchWeeklyRenfo(idx,slot,signal){
   var s=RENFO_WEEK[idx];
   var org=rnd(s.cat==="A"?["sets","sets","superset","cluster5"]:["sets","superset","circuit"]);
   pSuppName=s.name+" · "+orgLabel(org);
-  var warm=TF_WARM[weekCounter()%TF_WARM.length].map(function(w){return {kind:"flow",name:w.name,cue:w.cue,reps:w.reps,hold:w.hold,label:"Échauffement coureur"};});
-  var work=buildWeeklyWork(s,org);
-  pSegs=warm.concat(work); pIdx=0;
+  var warmItems=TF_WARM[weekCounter()%TF_WARM.length];
+  var warmSeg={kind:"renfowarm",rounds:2,label:"Échauffement",items:warmItems};
+  var work=tagRenfoSegs(buildWeeklyWork(s,org));
+  pRenfoBlocks=s.blocks;
+  pSegs=[warmSeg].concat(work); pIdx=0;
   document.getElementById("player").classList.add("on"); renderSeg();
 }
 /* ===== SORTIE LONGUE flottante (slot hebdo, rythme 3:1) ===== */
@@ -1869,8 +1896,139 @@ function movesList(seg){
   if(seg.kind==="emom"||seg.kind==="tabata") return seg.moves.map(function(m,i){return '<div class="li"><span class="k">'+(i+1)+'</span><div><b>'+m.name+'</b>'+(m.cue?' <span style="color:var(--mut)">· '+m.cue+'</span>':'')+'</div></div>';}).join("");
   return seg.moves.map(function(m){return '<div class="li"><span class="k">'+(m[0]||'•')+'</span><div><b>'+m[1]+'</b>'+(m[2]?' <span style="color:var(--mut)">· '+m[2]+'</span>':'')+'</div></div>';}).join("");
 }
+/* ===== FIGURINES (style bâton, tokens LV) ===== */
+var _FI="#15171a",_FA="#d8843d",_FT="#2f86c9";
+function _fig(inner){return '<svg viewBox="0 0 100 132" xmlns="http://www.w3.org/2000/svg">'+
+  '<g fill="none" stroke="'+_FI+'" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round">'+inner+'</g></svg>';}
+function _head(x,y){return '<circle cx="'+x+'" cy="'+y+'" r="10" fill="'+_FI+'"/>';}
+var FIGS={
+  warmup:  _head(50,20)+'<path d="M50 32 L50 76"/><path d="M50 40 L28 22"/><path d="M50 40 L72 22"/><path d="M50 76 L36 116"/><path d="M50 76 L66 110"/><path d="M26 30 A8 8 0 0 1 22 18" stroke="'+_FA+'"/>',
+  hinge:   _head(66,24)+'<path d="M66 32 L40 70"/><path d="M40 70 L38 116"/><path d="M40 70 L60 112"/><path d="M45 62 L43 100"/><path d="M26 101 L60 101" stroke="'+_FA+'" stroke-width="8"/>',
+  bridge:  _head(20,86)+'<path d="M28 84 L54 66"/><path d="M54 66 L74 66"/><path d="M54 66 L58 96"/><path d="M58 96 L54 116"/><path d="M74 66 L74 116"/><path d="M40 60 A16 16 0 0 1 68 58" stroke="'+_FA+'" stroke-width="4"/>',
+  lunge:   _head(50,20)+'<path d="M50 30 L50 72"/><path d="M50 40 L38 60"/><path d="M50 40 L62 60"/><path d="M50 72 L34 96 L34 118"/><path d="M50 72 L72 100 L72 118"/>',
+  carry:   _head(50,20)+'<path d="M50 30 L50 78"/><path d="M50 38 L34 78"/><path d="M50 38 L66 78"/><path d="M50 78 L40 118"/><path d="M50 78 L60 118"/><path d="M26 80 L42 80" stroke="'+_FA+'" stroke-width="8"/><path d="M58 80 L74 80" stroke="'+_FA+'" stroke-width="8"/>',
+  core:    _head(16,64)+'<path d="M24 66 L82 82"/><path d="M40 71 L34 96"/><path d="M82 82 L88 104"/><path d="M30 78 L26 96" stroke="'+_FA+'"/><path d="M64 79 L60 100" stroke="'+_FA+'"/>',
+  calf:    _head(50,20)+'<path d="M50 30 L50 74"/><path d="M50 40 L36 66"/><path d="M50 40 L64 66"/><path d="M50 74 L42 108"/><path d="M50 74 L58 108"/><path d="M40 108 L34 108"/><path d="M56 108 L64 108"/><path d="M50 14 L50 4" stroke="'+_FA+'" stroke-width="5"/><path d="M45 9 L50 3 L55 9" stroke="'+_FA+'" stroke-width="5"/>',
+  plyo:    _head(50,22)+'<path d="M50 32 L50 66"/><path d="M50 40 L30 26"/><path d="M50 40 L70 26"/><path d="M50 66 L36 88 L44 104"/><path d="M50 66 L64 88 L56 104"/><path d="M22 116 L78 116" stroke="'+_FA+'" stroke-width="5"/>',
+  balance: _head(46,20)+'<path d="M46 30 L48 74"/><path d="M46 40 L24 44"/><path d="M46 40 L70 40"/><path d="M48 74 L46 118"/><path d="M48 74 L74 96"/>',
+  pull:    '<path d="M22 20 L78 20" stroke="'+_FA+'" stroke-width="7"/>'+_head(50,44)+'<path d="M50 54 L50 96"/><path d="M50 56 L34 22"/><path d="M50 56 L66 22"/><path d="M50 96 L40 122"/><path d="M50 96 L60 122"/>',
+  circuit: '<path d="M50 24 A34 34 0 1 1 22 42" stroke="'+_FT+'"/><path d="M20 28 L22 44 L36 40" stroke="'+_FT+'"/><circle cx="50" cy="66" r="6" fill="'+_FA+'" stroke="none"/>'
+};
+function figFor(name){
+  var n=(name||"").toLowerCase();
+  if(/^tour|circuit/.test(n)) return "circuit";
+  if(/tract|pull-?up|traction|dead ?hang|suspension/.test(n)) return "pull";
+  if(/hip thrust|pont fessier|glute bridge|clamshell|abduction|monster|clam/.test(n)) return "bridge";
+  if(/rdl|soulevé de terre|hinge|nordic|good ?morning|dead ?lift|leg curl|ischio/.test(n)) return "hinge";
+  if(/mollet|pointe|heel-?drop|soléaire|gastro|tibial|short foot|pince|toe raise/.test(n)) return "calf";
+  if(/saut|bond|pogo|plio|détente|broad|hop|corde|drop jump|squat sauté/.test(n)) return "plyo";
+  if(/carry|farmer|suitcase|porté/.test(n)) return "carry";
+  if(/gainage|plank|planche|pallof|dead ?bug|bird-?dog|mountain|hollow|copenhagen|anti-rot|anti-ext/.test(n)) return "core";
+  if(/équilibre|unipodal|proprio|reach|glisse/.test(n)) return "balance";
+  if(/squat|fente|split|pistol|step-?up|step-?down|latérale|lateral/.test(n)) return "lunge";
+  return "lunge";
+}
+function figSVG(k){ return _fig(FIGS[k]||FIGS.lunge); }
+/* ===== PARSING série / récup ===== */
+function renfoSeries(seg){
+  if(seg.name&&/^Tour/.test(seg.name)) return 1;
+  var m=(seg.reps||"").match(/(\d+)\s*[×x]/);
+  return m?parseInt(m[1],10):3;
+}
+function renfoRecup(seg){
+  var src=(seg.reps||"")+" "+(seg.cue||"");
+  var m=src.match(/récup\s*(\d+)\s*(′|'|min|″|"|s)/i);
+  if(m){ var v=parseInt(m[1],10); return /['′]|min/i.test(m[2])?v*60:v; }
+  return 75;
+}
+function tagRenfoSegs(segs){
+  segs.forEach(function(s){
+    s.renfoWork=true; s.series=renfoSeries(s); s.recup=renfoRecup(s);
+    s.repsHead=(s.reps||"").split("·")[0].trim(); s.fig=figFor(s.name);
+  });
+  return segs;
+}
+/* ===== MOT DU COACH (statique, orienté trail) ===== */
+var RENFO_WHY=[
+  [/tract|pull-?up|traction|dead ?hang/,"Tirage vertical : dos et grip solides pour les portions à quatre pattes et l'usage des bâtons en montée raide."],
+  [/rdl|soulevé de terre|hinge|good ?morning/,"Le hinge charge ischios et fessiers, moteurs de la propulsion en montée et amortisseurs du bassin sur le plat."],
+  [/nordic|leg curl|ischio/,"Excentrique ischios : ta meilleure assurance anti-claquage sur les relances et les longues descentes."],
+  [/hip thrust|pont fessier|glute bridge/,"Extension de hanche pure : le grand fessier est le premier moteur de la grimpe, on le rend puissant et endurant."],
+  [/split squat|fente|bulgare/,"Force unilatérale : chaque foulée en trail est monopode — tu corriges les asymétries et stabilises le genou."],
+  [/pistol|step-?down|excentrique.*quad|split squat excentrique/,"Excentrique quadriceps : durabilité pour encaisser des heures de descente sans exploser les cuisses."],
+  [/step-?up/,"Transfert direct de la montée : extension complète de hanche sous charge, geste spécifique du trail."],
+  [/mollet|pointe|heel-?drop|soléaire|gastro/,"Le triangle mollet/soléaire encaisse chaque impact ; solide, il repousse l'apparition des crampes en fin de course."],
+  [/tibial|toe raise/,"Tibial antérieur : muscle clé de la descente et de l'attaque de foulée, souvent négligé, souvent responsable des douleurs de jambe."],
+  [/saut|bond|pogo|plio|détente|broad|hop|drop jump/,"Pliométrie : tu améliores la raideur tendineuse et l'économie de course — tu vas plus vite pour le même coût énergétique."],
+  [/carry|farmer|suitcase|porté/,"Portés lourds : gainage global et posture qui tient sous fatigue, quand le sac et les heures pèsent sur le dos."],
+  [/pallof|anti-rot/,"Anti-rotation : le tronc verrouille le transfert de force jambes↔bassin et protège le bas du dos en terrain cassant."],
+  [/copenhagen|adducteur/,"Adducteurs robustes = genou stable en descente technique et bassin protégé (ta zone de vigilance)."],
+  [/dead ?bug|hollow|anti-ext|gainage.*(?:box|coude)|planche|plank/,"Gainage anti-extension : un tronc rigide = moins de déperdition d'énergie et un dos protégé sur les longues heures."],
+  [/bird-?dog/,"Coordination controlatérale + gainage : la stabilité qui tient ta foulée propre quand tout le corps fatigue."],
+  [/monster|clamshell|abduction|glute med/,"Moyen fessier : le stabilisateur latéral qui empêche le genou de partir en dedans (anti-valgus) sur terrain irrégulier."],
+  [/gainage latéral|suitcase|anti-inclin/,"Gainage frontal : anti-bascule du bassin, il garde ton axe droit sur les dévers et sentiers en balcon."],
+  [/équilibre|unipodal|proprio|reach|glisse/,"Proprioception cheville : les micro-ajustements qui évitent l'entorse sur pierrier et racines."],
+  [/fente latérale|latérale lestée/,"Plan frontal chargé : rare en salle, essentiel en trail pour les appuis de côté et les changements de direction."]
+];
+function coachWhy(name){
+  var n=(name||"").toLowerCase();
+  for(var i=0;i<RENFO_WHY.length;i++){ if(RENFO_WHY[i][0].test(n)) return RENFO_WHY[i][1]; }
+  return "Renforcement spécifique trail : gagne en force et en durabilité pour tenir la charge de l'UT4M.";
+}
+/* ===== RENDU écrans renfo ===== */
+function renderRenfoWarm(seg){
+  document.getElementById("pSeg").textContent="Échauffement "+(pIdx+1)+"/"+pSegs.length;
+  var lis=seg.items.map(function(w){
+    var r=w.reps?w.reps:(w.hold?w.hold+"″":"");
+    return '<div class="li"><span class="k">•</span><div><b>'+w.name+'</b>'+(r?' <span style="color:var(--mut)">· '+r+'</span>':'')+'</div></div>';
+  }).join("");
+  document.getElementById("pBody").innerHTML=
+    '<div class="rfig">'+figSVG("warmup")+'</div>'+
+    '<div class="pname bebas">Échauffement</div>'+
+    '<div class="rchip">'+seg.rounds+' TOURS</div>'+
+    '<div class="plist">'+lis+'</div>';
+  document.getElementById("pAct").innerHTML='<button class="btn btn-acid" onclick="nextSeg()">SUIVANT</button>';
+}
+var _rfCueId="";
+function rfToggleCue(){ var b=document.getElementById(_rfCueId); if(b)b.style.display=(b.style.display==="none"?"block":"none"); }
+function rfValidate(){
+  if(pState.rfDone<pState.rfN){ pState.rfDone++; beep(1000,.09); }
+  var c=document.getElementById("rfCnt"); if(c)c.textContent=pState.rfDone+" / "+pState.rfN;
+  if(pState.rfDone>=pState.rfN){ var s=document.getElementById("rfSerie"); if(s)s.classList.add("done"); }
+  rfStartRecup();
+}
+function rfStartRecup(){
+  clearInterval(pTimer);
+  var t=pState.rfRecup, box=document.getElementById("rfRecup"), el=document.getElementById("rfTime");
+  if(box){box.classList.remove("ready");box.classList.add("run");}
+  if(el)el.textContent=fmtClock(t);
+  pTimer=setInterval(function(){
+    t--; var e=document.getElementById("rfTime"); if(!e){clearInterval(pTimer);return;}
+    e.textContent=fmtClock(Math.max(0,t));
+    if(t<=3&&t>0)beep(700,.07);
+    if(t<=0){ clearInterval(pTimer); dbeep(); if(box){box.classList.remove("run");box.classList.add("ready");} e.textContent="PRÊT"; }
+  },1000);
+}
+function renderRenfoWork(seg){
+  clearInterval(pTimer);
+  document.getElementById("pSeg").textContent=(seg.label||"Exercice")+" "+(pIdx+1)+"/"+pSegs.length;
+  pState.rfN=seg.series||3; pState.rfDone=0; pState.rfRecup=seg.recup||75;
+  _rfCueId="rfCue"+pIdx;
+  document.getElementById("pBody").innerHTML=
+    '<div class="rfig">'+figSVG(seg.fig||"lunge")+'</div>'+
+    '<div class="pname bebas">'+seg.name+'</div>'+
+    (seg.repsHead?'<div class="preps">'+seg.repsHead+'</div>':'')+
+    '<div class="rrow">'+
+      '<button class="rserie" id="rfSerie" onclick="rfValidate()"><span class="rlab">Série ✓</span><span class="rcnt bebas" id="rfCnt">0 / '+pState.rfN+'</span></button>'+
+      '<div class="rrecup" id="rfRecup"><span class="rlab">Récup</span><span class="rtime bebas" id="rfTime">'+fmtClock(pState.rfRecup)+'</span></div>'+
+    '</div>'+
+    (seg.cue?'<button class="rcueBtn" onclick="rfToggleCue()">▾ Comment faire</button><div class="rcueBody" id="'+_rfCueId+'" style="display:none">'+seg.cue.replace(/\n/g,"<br>")+'</div>':'');
+  document.getElementById("pAct").innerHTML='<button class="btn btn-acid" onclick="nextSeg()">'+(pIdx===pSegs.length-1?'TERMINER':'EXERCICE SUIVANT')+'</button>';
+}
 function renderSeg(){
   clearInterval(pTimer); pProg(); renderSignalBanner();
+  if(pSegs[pIdx]&&pSegs[pIdx].kind==="renfowarm"){ renderRenfoWarm(pSegs[pIdx]); return; }
+  if(pSegs[pIdx]&&pSegs[pIdx].kind==="flow"&&pSegs[pIdx].renfoWork){ renderRenfoWork(pSegs[pIdx]); return; }
   var seg=pSegs[pIdx], body=document.getElementById("pBody"), act=document.getElementById("pAct");
   document.getElementById("pSeg").textContent=(seg.label||"Étape")+" "+(pIdx+1)+"/"+pSegs.length;
   if(seg.kind==="flow"){
@@ -2027,28 +2185,39 @@ function saveSuppWod(){
   closeSheet(); renderToday(); renderLog();
 }
 function finishSuppRenfo(){
+  var displayType = pWeekly ? ("RENFO "+_wkSlot+"/2") : "RENFO SUPP";
   var entry={id:"r_"+Date.now(),dateKey:pKey,ts:Date.now(),
-    typeKey:"renfo-supp",type:"RENFO SUPP",title:pSuppName,color:"var(--orange)",
+    typeKey:"renfo-supp",type:displayType,title:pSuppName,color:"var(--orange)",
     rpe:"",zp:"",jambes:"",score:"",note:""};
   openSheet(pKey);
   curKey=pKey; editing=entry;
   document.getElementById("shTitle").textContent=pSuppName;
   document.getElementById("shWhy").textContent="Séance de renfo — note ton ressenti (RPE, jambes, sensations).";
   document.getElementById("shSpecs").innerHTML='<div class="spec"><b>≈30′</b>FAIT</div>';
+  var recap="";
+  if(pWeekly&&pRenfoBlocks&&pRenfoBlocks.length){
+    recap='<div class="recapWrap"><div class="recapHead">Séance faite · '+pRenfoBlocks.length+' exercices</div>'+
+      pRenfoBlocks.map(function(b,i){
+        return '<div class="recapEx"><div class="recapName"><span>'+b.name+'</span><span class="recapReps">'+((b.reps||"").split("·")[0].trim())+'</span></div>'+
+          '<button class="coachBtn" onclick="toggleCoach('+i+')">▾ mot du coach</button>'+
+          '<div class="coachBody" id="coach'+i+'" style="display:none">'+coachWhy(b.name)+'</div></div>';
+      }).join("")+'</div>';
+  }
   var f='<div class="field"><label>RPE <b id="frV">6</b></label><input type="range" min="1" max="10" value="6" id="fRpe" oninput="frV.textContent=this.value"></div>'+
     '<div class="field"><label>Jambes <b id="fjV">6</b></label><input type="range" min="1" max="10" value="6" id="fJambes" oninput="fjV.textContent=this.value"></div>'+
     '<div class="field"><label>Note</label><textarea id="fNote" placeholder="Charges, sensations, douleur…"></textarea></div>'+
     '';
-  document.getElementById("shSummary").innerHTML='<div class="summary" style="padding:12px">'+f+'</div><div id="suppLink" style="margin-top:8px"></div>';
+  document.getElementById("shSummary").innerHTML='<div class="summary" style="padding:12px">'+recap+f+'</div><div id="suppLink" style="margin-top:8px"></div>';
   document.getElementById("shForm").style.display="none";
   document.getElementById("shButtons").style.display="flex";
   document.getElementById("shButtons").innerHTML='<button class="btn btn-ghost" onclick="closeSheet()">Ignorer</button><button class="btn btn-go" onclick="saveSuppRenfo()">VALIDER LE RENFO</button>';
   renderSuppLink();
 }
+function toggleCoach(i){ var b=document.getElementById("coach"+i); if(b)b.style.display=(b.style.display==="none"?"block":"none"); }
 function saveSuppRenfo(){
   var log=loadLog();
   var entry={id:"r_"+Date.now(),dateKey:curKey,ts:Date.now(),_u:Date.now(),
-    typeKey:"renfo-supp",type:"RENFO SUPP",title:editing.title,color:"var(--orange)",
+    typeKey:"renfo-supp",type:pWeekly?("RENFO "+_wkSlot+"/2"):"RENFO SUPP",title:editing.title,color:"var(--orange)",
     rpe:val("fRpe"),zp:"",jambes:val("fJambes"),score:"",note:[signalNote(),(val("fNote")||"").trim()].filter(Boolean).join(" · "),
     wk:pWeekly?mondayKey():"",wslot:pWeekly?_wkSlot:0,
     sid:editing.sid||"",stravaName:editing.stravaName||"",hrAvg:editing.hrAvg||null,hrMax:editing.hrMax||null,durMin:editing.durMin||null,wAvg:editing.wAvg||null};
