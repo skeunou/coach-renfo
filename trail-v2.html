@@ -195,6 +195,7 @@
     <div class="week" id="weekStrip"></div>
     <div id="weekRecap"></div>
     <div id="loadCard"></div>
+    <div id="renfoWeek"></div>
     <div class="card stravacard">
       <div class="strava" onclick="goStrava()">
         <div class="ic">≈</div>
@@ -345,7 +346,7 @@ function classify(d){
     if(dow==="mer")return "fond"; if(dow==="ven")return "fond"; return "repos";
   }
   if(ph==="base"||ph==="force"||ph==="build"){
-    var renfoDays=(ph==="base")?["ven"]:["mer","ven"];
+    var renfoDays=[]; // renfo géré par la carte "Renfo de la semaine" (2 slots flexibles)
     if(renfoDays.indexOf(dow)!==-1)return "renfo";
     if(dow==="lun")return "longue"; if(dow==="mar")return "cotes";
     if(dow==="mer"||dow==="jeu"||dow==="ven")return "fond"; return "repos";
@@ -400,7 +401,7 @@ function gen(d){
   if(ph==="recup"){
     // Récup post-course : lundi EF facile club, mar repos, mer EF léger, jeu repos, ven marche
     if(dow==="lun"){ o.typeKey="longue"; o.label="EF Club facile"; o.short="EF Club 1h"; o.sub="~1h · Z2 · club"; o.why="Récupération active en groupe."; o.detail=["1h EF avec le club (lundi midi fixe).","Allure vraiment facile, nez qui respire.","Social et mobilisation sans charge."]; o.color="var(--grn)"; o.plan={durMin:60}; }
-    else if(dow==="mar"){ o.typeKey="trailforce"; o.tfIdx=(wi.wb-1)%3; o.label="Renfo trail"; o.sub="~35′ · 7 blocs · 3 plans"; o.why="Force spécifique coureur : sagittal, frontal/transverse, prépa nerveuse + soléaire & psoas."; o.detail=["7 blocs en séries droites (~35′) : les 3 plans de mouvement + prépa nerveuse + accessoires soléaire/psoas.","Échauffement coureur tournant (3 versions selon la semaine).","Charge : monte quand la dernière série passe propre et contrôlée.","Déplaçable selon ta semaine."]; o.color="var(--ink)"; o.plan={tfIdx:o.tfIdx}; }
+    else if(dow==="mar"){ o.typeKey="mobilite"; o.mobiIdx=(wi.wb-1)%3; var mf=MOBI_FOCUS[o.mobiIdx]; o.label="Mobilité guidée"; o.sub="~15′ · "+mf; o.why="Récup active : mobilité guidée."; o.detail=["Routine guidée ~15′ · focus "+mf+".","Récup active post-course."]; o.color="var(--blue)"; o.plan={mobiIdx:o.mobiIdx}; }
     else if(dow==="mer"){ o.typeKey="fond"; o.label="EF léger doux"; o.short="EF 35' souple"; o.sub="30–40′ · Z2"; o.why="Mobilisation douce."; o.detail=["30–40′ EF très facile, solo ou avec pote.","Réveil des jambes sans fatigue."]; o.color="var(--grn)"; o.plan={durMin:35}; }
     else if(dow==="jeu"){ o.typeKey="repos"; o.label="Repos"; o.sub="récup"; o.why="Jour allégé."; }
     else if(dow==="ven"){ o.typeKey="fond"; o.label="Marche facile"; o.short="EF souple 30'"; o.sub="30′ · Z1"; o.why="Mobilisation extrêmement douce."; o.detail=["30′ marche ou EF ultra-léger.","Pas de charge."]; o.color="var(--grn)"; o.plan={durMin:30}; }
@@ -457,7 +458,7 @@ function gen(d){
     // Renfo placé par phase. Vendredi = ancre (avant repos week-end).
     // base = 1× (ven) · force/build = 2× (mer + ven). Déplaçable selon ta semaine.
     var renfoVar=(ph==="base")?"ADAPT":"FORCE";
-    var renfoDays=(ph==="base")?["ven"]:["mer","ven"];
+    var renfoDays=[]; // renfo géré par la carte "Renfo de la semaine" (2 slots flexibles)
     if(renfoDays.indexOf(dow)!==-1){
       o.typeKey="renfo"; o.label="Renfo "+(renfoVar==="FORCE"?"force":"adaptation"); o.sub="~30′ · EMOM+AMRAP";
       o.why=renfoVar==="FORCE"?"Force structurelle spécifique trail.":"Adaptation : volume modéré, technique.";
@@ -714,6 +715,118 @@ var TRAIL_FORCE=[
   {label:"Accessoire soléaire",name:"Mollet genou fléchi (soléaire)",reps:"3 × 12 / côté · récup 45″",cue:"Avant-pied sur un disque, genou fléchi ~30°, haltère posé sur la cuisse. Amplitude complète, pause 1s en haut. Clé pour encaisser les descentes."},
   {label:"Accessoire fléchisseurs de hanche",name:"Montée de genou élastique debout",reps:"3 × 8 / côté · récup 45″",cue:"Élastique à la cheville, monte le genou au-dessus de la hanche, buste droit et stable, descente freinée. Renforce le psoas, moteur de la foulée."}
 ];
+/* ===== BANQUE RENFO SEMAINE — 8 séances trail (séries droites). cat A=jambes/force, B=puissance/accessoires ===== */
+var RENFO_WEEK=[
+  {cat:"A", name:"Plans de mouvement", blocks:TRAIL_FORCE},
+  {cat:"A", name:"Chaîne postérieure & grimpe", blocks:[
+    {label:"Hinge lourd",name:"RDL barre",reps:"3 × 8 · récup 90″",cue:"Hanche loin en arrière, ischios sous tension, dos plat. La base de la grimpe."},
+    {label:"Extension de hanche",name:"Hip thrust barre",reps:"3 × 10 · récup 75″",cue:"Pause 1s verrouillée en haut, menton rentré."},
+    {label:"Unilatéral postérieur",name:"Soulevé de terre unilatéral DB",reps:"3 × 8 / côté · récup 60″",cue:"Équilibre + ischios, bassin bien horizontal."},
+    {label:"Ischios excentrique",name:"Nordic curl (ou leg curl TRX)",reps:"3 × 6 · récup 75″",cue:"Freine la descente au maximum, remontée assistée si besoin."},
+    {label:"Mollet grimpe",name:"Montée sur pointes jambe tendue",reps:"3 × 15 · récup 45″",cue:"Amplitude complète, gastrocnémien, pause haute."},
+    {label:"Fessier",name:"Pont fessier unilatéral",reps:"3 × 12 / côté · récup 45″",cue:"Poussée talon, bassin stable."} ]},
+  {cat:"A", name:"Descente & excentrique", blocks:[
+    {label:"Excentrique quadri",name:"Split squat excentrique",reps:"3 × 6 / côté · récup 75″",cue:"4s à la descente, remontée normale. Durabilité pour les longues descentes."},
+    {label:"Contrôle descente",name:"Step-down freiné du banc",reps:"3 × 8 / côté · récup 60″",cue:"Descends au ralenti, le pied effleure le sol sans se poser."},
+    {label:"Soléaire excentrique",name:"Heel-drop soléaire (genou fléchi)",reps:"3 × 12 / côté · récup 45″",cue:"Descente lente du talon sous la marche, genou fléchi."},
+    {label:"Impact contrôlé",name:"Fente arrière lestée",reps:"3 × 8 / côté · récup 60″",cue:"Encaisse la descente, genou aligné sur le pied."},
+    {label:"Adducteurs",name:"Copenhagen plank",reps:"3 × 8 / côté · récup 45″",cue:"Adducteurs solides = genou stable en descente technique."},
+    {label:"Anti-rotation",name:"Pallof press",reps:"3 × 10 / côté · récup 45″",cue:"Résiste à la rotation, gaine le tronc."} ]},
+  {cat:"B", name:"Puissance & pliométrie", blocks:[
+    {label:"Prépa nerveuse",name:"Step-up explosif box",reps:"3 × 4 / côté · récup 90″",cue:"Intention maximale, extension complète, repos long. Qualité pure."},
+    {label:"Détente",name:"Squat sauté",reps:"3 × 5 · récup 90″",cue:"Explose vers le haut, réception souple et gainée."},
+    {label:"Puissance horizontale",name:"Bonds horizontaux (broad jump)",reps:"3 × 4 · récup 90″",cue:"Projette loin, absorbe la réception genoux fléchis."},
+    {label:"Raideur unipodale",name:"Sauts unipodaux (contacts brefs)",reps:"3 × 6 / côté · récup 75″",cue:"Contact sol minimal, ressort cheville, économie de course."},
+    {label:"Pliométrie basse",name:"Pogo hops",reps:"3 × 20 · récup 45″",cue:"Chevilles ressort, genoux quasi tendus."},
+    {label:"Gainage dynamique",name:"Mountain climber lent",reps:"3 × 20 · récup 45″",cue:"Bassin bas, contrôle chaque montée de genou."} ]},
+  {cat:"A", name:"Unilatéral & stabilité terrain", blocks:[
+    {label:"Proprioception postérieure",name:"Soulevé de terre unilatéral KB",reps:"3 × 8 / côté · récup 60″",cue:"Cherche l'équilibre autant que la charge."},
+    {label:"Force unilatérale profonde",name:"Progression pistol sur box",reps:"3 × 5 / côté · récup 75″",cue:"Descente contrôlée jusqu'au box, remontée sur une jambe."},
+    {label:"Plan frontal",name:"Fente latérale lestée",reps:"3 × 8 / côté · récup 60″",cue:"Grand pas de côté, assieds-toi sur la hanche, buste droit."},
+    {label:"Glute med",name:"Monster walk élastique",reps:"3 × 12 pas / sens · récup 45″",cue:"Élastique aux chevilles, genoux écartés, bassin stable."},
+    {label:"Équilibre cheville",name:"Équilibre unipodal + reach",reps:"3 × 30″ / côté · récup 45″",cue:"Yeux fermés si possible, va chercher loin avec la jambe libre."},
+    {label:"Gainage latéral",name:"Gainage latéral",reps:"3 × 30″ / côté · récup 45″",cue:"Bassin haut, corps aligné."} ]},
+  {cat:"B", name:"Gainage & portés (posture sous fatigue)", blocks:[
+    {label:"Porté lourd",name:"Farmer carry",reps:"3 × 30 m · récup 75″",cue:"Lourd, buste droit, épaules basses. Posture sous charge."},
+    {label:"Anti-inclinaison",name:"Suitcase carry",reps:"3 × 20 m / côté · récup 60″",cue:"Un seul côté chargé, reste parfaitement vertical."},
+    {label:"Anti-rotation marchant",name:"Pallof press marchant",reps:"3 × 10 / côté · récup 45″",cue:"Avance en résistant à la rotation."},
+    {label:"Anti-extension",name:"Dead bug lesté",reps:"3 × 10 / côté · récup 45″",cue:"Lombaires plaquées au sol, mouvements opposés lents."},
+    {label:"Stabilité postérieure",name:"Bird-dog + tirage élastique",reps:"3 × 10 / côté · récup 45″",cue:"Bras/jambe opposés, tire l'élastique sans tourner le bassin."},
+    {label:"Frontal",name:"Gainage latéral + abduction jambe",reps:"3 × 10 / côté · récup 45″",cue:"Monte la jambe du dessus en gainage latéral."} ]},
+  {cat:"B", name:"Mollets · pieds · cheville", blocks:[
+    {label:"Gastrocnémien",name:"Mollet debout jambe tendue",reps:"3 × 15 · récup 45″",cue:"Amplitude complète, pause 1s en haut."},
+    {label:"Soléaire",name:"Mollet assis genou fléchi",reps:"3 × 15 / côté · récup 45″",cue:"Avant-pied sur disque, charge sur le genou."},
+    {label:"Soléaire excentrique",name:"Heel-drop excentrique sur marche",reps:"3 × 12 / côté · récup 45″",cue:"Descente lente 4s du talon."},
+    {label:"Tibial antérieur",name:"Toe raise / tibial élastique",reps:"3 × 15 · récup 45″",cue:"Le muscle des descentes et de l'attaque de foulée."},
+    {label:"Stabilité cheville",name:"Équilibre unipodal sur disque de glisse",reps:"3 × 30″ / côté · récup 45″",cue:"Surface instable, corrige en continu."},
+    {label:"Pied fonctionnel",name:"Short foot + pince serviette",reps:"3 × 12 · récup 30″",cue:"Creuse la voûte, agrippe avec les orteils."},
+    {label:"Rebond",name:"Corde à sauter légère",reps:"3 × 40″ · récup 45″",cue:"Rebond souple sur l'avant-pied."} ]},
+  {cat:"B", name:"Fessiers & plan frontal (anti-valgus)", blocks:[
+    {label:"Extension de hanche",name:"Hip thrust barre",reps:"3 × 12 · récup 60″",cue:"Verrouille les fessiers en haut."},
+    {label:"Frontal chargé",name:"Fente latérale lestée",reps:"3 × 8 / côté · récup 60″",cue:"Fessiers + adducteurs, buste droit."},
+    {label:"Glute med isolé",name:"Abduction hanche debout élastique",reps:"3 × 15 / côté · récup 45″",cue:"Jambe tendue de côté, bassin fixe."},
+    {label:"Activation latérale",name:"Monster walk + squat walk",reps:"3 × 12 pas · récup 45″",cue:"Élastique aux genoux, reste bas."},
+    {label:"Rotateurs hanche",name:"Clamshell lesté élastique",reps:"3 × 15 / côté · récup 45″",cue:"Ouvre le genou sans bouger le bassin."},
+    {label:"Contrôle du genou",name:"Step-down contrôlé (anti-valgus)",reps:"3 × 8 / côté · récup 60″",cue:"Genou parfaitement aligné sur le 2e orteil."},
+    {label:"Frontal gainé",name:"Gainage latéral + abduction",reps:"3 × 10 / côté · récup 45″",cue:"Monte la jambe du dessus, contrôle."} ]}
+];
+var RENFO_CAT_A=[0,1,2,4], RENFO_CAT_B=[3,5,6,7];
+function mondayOf(d){ var x=new Date(d.getFullYear(),d.getMonth(),d.getDate()); var off=(x.getDay()+6)%7; x.setDate(x.getDate()-off); return x; }
+function weekCounter(){ return Math.floor(mondayOf(new Date()).getTime()/(7*864e5)); }
+function mondayKey(){ return iso(mondayOf(new Date())); }
+function renfoPair(){ var wc=weekCounter(), na=RENFO_CAT_A.length, nb=RENFO_CAT_B.length; return { a:RENFO_CAT_A[((wc%na)+na)%na], b:RENFO_CAT_B[(((wc+Math.floor(wc/nb))%nb)+nb)%nb] }; }
+function slotIdx(slot){ var p=renfoPair(); return slot===1?p.a:p.b; }
+function slotDone(slot){ var wk=mondayKey(); return loadLog().some(function(e){return e.typeKey==="renfo-supp"&&e.wk===wk&&e.wslot===slot;}); }
+var _wkSlot=0,_wkIdx=-1,pWeekly=false;
+function renderRenfoWeek(){
+  var box=document.getElementById("renfoWeek"); if(!box)return;
+  var p=renfoPair();
+  function btn(slot,idx){
+    var done=slotDone(slot), s=RENFO_WEEK[idx];
+    var bg=done?"var(--grn)":(slot===1?"var(--orange)":"var(--purp)"), lab=done?"✓ FAIT":("Renfo "+slot);
+    return '<button class="btn btn-go" style="background:'+bg+';flex:1;flex-direction:column;align-items:flex-start;text-align:left;padding:10px 12px" onclick="startWeeklyRenfo('+slot+')">'+
+      '<span style="font-size:11px;opacity:.85;letter-spacing:.5px">'+lab+'</span>'+
+      '<span style="font-size:13px;font-weight:700;line-height:1.2">'+s.name+'</span>'+
+      '<span style="font-size:10.5px;opacity:.8">'+s.blocks.length+' blocs · '+(s.cat==="A"?"force":"puissance/access.")+'</span></button>';
+  }
+  box.innerHTML='<div class="card" style="padding:13px;margin-top:10px">'+
+    '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px"><div style="font-weight:800;font-size:13px;letter-spacing:.5px">RENFO DE LA SEMAINE</div><div style="font-size:10.5px;color:var(--mut)">2 séances · où tu veux</div></div>'+
+    '<div style="display:flex;gap:8px">'+btn(1,p.a)+btn(2,p.b)+'</div>'+
+    '<div style="font-size:10.5px;color:var(--mut);margin-top:8px">Appairage force + puissance/accessoires. Nouvelle paire chaque lundi.</div>'+
+    '<div id="renfoWeekCk"></div></div>';
+}
+function startWeeklyRenfo(slot){
+  var box=document.getElementById("renfoWeekCk"); if(!box)return;
+  _wkSlot=slot; _wkIdx=slotIdx(slot); checkinFlags=[];
+  var chips=Object.keys(ZONE_LBL).map(function(zk){
+    return '<button type="button" id="ck-'+zk+'" onclick="toggleFlag(\''+zk+'\')" style="border:1px solid var(--line);background:transparent;color:var(--mut);border-radius:999px;padding:6px 11px;font-size:12px;font-weight:600;cursor:pointer">'+ZONE_LBL[zk]+'</button>';
+  }).join("");
+  box.innerHTML='<div style="border-top:1px solid var(--line);margin-top:11px;padding-top:11px">'+
+    '<div style="font-weight:700;font-size:13px;margin-bottom:4px">'+RENFO_WEEK[_wkIdx].name+'</div>'+
+    '<div style="font-size:12px;color:var(--mut);margin-bottom:9px">Quelque chose à signaler aujourd\'hui ?</div>'+
+    '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">'+chips+'</div>'+
+    '<textarea id="ckTxt" placeholder="Optionnel : ex. raideur épaule, genou sensible…" style="width:100%;box-sizing:border-box;min-height:50px;font-size:13px;padding:9px;background:var(--bg);border:1px solid var(--line);border-radius:10px;color:var(--ink);font-family:inherit"></textarea>'+
+    '<div style="display:flex;gap:8px;margin-top:11px">'+
+      '<button class="btn btn-ghost" style="flex:1" onclick="runWeekCheckin(true)">RAS → lance</button>'+
+      '<button class="btn btn-go" style="flex:1" onclick="runWeekCheckin(false)">Lancer</button>'+
+    '</div>'+
+    '<button class="btn btn-ghost" style="width:100%;margin-top:6px;font-size:12px;padding:6px" onclick="renderRenfoWeek()">← annuler</button></div>';
+}
+function runWeekCheckin(ras){
+  var txt=ras?"":(((document.getElementById("ckTxt")||{}).value)||"").trim();
+  var signal={zones:ras?[]:checkinFlags.slice(), text:txt};
+  launchWeeklyRenfo(_wkIdx,_wkSlot,signal);
+}
+function launchWeeklyRenfo(idx,slot,signal){
+  unlockAudio(); reqWake(); beep(660,.12);
+  pKey=iso(new Date()); pIsSupp=true; pSuppKind="renfo"; pWeekly=true; _wkSlot=slot; _wkIdx=idx;
+  pState={}; pSignal=signal||{zones:[],text:""};
+  var s=RENFO_WEEK[idx]; pSuppName=s.name;
+  var warm=TF_WARM[weekCounter()%TF_WARM.length].map(function(w){return {kind:"flow",name:w.name,cue:w.cue,reps:w.reps,hold:w.hold,label:"Échauffement coureur"};});
+  var work=s.blocks.map(function(b){return {kind:"flow",name:b.name,cue:b.cue,reps:b.reps,label:b.label};});
+  pSegs=warm.concat(work); pIdx=0;
+  document.getElementById("player").classList.add("on"); renderSeg();
+}
 var RENFO_WARM=[
   {name:"Bascules de hanche",cue:"Good morning à vide ou élastique. Réveille la charnière sans la charger.",reps:"10 lentes"},
   {name:"Fentes marchées",cue:"Amplitude contrôlée, genou stable. Pas de rebond.",reps:"8 / jambe"},
@@ -1240,6 +1353,7 @@ function renderToday(){
   renderWeekRecap();
   renderLoadCard();
   renderExtras();
+  renderRenfoWeek();
 }
 var weekOffset=0;
 function weekNav(d){ weekOffset+=d; renderWeek(); }
@@ -1499,14 +1613,14 @@ function chooseSupp(k){
 }
 function startSuppRenfo(k,signal){
   unlockAudio(); reqWake(); beep(660,.12);
-  pKey=k; pIsSupp=true; pSuppKind="renfo"; pState={}; pSignal=signal||{zones:[],text:""};
+  pKey=k; pIsSupp=true; pSuppKind="renfo"; pWeekly=false; pState={}; pSignal=signal||{zones:[],text:""};
   var r=buildSuppRenfo(pSignal); pSuppName=r.name; pSegs=r.segs; pIdx=0;
   closeSheet(); document.getElementById("player").classList.add("on");
   renderSeg();
 }
 function startSuppWod(k,signal){
   unlockAudio(); reqWake(); beep(660,.12);
-  pKey=k; pIsSupp=true; pSuppKind="wod"; pState={}; pSignal=signal||{zones:[],text:""};
+  pKey=k; pIsSupp=true; pSuppKind="wod"; pWeekly=false; pState={}; pSignal=signal||{zones:[],text:""};
   var idx=pickLeastLoading(WODS_SUPP,"wod",(pSignal.zones||[]),lastWodIdx); lastWodIdx=idx;
   var wod=WODS_SUPP[idx], r=Math.random(), seg;
   if(r<0.5){ seg={kind:"amrap",sec:600,label:"WOD SUPP",name:wod.name,moves:wod.moves}; }
@@ -1692,7 +1806,7 @@ function finishSuppRenfo(){
   openSheet(pKey);
   curKey=pKey; editing=entry;
   document.getElementById("shTitle").textContent=pSuppName;
-  document.getElementById("shWhy").textContent="Renfo supplémentaire (~30 min) — note ton ressenti, surtout la ZP.";
+  document.getElementById("shWhy").textContent="Séance de renfo — note ton ressenti (RPE, jambes, sensations).";
   document.getElementById("shSpecs").innerHTML='<div class="spec"><b>≈30′</b>FAIT</div>';
   var f='<div class="field"><label>RPE <b id="frV">6</b></label><input type="range" min="1" max="10" value="6" id="fRpe" oninput="frV.textContent=this.value"></div>'+
     '<div class="field"><label>Jambes <b id="fjV">6</b></label><input type="range" min="1" max="10" value="6" id="fJambes" oninput="fjV.textContent=this.value"></div>'+
@@ -1708,11 +1822,13 @@ function saveSuppRenfo(){
   var log=loadLog();
   var entry={id:"r_"+Date.now(),dateKey:curKey,ts:Date.now(),_u:Date.now(),
     typeKey:"renfo-supp",type:"RENFO SUPP",title:editing.title,color:"var(--orange)",
-    rpe:val("fRpe"),zp:val("fZp"),jambes:val("fJambes"),score:"",note:[signalNote(),(val("fNote")||"").trim()].filter(Boolean).join(" · "),
+    rpe:val("fRpe"),zp:"",jambes:val("fJambes"),score:"",note:[signalNote(),(val("fNote")||"").trim()].filter(Boolean).join(" · "),
+    wk:pWeekly?mondayKey():"",wslot:pWeekly?_wkSlot:0,
     sid:editing.sid||"",stravaName:editing.stravaName||"",hrAvg:editing.hrAvg||null,hrMax:editing.hrMax||null,durMin:editing.durMin||null,wAvg:editing.wAvg||null};
   log.unshift(entry);
   log.sort(function(a,b){return a.dateKey<b.dateKey?1:-1;});
   saveLog(log);
+  pWeekly=false;
   closeSheet(); renderToday(); renderLog();
 }
 
