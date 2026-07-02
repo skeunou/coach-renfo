@@ -173,6 +173,8 @@
   /* ===== RENFO : figurine + compteur série/récup + cue repliable ===== */
   .rfig{width:118px;height:132px;display:flex;align-items:center;justify-content:center}
   .rfig svg{width:100%;height:100%}
+  .rfig2{display:flex;gap:6px;align-items:center;justify-content:center;height:120px}
+  .rfigi{width:82px;height:100px} .rfigi svg{width:100%;height:100%}
   .rchip{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:#1a1d12;background:var(--acid);border-radius:999px;padding:5px 18px}
   .rrow{display:flex;gap:12px;width:100%;max-width:360px}
   .rserie,.rrecup{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;border:1.5px solid var(--line);border-radius:16px;padding:12px 8px;background:var(--paper)}
@@ -884,7 +886,7 @@ function renderRenfoWeek(){
   function btn(slot,idx){
     var done=slotDone(slot), s=RENFO_WEEK[idx];
     var accent=done?"var(--grn)":"var(--acid)";
-    return '<button style="flex:1;background:var(--paper);border:1px solid var(--line);border-left:4px solid '+accent+';border-radius:12px;padding:12px 13px;text-align:left;cursor:pointer;font-family:inherit" onclick="startWeeklyRenfo('+slot+')">'+
+    return '<button style="flex:1;background:var(--paper);border:1px solid var(--line);border-left:4px solid '+accent+';border-radius:12px;padding:12px 13px;text-align:left;cursor:pointer;font-family:inherit" onclick="'+(done?'reviewWeeklyRenfo':'startWeeklyRenfo')+'('+slot+')">'+
       (done?'<div style="font-size:10.5px;font-weight:800;color:var(--grn);letter-spacing:.5px;margin-bottom:4px">✓ FAIT</div>':'')+
       '<div style="font-size:14px;font-weight:700;line-height:1.25;color:var(--ink)">'+s.name+'</div>'+
       '<div style="font-size:11px;color:var(--mut);margin-top:6px">'+s.blocks.length+' blocs · '+(s.cat==="A"?"force":"puissance / access.")+'</div></button>';
@@ -894,6 +896,19 @@ function renderRenfoWeek(){
     '<div style="display:flex;gap:8px">'+btn(1,p.a)+btn(2,p.b)+'</div>'+
     '<div style="font-size:10.5px;color:var(--mut);margin-top:8px">Appairage force + puissance/accessoires. Nouvelle paire chaque lundi.</div>'+
     '<div id="renfoWeekCk"></div></div>';
+}
+function reviewWeeklyRenfo(slot){
+  var box=document.getElementById("renfoWeekCk"); if(!box)return;
+  var wk=mondayKey();
+  var e=loadLog().filter(function(x){return x.typeKey==="renfo-supp"&&x.wk===wk&&x.wslot===slot;})[0];
+  if(!e){ startWeeklyRenfo(slot); return; }
+  var meta=[]; if(e.rpe)meta.push("RPE "+e.rpe); if(e.jambes)meta.push("Jambes "+e.jambes);
+  box.innerHTML='<div style="border-top:1px solid var(--line);margin-top:11px;padding-top:11px">'+
+    '<div style="font-weight:700;font-size:13px;margin-bottom:2px">'+(e.title||"Renfo")+'</div>'+
+    (meta.length?'<div style="font-size:12px;color:var(--mut);margin-bottom:8px">'+meta.join(" · ")+'</div>':'')+
+    (e.note?'<div style="font-size:12px;color:var(--mut);margin-bottom:8px">'+e.note+'</div>':'')+
+    (e.exos&&e.exos.length?renfoRecapHTML(e.exos,"rw"+slot):'<div style="font-size:12px;color:var(--mut)">Détail des exercices non enregistré pour cette séance.</div>')+
+    '<button class="btn btn-ghost" style="width:100%;margin-top:8px;font-size:12px;padding:6px" onclick="renderRenfoWeek()">← fermer</button></div>';
 }
 function startWeeklyRenfo(slot){
   var box=document.getElementById("renfoWeekCk"); if(!box)return;
@@ -927,6 +942,7 @@ function buildWeeklyWork(s,org){
       if(i+1<b.length){
         segs.push({kind:"flow",label:"Superset "+(Math.floor(i/2)+1),name:b[i].name+"  +  "+b[i+1].name,
           reps:repHead(b[i].reps)+"   +   "+repHead(b[i+1].reps),
+          figs:[figFor(b[i].name),figFor(b[i+1].name)],
           cue:"Enchaîne les 2 sans repos entre, récup 75″ après la paire.\n• "+b[i].name+" : "+b[i].cue+"\n• "+b[i+1].name+" : "+b[i+1].cue});
       } else { segs.push({kind:"flow",label:b[i].label,name:b[i].name,reps:b[i].reps,cue:b[i].cue}); }
     }
@@ -1903,29 +1919,62 @@ function _fig(inner){return '<svg viewBox="0 0 100 132" xmlns="http://www.w3.org
 function _head(x,y){return '<circle cx="'+x+'" cy="'+y+'" r="10" fill="'+_FI+'"/>';}
 var FIGS={
   warmup:  _head(50,20)+'<path d="M50 32 L50 76"/><path d="M50 40 L28 22"/><path d="M50 40 L72 22"/><path d="M50 76 L36 116"/><path d="M50 76 L66 110"/><path d="M26 30 A8 8 0 0 1 22 18" stroke="'+_FA+'"/>',
+  /* hinge : penché en avant, dos plat, barre au sol */
   hinge:   _head(66,24)+'<path d="M66 32 L40 70"/><path d="M40 70 L38 116"/><path d="M40 70 L60 112"/><path d="M45 62 L43 100"/><path d="M26 101 L60 101" stroke="'+_FA+'" stroke-width="8"/>',
-  bridge:  _head(20,86)+'<path d="M28 84 L54 66"/><path d="M54 66 L74 66"/><path d="M54 66 L58 96"/><path d="M58 96 L54 116"/><path d="M74 66 L74 116"/><path d="M40 60 A16 16 0 0 1 68 58" stroke="'+_FA+'" stroke-width="4"/>',
+  /* bridge/hip thrust : allongé, bassin en pont */
+  bridge:  _head(18,96)+'<path d="M26 94 L52 74"/><path d="M52 74 L74 74"/><path d="M74 74 L74 116"/><path d="M52 74 L54 100 L48 116"/><path d="M40 68 A16 14 0 0 1 66 66" stroke="'+_FA+'" stroke-width="4"/>',
+  /* fente/split squat */
   lunge:   _head(50,20)+'<path d="M50 30 L50 72"/><path d="M50 40 L38 60"/><path d="M50 40 L62 60"/><path d="M50 72 L34 96 L34 118"/><path d="M50 72 L72 100 L72 118"/>',
+  /* portés : haltères aux mains */
   carry:   _head(50,20)+'<path d="M50 30 L50 78"/><path d="M50 38 L34 78"/><path d="M50 38 L66 78"/><path d="M50 78 L40 118"/><path d="M50 78 L60 118"/><path d="M26 80 L42 80" stroke="'+_FA+'" stroke-width="8"/><path d="M58 80 L74 80" stroke="'+_FA+'" stroke-width="8"/>',
+  /* gainage frontal / mountain climber : planche sur avant-bras */
   core:    _head(16,64)+'<path d="M24 66 L82 82"/><path d="M40 71 L34 96"/><path d="M82 82 L88 104"/><path d="M30 78 L26 96" stroke="'+_FA+'"/><path d="M64 79 L60 100" stroke="'+_FA+'"/>',
+  /* mollet : sur la pointe des pieds, flèche montante */
   calf:    _head(50,20)+'<path d="M50 30 L50 74"/><path d="M50 40 L36 66"/><path d="M50 40 L64 66"/><path d="M50 74 L42 108"/><path d="M50 74 L58 108"/><path d="M40 108 L34 108"/><path d="M56 108 L64 108"/><path d="M50 14 L50 4" stroke="'+_FA+'" stroke-width="5"/><path d="M45 9 L50 3 L55 9" stroke="'+_FA+'" stroke-width="5"/>',
+  /* pliométrie : en l\'air, sol dessous */
   plyo:    _head(50,22)+'<path d="M50 32 L50 66"/><path d="M50 40 L30 26"/><path d="M50 40 L70 26"/><path d="M50 66 L36 88 L44 104"/><path d="M50 66 L64 88 L56 104"/><path d="M22 116 L78 116" stroke="'+_FA+'" stroke-width="5"/>',
+  /* équilibre unipodal + reach */
   balance: _head(46,20)+'<path d="M46 30 L48 74"/><path d="M46 40 L24 44"/><path d="M46 40 L70 40"/><path d="M48 74 L46 118"/><path d="M48 74 L74 96"/>',
+  /* tractions : suspendu à la barre */
   pull:    '<path d="M22 20 L78 20" stroke="'+_FA+'" stroke-width="7"/>'+_head(50,44)+'<path d="M50 54 L50 96"/><path d="M50 56 L34 22"/><path d="M50 56 L66 22"/><path d="M50 96 L40 122"/><path d="M50 96 L60 122"/>',
+  /* marche latérale élastique / abduction debout : mini-squat, jambes écartées, élastique */
+  sidestep:_head(50,20)+'<path d="M50 30 L50 66"/><path d="M50 40 L36 54"/><path d="M50 40 L64 54"/><path d="M50 66 L30 110"/><path d="M50 66 L70 110"/><path d="M30 111 L70 111" stroke="'+_FA+'" stroke-width="6"/>',
+  /* gainage latéral (side plank) */
+  sideplank:_head(28,34)+'<path d="M34 40 L82 100"/><path d="M34 44 L26 100"/><path d="M54 66 L58 42" stroke="'+_FA+'"/><path d="M22 102 L88 102" stroke="'+_FA+'" stroke-width="4"/>',
+  /* clamshell : couché sur le côté, genou qui s\'ouvre */
+  clam:    _head(20,64)+'<path d="M28 66 L58 72"/><path d="M58 72 L74 60"/><path d="M74 60 L84 74"/><path d="M74 60 L72 42" stroke="'+_FA+'"/><path d="M78 52 A10 10 0 0 0 70 44" stroke="'+_FA+'" stroke-width="3.5"/>',
+  /* bird-dog : quadrupédie, bras/jambe opposés tendus */
+  quad:    _head(20,54)+'<path d="M28 58 L66 58"/><path d="M40 60 L40 92"/><path d="M58 60 L58 92"/><path d="M28 58 L12 48" stroke="'+_FA+'"/><path d="M66 58 L84 68" stroke="'+_FA+'"/>',
+  /* dead bug : sur le dos, bras/jambes en l\'air */
+  deadbug: _head(16,88)+'<path d="M24 90 L66 90"/><path d="M34 90 L30 60"/><path d="M46 90 L50 60" stroke="'+_FA+'"/><path d="M60 90 L70 68 L64 52" stroke="'+_FA+'"/><path d="M52 90 L44 70 L48 54"/>',
+  /* step-up / step-down : un pied sur la box */
+  stepup:  _head(44,20)+'<path d="M44 30 L44 66"/><path d="M44 40 L32 54"/><path d="M44 40 L56 52"/><path d="M44 66 L60 84 L60 100"/><path d="M44 66 L34 112"/><path d="M54 100 L86 100" stroke="'+_FA+'" stroke-width="7"/>',
+  /* pallof / anti-rotation : debout, bras tendus devant */
+  antirot: _head(38,20)+'<path d="M38 30 L38 78"/><path d="M38 42 L72 48"/><path d="M38 78 L28 116"/><path d="M38 78 L48 116"/><path d="M70 44 L76 48 L70 52" stroke="'+_FA+'"/>',
+  /* montée de genou : un genou haut */
+  kneeraise:_head(46,20)+'<path d="M46 30 L46 74"/><path d="M46 40 L34 52"/><path d="M46 40 L58 54"/><path d="M46 74 L44 116"/><path d="M46 74 L66 66 L58 90" stroke="'+_FA+'"/>',
   circuit: '<path d="M50 24 A34 34 0 1 1 22 42" stroke="'+_FT+'"/><path d="M20 28 L22 44 L36 40" stroke="'+_FT+'"/><circle cx="50" cy="66" r="6" fill="'+_FA+'" stroke="none"/>'
 };
 function figFor(name){
   var n=(name||"").toLowerCase();
   if(/^tour|circuit/.test(n)) return "circuit";
+  if(/monster walk|abduction hanche|squat walk/.test(n)) return "sidestep";
+  if(/clamshell|clam/.test(n)) return "clam";
+  if(/gainage latéral|side ?plank/.test(n)) return "sideplank";
+  if(/bird-?dog/.test(n)) return "quad";
+  if(/dead ?bug/.test(n)) return "deadbug";
+  if(/pallof/.test(n)) return "antirot";
+  if(/step-?up|step-?down/.test(n)) return "stepup";
+  if(/montée de genou/.test(n)) return "kneeraise";
   if(/tract|pull-?up|traction|dead ?hang|suspension/.test(n)) return "pull";
-  if(/hip thrust|pont fessier|glute bridge|clamshell|abduction|monster|clam/.test(n)) return "bridge";
-  if(/rdl|soulevé de terre|hinge|nordic|good ?morning|dead ?lift|leg curl|ischio/.test(n)) return "hinge";
+  if(/hip thrust|pont fessier|glute bridge/.test(n)) return "bridge";
+  if(/rdl|soulevé de terre|nordic|good ?morning|dead ?lift|leg curl|ischio/.test(n)) return "hinge";
+  if(/saut|bond|pogo|plio|détente|broad|hop|corde|drop jump/.test(n)) return "plyo";
   if(/mollet|pointe|heel-?drop|soléaire|gastro|tibial|short foot|pince|toe raise/.test(n)) return "calf";
-  if(/saut|bond|pogo|plio|détente|broad|hop|corde|drop jump|squat sauté/.test(n)) return "plyo";
   if(/carry|farmer|suitcase|porté/.test(n)) return "carry";
-  if(/gainage|plank|planche|pallof|dead ?bug|bird-?dog|mountain|hollow|copenhagen|anti-rot|anti-ext/.test(n)) return "core";
+  if(/gainage|plank|planche|mountain|hollow|anti-rot|anti-ext/.test(n)) return "core";
   if(/équilibre|unipodal|proprio|reach|glisse/.test(n)) return "balance";
-  if(/squat|fente|split|pistol|step-?up|step-?down|latérale|lateral/.test(n)) return "lunge";
+  if(/squat|fente|split|pistol|latérale|lateral/.test(n)) return "lunge";
   return "lunge";
 }
 function figSVG(k){ return _fig(FIGS[k]||FIGS.lunge); }
@@ -1944,7 +1993,7 @@ function renfoRecup(seg){
 function tagRenfoSegs(segs){
   segs.forEach(function(s){
     s.renfoWork=true; s.series=renfoSeries(s); s.recup=renfoRecup(s);
-    s.repsHead=(s.reps||"").split("·")[0].trim(); s.fig=figFor(s.name);
+    s.repsHead=(s.reps||"").split("·")[0].trim(); if(!s.figs) s.fig=figFor(s.name);
   });
   return segs;
 }
@@ -1974,6 +2023,17 @@ function coachWhy(name){
   var n=(name||"").toLowerCase();
   for(var i=0;i<RENFO_WHY.length;i++){ if(RENFO_WHY[i][0].test(n)) return RENFO_WHY[i][1]; }
   return "Renforcement spécifique trail : gagne en force et en durabilité pour tenir la charge de l'UT4M.";
+}
+function toggleEl(id){ var b=document.getElementById(id); if(b)b.style.display=(b.style.display==="none"?"block":"none"); }
+function renfoRecapHTML(exos,pfx){
+  if(!exos||!exos.length) return "";
+  return '<div class="recapWrap"><div class="recapHead">Séance faite · '+exos.length+' exercices</div>'+
+    exos.map(function(b,i){
+      var cid=pfx+"_c"+i;
+      return '<div class="recapEx"><div class="recapName"><span>'+b.name+'</span><span class="recapReps">'+((b.reps||"").split("·")[0].trim())+'</span></div>'+
+        '<button class="coachBtn" onclick="toggleEl(\''+cid+'\')">▾ mot du coach</button>'+
+        '<div class="coachBody" id="'+cid+'" style="display:none">'+coachWhy(b.name)+'</div></div>';
+    }).join("")+'</div>';
 }
 /* ===== RENDU écrans renfo ===== */
 function renderRenfoWarm(seg){
@@ -2014,8 +2074,11 @@ function renderRenfoWork(seg){
   document.getElementById("pSeg").textContent=(seg.label||"Exercice")+" "+(pIdx+1)+"/"+pSegs.length;
   pState.rfN=seg.series||3; pState.rfDone=0; pState.rfRecup=seg.recup||75;
   _rfCueId="rfCue"+pIdx;
+  var figHTML = (seg.figs&&seg.figs.length>1)
+    ? '<div class="rfig2">'+seg.figs.map(function(f){return '<div class="rfigi">'+figSVG(f)+'</div>';}).join('')+'</div>'
+    : '<div class="rfig">'+figSVG(seg.fig||"lunge")+'</div>';
   document.getElementById("pBody").innerHTML=
-    '<div class="rfig">'+figSVG(seg.fig||"lunge")+'</div>'+
+    figHTML+
     '<div class="pname bebas">'+seg.name+'</div>'+
     (seg.repsHead?'<div class="preps">'+seg.repsHead+'</div>':'')+
     '<div class="rrow">'+
@@ -2194,15 +2257,7 @@ function finishSuppRenfo(){
   document.getElementById("shTitle").textContent=pSuppName;
   document.getElementById("shWhy").textContent="Séance de renfo — note ton ressenti (RPE, jambes, sensations).";
   document.getElementById("shSpecs").innerHTML='<div class="spec"><b>≈30′</b>FAIT</div>';
-  var recap="";
-  if(pWeekly&&pRenfoBlocks&&pRenfoBlocks.length){
-    recap='<div class="recapWrap"><div class="recapHead">Séance faite · '+pRenfoBlocks.length+' exercices</div>'+
-      pRenfoBlocks.map(function(b,i){
-        return '<div class="recapEx"><div class="recapName"><span>'+b.name+'</span><span class="recapReps">'+((b.reps||"").split("·")[0].trim())+'</span></div>'+
-          '<button class="coachBtn" onclick="toggleCoach('+i+')">▾ mot du coach</button>'+
-          '<div class="coachBody" id="coach'+i+'" style="display:none">'+coachWhy(b.name)+'</div></div>';
-      }).join("")+'</div>';
-  }
+  var recap = pWeekly ? renfoRecapHTML(pRenfoBlocks,"fin") : "";
   var f='<div class="field"><label>RPE <b id="frV">6</b></label><input type="range" min="1" max="10" value="6" id="fRpe" oninput="frV.textContent=this.value"></div>'+
     '<div class="field"><label>Jambes <b id="fjV">6</b></label><input type="range" min="1" max="10" value="6" id="fJambes" oninput="fjV.textContent=this.value"></div>'+
     '<div class="field"><label>Note</label><textarea id="fNote" placeholder="Charges, sensations, douleur…"></textarea></div>'+
@@ -2213,12 +2268,12 @@ function finishSuppRenfo(){
   document.getElementById("shButtons").innerHTML='<button class="btn btn-ghost" onclick="closeSheet()">Ignorer</button><button class="btn btn-go" onclick="saveSuppRenfo()">VALIDER LE RENFO</button>';
   renderSuppLink();
 }
-function toggleCoach(i){ var b=document.getElementById("coach"+i); if(b)b.style.display=(b.style.display==="none"?"block":"none"); }
 function saveSuppRenfo(){
   var log=loadLog();
   var entry={id:"r_"+Date.now(),dateKey:curKey,ts:Date.now(),_u:Date.now(),
     typeKey:"renfo-supp",type:pWeekly?("RENFO "+_wkSlot+"/2"):"RENFO SUPP",title:editing.title,color:"var(--orange)",
     rpe:val("fRpe"),zp:"",jambes:val("fJambes"),score:"",note:[signalNote(),(val("fNote")||"").trim()].filter(Boolean).join(" · "),
+    exos:pWeekly?pRenfoBlocks.map(function(b){return {name:b.name,reps:b.reps};}):null,
     wk:pWeekly?mondayKey():"",wslot:pWeekly?_wkSlot:0,
     sid:editing.sid||"",stravaName:editing.stravaName||"",hrAvg:editing.hrAvg||null,hrMax:editing.hrMax||null,durMin:editing.durMin||null,wAvg:editing.wAvg||null};
   log.unshift(entry);
@@ -2387,12 +2442,13 @@ function suppCard(e){
   if(e.rpe)meta.push("RPE "+e.rpe); if(e.zp)meta.push("ZP "+e.zp);
   if(e.sid){ if(e.hrAvg)meta.push("FC "+e.hrAvg); if(e.durMin)meta.push(fmtMin(e.durMin)); }
   var link=e.sid?'<span style="color:#fc4c02;font-weight:700;font-size:11px"> · ↗ Strava</span>':'';
+  var review=(e.exos&&e.exos.length)?'<button class="coachBtn" style="margin-top:8px" onclick="toggleEl(\'rk_'+e.id+'\')">▾ Revoir la séance</button><div id="rk_'+e.id+'" style="display:none;margin-top:6px">'+renfoRecapHTML(e.exos,'rk'+e.id)+'</div>':'';
   return '<div class="card" style="padding:12px 13px;margin-bottom:8px;border-left:3px solid '+(e.color||'var(--purp)')+'">'+
     '<div style="display:flex;justify-content:space-between;align-items:flex-start">'+
     '<div><div style="font-weight:700;font-size:14px">'+(e.type||"SÉANCE")+link+'</div>'+
     '<div style="color:var(--mut);font-size:12px;margin-top:2px">'+(e.title||"")+(meta.length?' · '+meta.join(' · '):'')+'</div></div>'+
     '<button class="x" onclick="delSuppUI(\''+e.id+'\')" style="border:none;background:none;color:var(--mut);font-size:15px;cursor:pointer;padding:0 0 0 8px">✕</button>'+
-    '</div></div>';
+    '</div>'+review+'</div>';
 }
 function delSuppUI(id){
   if(!confirm("Supprimer cette séance supplémentaire ?"))return;
