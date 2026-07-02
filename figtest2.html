@@ -1,0 +1,75 @@
+<!doctype html><html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Démo figurines v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#ebede9;--paper:#fff;--ink:#15171a;--mut:#7a8088;--line:#dadfd6;--acid:#e8ff47}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;padding:18px 14px 40px}
+  h1{font-family:'Bebas Neue';font-size:30px;letter-spacing:1px;margin:0 0 4px}
+  .sub{color:var(--mut);font-size:13px;margin:0 0 20px;line-height:1.5}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:14px 10px 12px;text-align:center}
+  .figbox{position:relative;width:140px;height:150px;margin:0 auto 8px}
+  .figbox svg{position:absolute;inset:0;width:100%;height:100%}
+  .fa{animation:fA 1.6s ease-in-out infinite}
+  .fb{animation:fB 1.6s ease-in-out infinite}
+  @keyframes fA{0%,40%{opacity:1}60%,100%{opacity:0}}
+  @keyframes fB{0%,40%{opacity:0}60%,100%{opacity:1}}
+  .nm{font-weight:700;font-size:13.5px}
+  .fam{color:var(--mut);font-size:11px;margin-top:1px}
+  .note{margin-top:22px;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 15px;font-size:13.5px;line-height:1.55;color:#3a3f44}
+  .note b{color:var(--ink)}
+</style></head>
+<body>
+<h1>Figurines v2 — plus étoffées</h1>
+<p class="sub">Silhouette avec volume, profil, matériel visible, + animation 2 temps. Regarde surtout les 2 techniques : Pallof et bird-dog. Est-ce assez lisible ?</p>
+<div class="grid" id="grid"></div>
+<div class="note"><b>Voie 1</b> = ce style dessiné (léger, offline, dans le flux).<br><b>Voie 2</b> = un lien ▶ vidéo par exo, précision max, au tap.<br><br>Dis-moi si ces figures « parlent » assez, ou si on part sur la vidéo pour les techniques.</div>
+<script>
+var I="#15171a",A="#d8843d";
+function frame(inner,cls){return '<svg class="'+cls+'" viewBox="0 0 140 150">'+
+  '<g fill="'+I+'" stroke="'+I+'" stroke-width="13" stroke-linecap="round" stroke-linejoin="round">'+inner+'</g></svg>';}
+function fig(a,b){return '<div class="figbox">'+frame(a,'fa')+frame(b,'fb')+'</div>';}
+function head(x,y,r){return '<circle cx="'+x+'" cy="'+y+'" r="'+(r||13)+'" stroke="none"/>';}
+// torse "étoffé" = polygone épaules->bassin
+function torso(sx,sy,hx,hy,w){var dx=hy-sy,dy=sx-hx;var l=Math.hypot(dx,dy)||1;dx=dx/l*(w/2);dy=dy/l*(w/2);
+  return '<polygon stroke="none" points="'+(sx+dx)+','+(sy+dy)+' '+(sx-dx)+','+(sy-dy)+' '+(hx-dx*0.7)+','+(hy-dy*0.7)+' '+(hx+dx*0.7)+','+(hy+dy*0.7)+'"/>';}
+function limb(x1,y1,x2,y2,w){return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke-width="'+(w||13)+'"/>';}
+function limb3(x1,y1,x2,y2,x3,y3,w){return limb(x1,y1,x2,y2,w)+limb(x2,y2,x3,y3,w);}
+function amberL(x1,y1,x2,y2,w){return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+A+'" stroke-width="'+(w||9)+'"/>';}
+function amberRect(x,y,w,h){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="3" fill="'+A+'" stroke="none"/>';}
+function ground(y){return '<line x1="18" y1="'+y+'" x2="122" y2="'+y+'" stroke="'+A+'" stroke-width="5"/>';}
+
+// SQUAT profil : debout -> accroupi
+var squatA=head(70,26)+torso(70,38,70,80,26)+limb(58,52,44,64,12)+limb(58,80,54,124,13)+limb(82,80,86,124,13);
+var squatB=head(66,52)+torso(66,64,64,96,26)+limb(56,72,84,70,12)+limb3(64,96,86,102,80,132,13)+limb3(64,96,42,104,48,132,13);
+
+// HINGE / RDL profil : debout barre -> penché dos plat
+var hingeA=head(70,24)+torso(70,36,70,78,26)+limb(66,50,62,96,12)+amberRect(48,98,44,7)+limb(62,78,56,124,13)+limb(78,78,84,124,13);
+var hingeB=head(96,44)+torso(92,50,54,80,26)+limb(58,74,52,110,12)+amberRect(34,112,44,7)+limb3(54,80,52,104,66,120,13)+limb(54,80,40,118,13);
+
+// PALLOF PRESS face : élastique tire de côté, mains poussent devant -> bras tendus
+var pallofA=head(70,24)+torso(70,36,70,86,30)+limb(70,50,52,60,12)+limb(70,50,58,64,12)+amberL(58,62,24,50,9)+limb(70,86,58,128,13)+limb(70,86,82,128,13);
+var pallofB=head(70,24)+torso(70,36,70,86,30)+limb3(70,52,70,66,96,70,12)+amberL(96,70,24,50,9)+limb(70,86,58,128,13)+limb(70,86,82,128,13);
+
+// BIRD-DOG profil : quadrupédie, bras+jambe opposés tendus + tirage élastique
+var bdA=head(30,66)+torso(38,68,84,70,24)+limb(52,74,52,108,12)+limb(74,74,74,108,12)+limb(40,68,26,56,11)+limb(84,70,98,78,11);
+var bdB=head(26,60)+torso(36,64,84,68,24)+limb(52,72,52,108,12)+limb(74,70,74,108,12)+limb3(40,64,22,52,12,66,11)+amberL(12,66,14,110,8)+limb(84,68,110,58,11);
+
+// COPENHAGEN profil : appui avant-bras, pied haut sur banc, hanche monte
+var copA=head(28,84)+torso(36,84,86,96,22)+limb(40,88,30,120,12)+amberRect(96,86,26,8)+limb(86,96,104,90,12);
+var copB=head(26,72)+torso(34,74,88,80,22)+limb(38,78,30,120,12)+amberRect(96,74,26,8)+limb(88,80,104,78,12);
+
+var items=[
+  ["Squat / fente","jambes · simple",squatA,squatB],
+  ["Soulevé de terre / RDL","hinge · simple",hingeA,hingeB],
+  ["Pallof press","anti-rotation · TECHNIQUE",pallofA,pallofB],
+  ["Bird-dog + tirage","gainage · TECHNIQUE",bdA,bdB],
+  ["Copenhagen plank","adducteurs · TECHNIQUE",copA,copB]
+];
+document.getElementById('grid').innerHTML=items.map(function(it){
+  return '<div class="card">'+fig(it[2],it[3])+'<div class="nm">'+it[0]+'</div><div class="fam">'+it[1]+'</div></div>';
+}).join('');
+</script>
+</body></html>
