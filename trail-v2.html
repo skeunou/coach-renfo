@@ -1748,6 +1748,22 @@ function renderLoadCard(){
   h+='</div>';
   box.innerHTML=h;
 }
+function realDaySummary(key){
+  // ce qui a été RÉELLEMENT fait ce jour (activités Strava), pour les jours validés
+  if(typeof lastActs==="undefined"||!Array.isArray(lastActs))return null;
+  var acts=lastActs.filter(function(a){return (a.date||"").slice(0,10)===key;});
+  if(!acts.length)return null;
+  var prim=acts.slice().sort(function(a,b){return (b.movingMin||0)-(a.movingMin||0);})[0];
+  var t=(prim.type||"")+" "+(prim.name||"");
+  var ic=/ride|v[ée]lo|bike|H\.T|VdR/i.test(t)?"🚴":(/hiit|workout|weight/i.test(t)?"🥊":"🏃");
+  var parts=[];
+  if(prim.km)parts.push(prim.km+" km");
+  if(prim.movingMin)parts.push(fmtMin(prim.movingMin));
+  if(prim.dplus)parts.push(prim.dplus+" m D+");
+  if(prim.hrAvg)parts.push("FC "+prim.hrAvg);
+  var more=acts.length>1?' <span style="color:var(--mut)">+'+(acts.length-1)+'</span>':'';
+  return {name:ic+" "+(prim.name||"Activité")+more, sub:parts.join(" · ")};
+}
 function renderWeekView(){
   var out="";
   for(var w=0;w<2;w++){
@@ -1758,10 +1774,14 @@ function renderWeekView(){
     var range=mon.getDate()+(mon.getMonth()!==sun.getMonth()?' '+MOIS[mon.getMonth()]:'')+'–'+sun.getDate()+' '+MOIS[sun.getMonth()];
     out+='<div class="wkhead"><div class="wktitle bebas">'+(w===0?'Cette semaine':'Semaine prochaine')+'</div><div class="wkmeta">'+range+' · '+blk.name+'</div></div>';
     out+='<div class="card" style="padding:0;margin-bottom:18px;overflow:hidden">';
-    for(var i=0;i<7;i++){var d=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+i);var s=sessionFor(d);var done=sessionDone(s)||extrasForDay(iso(d)).length>0||suppEntriesFor(iso(d)).length>0;var dd=s.plan;
-      out+='<div class="wkrow'+(iso(d)===iso(today)?' wktoday':'')+'" onclick="openSheet(\''+iso(d)+'\')">'
+    for(var i=0;i<7;i++){var d=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+i);var s=sessionFor(d);var dk=iso(d);var done=sessionDone(s)||extrasForDay(dk).length>0||suppEntriesFor(dk).length>0;var dd=s.plan;
+      var real=done?realDaySummary(dk):null;
+      var wm=real?real.name:((dd.sid?'<span style="color:var(--blue)">'+dd.sid+'</span> · ':'')+dd.label);
+      var wsub=real?real.sub:dd.sub;
+      var pip=real?'var(--grn)':s.info.color;
+      out+='<div class="wkrow'+(dk===iso(today)?' wktoday':'')+'" onclick="openSheet(\''+dk+'\')">'
         +'<div class="wkdn bebas">'+JOURS[i]+' '+d.getDate()+'</div>'
-        +'<div class="wkdesc"><span class="pip" style="background:'+s.info.color+'"></span><div class="wtxt"><div class="wm">'+(dd.sid?'<span style="color:var(--blue)">'+dd.sid+'</span> · ':'')+dd.label+'</div>'+(dd.sub?'<div class="wsub">'+dd.sub+'</div>':'')+'</div></div>'
+        +'<div class="wkdesc"><span class="pip" style="background:'+pip+'"></span><div class="wtxt"><div class="wm">'+wm+'</div>'+(wsub?'<div class="wsub">'+wsub+'</div>':'')+'</div></div>'
         +'<div class="wkchk">'+(done?'✓':'')+'</div></div>';}
     out+='</div>';
   }
