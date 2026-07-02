@@ -378,20 +378,23 @@ var EPOCH_START=parse("2026-06-22"), EPOCH_SWITCH=parse("2027-01-01");
 // classify() : type de séance SANS construire le contenu (léger, pas de récursion).
 // DOIT rester synchro avec la logique de gen().
 function classify(d){
-  var wi=weekInfo(d), dow=getByDow(d), ph=wi.phase;
+  // ⚠️ DOIT rester synchro avec gen() : mêmes typeKey par (phase, jour).
+  // Sert uniquement à sessionId() pour numéroter les runs.
+  var dow=getByDow(d), ph=weekInfo(d).phase;
   if(ph==="recup"){
-    if(dow==="lun")return "fond"; if(dow==="mar")return "mobilite";
-    if(dow==="mer")return "fond"; if(dow==="ven")return "fond"; if(dow==="sam")return "longue"; return "repos";
+    if(dow==="mar")return "cotes";
+    if(dow==="lun"||dow==="mer"||dow==="jeu")return "fond";
+    return "repos"; // ven + week-end (longue = slot flottant, non numéroté)
   }
   if(ph==="base"||ph==="force"||ph==="build"){
-    var renfoDays=[]; // renfo géré par la carte "Renfo de la semaine" (2 slots flexibles)
-    if(renfoDays.indexOf(dow)!==-1)return "renfo";
-    if(dow==="lun")return "longue"; if(dow==="mar")return "cotes";
-    if(dow==="mer"||dow==="jeu"||dow==="ven")return "fond"; return "repos";
+    if(dow==="mar")return "cotes";
+    if(dow==="lun"||dow==="mer"||dow==="jeu")return "fond";
+    return "repos"; // ven + week-end (longue = slot flottant)
   }
   if(ph==="affutage"){
-    if(dow==="lun")return "longue"; if(dow==="mar")return "cotes";
-    if(dow==="mer"||dow==="jeu"||dow==="ven")return "fond"; return "repos";
+    if(dow==="mar")return "cotes";
+    if(dow==="lun"||dow==="mer"||dow==="jeu"||dow==="ven")return "fond";
+    return "repos";
   }
   return "repos";
 }
