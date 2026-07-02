@@ -2537,7 +2537,7 @@ function extraCard(e){
   var detailBtn = e.sid ? '<button class="btn btn-ghost" style="width:100%;margin-top:9px;font-size:12.5px;padding:7px" onclick="toggleExtraDetail(\''+e.xid+'\')" id="exbtn-'+e.xid+'">+ détails coach</button><div id="exdet-'+e.xid+'" style="display:none;margin-top:8px"></div>' : '';
   return '<div class="card" style="border-left:3px solid var(--blue);padding:12px 14px;margin-top:8px">'+
     '<div style="display:flex;justify-content:space-between;align-items:flex-start">'+
-    '<div><div style="font-weight:700">'+sp.ic+' '+sp.l+' · '+fmtMin(e.durMin)+src+'</div>'+
+    '<div><div style="font-weight:700">'+sp.ic+' '+((e.name||e.stravaName)||sp.l)+' · '+fmtMin(e.durMin)+src+'</div>'+
     (stats?'<div style="color:var(--mut);font-size:12.5px;margin-top:3px">'+stats+'</div>':'')+'</div>'+
     '<button class="x" onclick="delExtraUI(\''+e.xid+'\')" style="border:none;background:none;color:var(--mut);font-size:15px;cursor:pointer;padding:0 0 0 8px">✕</button>'+
     '</div>'+coachExtra(e)+detailBtn+'</div>';
