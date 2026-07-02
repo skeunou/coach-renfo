@@ -175,6 +175,10 @@
   .rfig svg{width:100%;height:100%}
   .rfig2{display:flex;gap:6px;align-items:center;justify-content:center;height:120px}
   .rfigi{width:82px;height:100px} .rfigi svg{width:100%;height:100%}
+  .rphoto{width:100%;max-width:340px;height:172px;border-radius:16px;overflow:hidden;background:#f4f4f2;border:1px solid var(--line);display:flex;align-items:center;justify-content:center}
+  .rphoto img{width:100%;height:100%;object-fit:contain;display:block}
+  .rphoto2{display:flex;gap:8px;width:100%;max-width:360px}
+  .rphoto2 .rphoto{height:150px;max-width:none;flex:1}
   .rchip{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:#1a1d12;background:var(--acid);border-radius:999px;padding:5px 18px}
   .rrow{display:flex;gap:12px;width:100%;max-width:360px}
   .rserie,.rrecup{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;border:1.5px solid var(--line);border-radius:16px;padding:12px 8px;background:var(--paper)}
@@ -942,7 +946,7 @@ function buildWeeklyWork(s,org){
       if(i+1<b.length){
         segs.push({kind:"flow",label:"Superset "+(Math.floor(i/2)+1),name:b[i].name+"  +  "+b[i+1].name,
           reps:repHead(b[i].reps)+"   +   "+repHead(b[i+1].reps),
-          figs:[figFor(b[i].name),figFor(b[i+1].name)],
+          figs:[figFor(b[i].name),figFor(b[i+1].name)], parts:[b[i].name,b[i+1].name],
           cue:"Enchaîne les 2 sans repos entre, récup 75″ après la paire.\n• "+b[i].name+" : "+b[i].cue+"\n• "+b[i+1].name+" : "+b[i+1].cue});
       } else { segs.push({kind:"flow",label:b[i].label,name:b[i].name,reps:b[i].reps,cue:b[i].cue}); }
     }
@@ -1978,6 +1982,33 @@ function figFor(name){
   return "lunge";
 }
 function figSVG(k){ return _fig(FIGS[k]||FIGS.lunge); }
+/* ===== PHOTOS d'exercices (eximg/) ===== */
+function exSlug(name){
+  return (name||"").toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .replace(/[()\/]/g," ").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
+}
+var EXIMG_REUSE={
+  "souleve-de-terre-unilateral-db":"souleve-de-terre-unilateral-db-kb",
+  "souleve-de-terre-unilateral-kb":"souleve-de-terre-unilateral-db-kb",
+  "step-up-explosif-box":"step-up-explosif-sur-box",
+  "mollet-debout-jambe-tendue":"montee-sur-pointes-jambe-tendue",
+  "monster-walk-squat-walk":"monster-walk-elastique",
+  "step-down-controle-anti-valgus":"step-down-freine-du-banc",
+  "gainage-lateral-abduction-jambe":"gainage-lateral",
+  "gainage-lateral-abduction":"gainage-lateral"
+};
+function exImgURL(name){
+  var s=exSlug(name); s=EXIMG_REUSE[s]||s;
+  return s?("eximg/"+s+".png"):"";
+}
+function exPhotoHTML(name, figKey){
+  var url=exImgURL(name);
+  if(!url) return '<div class="rfig">'+figSVG(figKey||"lunge")+'</div>';
+  return '<div class="rphoto"><img src="'+url+'" loading="lazy" alt="" '+
+    'onerror="this.closest(&quot;.rphoto&quot;).outerHTML=exFallback(&quot;'+(figKey||"lunge")+'&quot;)"></div>';
+}
+function exFallback(k){ return '<div class="rfig">'+figSVG(k)+'</div>'; }
 /* ===== PARSING série / récup ===== */
 function renfoSeries(seg){
   if(seg.name&&/^Tour/.test(seg.name)) return 1;
@@ -2074,9 +2105,14 @@ function renderRenfoWork(seg){
   document.getElementById("pSeg").textContent=(seg.label||"Exercice")+" "+(pIdx+1)+"/"+pSegs.length;
   pState.rfN=seg.series||3; pState.rfDone=0; pState.rfRecup=seg.recup||75;
   _rfCueId="rfCue"+pIdx;
-  var figHTML = (seg.figs&&seg.figs.length>1)
-    ? '<div class="rfig2">'+seg.figs.map(function(f){return '<div class="rfigi">'+figSVG(f)+'</div>';}).join('')+'</div>'
-    : '<div class="rfig">'+figSVG(seg.fig||"lunge")+'</div>';
+  var figHTML;
+  if(seg.parts&&seg.parts.length>1){
+    figHTML='<div class="rphoto2">'+seg.parts.map(function(nm,i){
+      return exPhotoHTML(nm, (seg.figs&&seg.figs[i])||"lunge");
+    }).join('')+'</div>';
+  } else {
+    figHTML=exPhotoHTML(seg.name, seg.fig||"lunge");
+  }
   document.getElementById("pBody").innerHTML=
     figHTML+
     '<div class="pname bebas">'+seg.name+'</div>'+
