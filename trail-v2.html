@@ -223,10 +223,12 @@
     <div class="card hero" id="heroCard" style="position:relative">
       <div class="type" id="heroType">—</div>
       <div class="sessionid bebas" id="heroId" style="font-size:14px;color:var(--acc);letter-spacing:1px">—</div>
-      <h1 id="heroTitle" style="padding-right:96px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:800;letter-spacing:0;margin:2px 0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">—</h1>
+      <h1 id="heroTitle" style="font-family:'DM Sans',sans-serif;font-size:15px;font-weight:800;letter-spacing:0;margin:2px 0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">—</h1>
       <div class="why" id="heroWhy">—</div>
-      <div class="specs" id="heroSpecs"></div>
-      <div id="heroActions" style="position:absolute;top:16px;right:16px"></div>
+      <div class="specsRow" style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+        <div class="specs" id="heroSpecs" style="flex:1;margin-bottom:0"></div>
+        <div id="heroActions" style="flex-shrink:0"></div>
+      </div>
     </div>
     <div id="extrasBox"></div>
     <div id="slWeek"></div>
@@ -2074,7 +2076,7 @@ function renderRenfoWarm(seg){
     return '<div class="li"><span class="k">•</span><div><b>'+w.name+'</b>'+(r?' <span style="color:var(--mut)">· '+r+'</span>':'')+'</div></div>';
   }).join("");
   document.getElementById("pBody").innerHTML=
-    '<div class="rfig">'+figSVG("warmup")+'</div>'+
+    /* illustration bâton retirée (n'apporte rien) — réactivable : '<div class="rfig">'+figSVG("warmup")+'</div>'+ */
     '<div class="pname bebas">Échauffement</div>'+
     '<div class="rchip">'+seg.rounds+' TOURS</div>'+
     '<div class="plist">'+lis+'</div>';
