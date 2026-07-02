@@ -1178,7 +1178,7 @@ function cloudSave(){
   syncTimer=setTimeout(cloudSaveNow,1200); // debounce : 1 écriture par rafale
 }
 function cloudSaveNow(){
-  var payload={log:loadLog(),links:linksGet(),extras:extrasGet()};
+  var payload={log:loadLog(),links:linksGet(),extras:extrasGet(),linkignore:ignGet()};
   fetch(SYNC_URL+"?action=save&user="+SYNC_USER,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)})
     .then(function(r){return r.json();})
     .then(function(d){ setSyncBadge(d&&d.ok?"ok":"err"); })
@@ -1193,9 +1193,11 @@ function cloudPull(cb){
 function mergeCloud(d){
   if(!d)return false;
   syncMuted=true; // on fusionne sans re-déclencher de push pendant l'opération
-  // liaisons : union (le local prime s'il existe déjà)
+  // activités déliées à la main : union d'abord (protège la fusion des liaisons)
+  var locIg=ignGet(), clIg=d.linkignore||[]; clIg.forEach(function(id){ if(locIg.indexOf(String(id))===-1)locIg.push(String(id)); }); _writeIgn(locIg);
+  // liaisons : union (le local prime ; on n'importe pas la liaison d'une activité déliée)
   var locL=linksGet(), cl=d.links||{};
-  Object.keys(cl).forEach(function(k){ if(!locL[k]) locL[k]=cl[k]; });
+  Object.keys(cl).forEach(function(k){ if(cl[k]&&ignHas(cl[k].id))return; if(!locL[k]) locL[k]=cl[k]; });
   _writeLinks(locL);
   // journal : union par id (préserve plusieurs entrées le même jour : run validé + supp), on garde la plus récente (_u)
   function lkey(e){ return e.id || (e.dateKey+"|"+(e.ts||"")); }
@@ -1221,6 +1223,12 @@ function initCloud(){
 
 /* ===== LIAISON STRAVA ↔ PLAN (V3) ===== */
 var LK="lvtrail:strava:links";
+var IG="lvtrail:strava:linkignore"; // activités déliées à la main : ne jamais re-lier auto
+function ignGet(){try{return JSON.parse(localStorage.getItem(IG)||"[]");}catch(e){return [];}}
+function _writeIgn(a){try{localStorage.setItem(IG,JSON.stringify(a));}catch(e){}}
+function ignHas(id){return ignGet().indexOf(String(id))!==-1;}
+function ignAdd(id){var a=ignGet(); if(a.indexOf(String(id))===-1){a.push(String(id));_writeIgn(a);}}
+function ignDel(id){_writeIgn(ignGet().filter(function(x){return x!==String(id);}));}
 function linksGet(){try{return JSON.parse(localStorage.getItem(LK)||"{}");}catch(e){return {};}}
 function _writeLinks(o){try{localStorage.setItem(LK,JSON.stringify(o));}catch(e){}}
 function linksSet(o){_writeLinks(o);cloudSave();}
@@ -1231,7 +1239,7 @@ function linkCount(){return Object.keys(linksGet()).length;}
 function scanLinks(all){
   if(!Array.isArray(all))return 0;
   var fresh={},links=linksGet();
-  all.forEach(function(a){var sid=parseSid(a.name); if(sid&&!fresh[sid])fresh[sid]={id:a.id,name:a.name,km:a.km,dplus:a.dplus,movingMin:a.movingMin,hrAvg:a.hrAvg,hrMax:a.hrMax,date:a.date};});
+  all.forEach(function(a){ if(ignHas(a.id))return; var sid=parseSid(a.name); if(sid&&!fresh[sid])fresh[sid]={id:a.id,name:a.name,km:a.km,dplus:a.dplus,movingMin:a.movingMin,hrAvg:a.hrAvg,hrMax:a.hrMax,date:a.date};});
   var added=0; Object.keys(fresh).forEach(function(sid){if(!links[sid])added++; links[sid]=fresh[sid];});
   linksSet(links); return added;
 }
@@ -1593,12 +1601,13 @@ function showPlanLinkList(k){
 function linkPlanStrava(k,sid,id){
   var a=null; lastActs.forEach(function(x){if(String(x.id)===String(id))a=x;});
   if(!a)return;
+  ignDel(id);
   var L=linksGet(); L[sid]={id:a.id,name:a.name,km:a.km,dplus:a.dplus,movingMin:a.movingMin,hrAvg:a.hrAvg,hrMax:a.hrMax,date:a.date}; linksSet(L);
   openSheet(k); renderToday();
 }
 function unlinkPlan(sid,k){
   if(!confirm("Délier cette séance de Strava ?"))return;
-  var L=linksGet(); delete L[sid]; linksSet(L);
+  var L=linksGet(); if(L[sid]&&L[sid].id)ignAdd(L[sid].id); delete L[sid]; linksSet(L);
   openSheet(k); renderToday();
 }
 
